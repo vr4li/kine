@@ -1,0 +1,25 @@
+.DS_Store
+*.pem
+.env
+.env.*
+node_modules/
+__pycache__/
+*.pyc
+.site-files.zip
+index.rtfd/
+site-files.zip
+index-backup.html
+maintenance.html
+
+# ملفات مشروع عقارات قديم — مو KineAI
+المستودعات/
+المعارض/
+logo-ar.png
+logo-en.png
+content-image*.png
+map-reference-blue.png
+NotoNaskhArabic*.ttf
+
+# MediaPipe قديم — المحلل يستخدم TensorFlow من CDN
+models/
+libs/
