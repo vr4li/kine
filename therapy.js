@@ -12,6 +12,7 @@ let selectedCondition = null;
 let selectedExercise = null;
 
 const msg = (ar, en) => (document.documentElement.lang === "en" ? en : ar);
+const isEn = () => document.documentElement.lang === "en";
 
 export function getSelectedExercise() {
   return selectedExercise;
@@ -23,19 +24,39 @@ function renderExercises(condition) {
 
   exercisesEl.innerHTML = exercises.map((ex) => `
     <button type="button" class="exercise-card" data-id="${ex.id}" aria-pressed="false">
-      <img src="${ex.image}" alt="" class="exercise-card-img" width="200" height="160" loading="lazy" />
+      <span class="exercise-card-badge">${ex.steps?.length || 3} ${msg("خطوات", "steps")}</span>
+      <img src="${ex.image}" alt="" class="exercise-card-img" width="200" height="180" loading="lazy" />
       <div class="exercise-card-body">
-        <h4>${document.documentElement.lang === "en" ? ex.nameEn : ex.nameAr}</h4>
-        <p>${document.documentElement.lang === "en" ? ex.descEn : ex.descAr}</p>
+        <h4>${isEn() ? ex.nameEn : ex.nameAr}</h4>
+        <p>${isEn() ? ex.descEn : ex.descAr}</p>
       </div>
     </button>
   `).join("");
 
   exercisesEl.hidden = exercises.length === 0;
-
   exercisesEl.querySelectorAll(".exercise-card").forEach((card) => {
     card.addEventListener("click", () => selectExercise(card.dataset.id));
   });
+}
+
+function renderStepGuide(ex) {
+  if (!stepsEl || !ex.steps) return;
+  const stepsHtml = ex.steps.map((step, i) => `
+    <figure class="exercise-step-card">
+      <img src="${step.image}" alt="" class="exercise-step-img" loading="lazy" />
+      <figcaption>
+        <span class="exercise-step-num">${i + 1}</span>
+        ${isEn() ? step.textEn : step.textAr}
+      </figcaption>
+    </figure>
+  `).join("");
+
+  stepsEl.hidden = false;
+  stepsEl.innerHTML = `
+    <h4>${msg("شرح التمرين خطوة بخطوة", "Step-by-step guide")}</h4>
+    <div class="exercise-steps-grid">${stepsHtml}</div>
+    <p class="exercise-steps-cta">${msg("↓ بعد ما تتعلّمين الخطوات — شغّلي الكاميرا وطبّقي", "↓ Learn the steps — then start camera")}</p>
+  `;
 }
 
 function selectExercise(id) {
@@ -48,17 +69,7 @@ function selectExercise(id) {
     c.setAttribute("aria-pressed", on ? "true" : "false");
   });
 
-  if (stepsEl) {
-    const steps = document.documentElement.lang === "en"
-      ? selectedExercise.stepsEn
-      : selectedExercise.stepsAr;
-    stepsEl.hidden = false;
-    stepsEl.innerHTML = `
-      <h4>${msg("خطوات التمرين", "Exercise Steps")}</h4>
-      <ol>${steps.map((s) => `<li>${s}</li>`).join("")}</ol>
-      <p class="exercise-steps-cta">${msg("↓ الآن شغّلي الكاميرا وطبّقي التمرين", "↓ Now start camera and practice")}</p>
-    `;
-  }
+  renderStepGuide(selectedExercise);
 
   if (cameraHint) {
     cameraHint.hidden = false;
@@ -70,17 +81,12 @@ function selectExercise(id) {
 
   if (launchBtn) {
     launchBtn.disabled = false;
-    launchBtn.querySelector("span")?.replaceChildren(
-      document.createTextNode(msg("ابدأ التمرين مع الكاميرا", "Start Exercise with Camera"))
-    );
+    const span = launchBtn.querySelector("span");
+    if (span) span.textContent = msg("ابدأ التمرين مع الكاميرا", "Start Exercise with Camera");
   }
 
   const label = document.querySelector(".camera-exercise");
-  if (label) {
-    label.textContent = document.documentElement.lang === "en"
-      ? selectedExercise.nameEn
-      : selectedExercise.nameAr;
-  }
+  if (label) label.textContent = isEn() ? selectedExercise.nameEn : selectedExercise.nameAr;
 
   document.getElementById("therapy-start")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
@@ -128,12 +134,6 @@ input?.addEventListener("input", () => {
 
 if (launchBtn) launchBtn.disabled = true;
 
-window.addEventListener("languagechange", () => {
-  if (selectedCondition) renderExercises(selectedCondition);
-  if (selectedExercise) selectExercise(selectedExercise.id);
-});
-
-/* اقتراحات سريعة */
 document.querySelectorAll("[data-condition-suggest]").forEach((btn) => {
   btn.addEventListener("click", () => {
     if (input) input.value = btn.dataset.conditionSuggest || "";
