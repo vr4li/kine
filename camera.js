@@ -243,7 +243,7 @@ const startCamera = async () => {
   const ex = getSelectedExercise();
   if (!ex) {
     showError(msg("اختاري تمريناً أولاً من القائمة فوق", "Select an exercise first"));
-    document.getElementById("therapy-panel")?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("therapy-start")?.scrollIntoView({ behavior: "smooth" });
     return;
   }
 
