@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" fill="none">
+  <rect width="200" height="160" rx="12" fill="#0D1B2E"/>
+  <line x1="60" y1="120" x2="100" y2="80" stroke="#00E5A0" stroke-width="3"/>
+  <line x1="100" y1="80" x2="140" y2="120" stroke="#00E5A0" stroke-width="3"/>
+  <line x1="100" y1="80" x2="100" y2="45" stroke="#00E5A0" stroke-width="3"/>
+  <circle cx="100" cy="80" r="8" fill="#00E5A0"/>
+  <circle cx="100" cy="45" r="6" fill="#00E5A0"/>
+  <text x="100" y="145" text-anchor="middle" fill="#8FA3BF" font-size="10" font-family="sans-serif">Leg Raise</text>
+</svg>

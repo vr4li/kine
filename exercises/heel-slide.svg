@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" fill="none">
+  <rect width="200" height="160" rx="12" fill="#0D1B2E"/>
+  <line x1="50" y1="100" x2="150" y2="100" stroke="#00E5A0" stroke-width="4"/>
+  <line x1="70" y1="100" x2="90" y2="75" stroke="#00E5A0" stroke-width="3"/>
+  <circle cx="90" cy="75" r="7" fill="#00E5A0"/>
+  <path d="M115 100 L130 88" stroke="#00E5A0" stroke-width="2" stroke-dasharray="3 2"/>
+  <text x="100" y="140" text-anchor="middle" fill="#8FA3BF" font-size="10" font-family="sans-serif">Heel Slide</text>
+</svg>

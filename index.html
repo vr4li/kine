@@ -33,7 +33,7 @@
         <a href="#problem" data-i18n="navProblem">المشكلة</a>
         <a href="#solution" data-i18n="navSolution">الحل</a>
         <a href="#how" data-i18n="navHow">كيف يعمل</a>
-        <a href="#camera-demo" data-i18n="navCamera">جرب الكاميرا</a>
+        <a href="#therapy-start" data-i18n="navCamera">ابدأ التأهيل</a>
         <a href="#roadmap" data-i18n="navRoadmap">خارطة الطريق</a>
         <a href="#pricing" data-i18n="navPricing">الباقات</a>
       </nav>
@@ -71,7 +71,7 @@
             KineAI تحوّل كاميرا جوالك إلى مساعد طبيعي رقمي يراقب حركتك، يصحّح وضعياتك فوراً، ويحميك من الإصابات الارتدادية — دون تحميل أي تطبيق.
           </p>
           <div class="hero-actions fade-up delay-3">
-            <a href="#camera-demo" class="btn btn-primary btn-lg" data-i18n="heroCtaCamera">جرب الكاميرا</a>
+            <a href="#therapy-start" class="btn btn-primary btn-lg" data-i18n="heroCtaCamera">ابدأ التأهيل</a>
             <a href="#cta" class="btn btn-ghost btn-lg" data-i18n="heroCta">سجّل اهتمامك</a>
           </div>
           <div class="hero-stats fade-up delay-4">
@@ -160,6 +160,110 @@
         </div>
       </div>
     </section>
+
+    <!-- Camera Demo -->
+    <section id="camera-demo" class="section section--dark camera-section">
+      <div class="container">
+        <div class="section-header section-header--center">
+          <span class="section-tag section-tag--light" data-i18n="cameraTag">جرب الآن</span>
+          <h2 data-i18n="cameraTitle">اكتب حالتك — تمارين — كاميرا</h2>
+          <p class="section-desc" data-i18n="cameraDesc">اكتب تشخيصك، اختاري تمريناً، ثم شغّلي الكaméra — النظام يحلّل وضعيتك ويصحّحك.</p>
+        </div>
+
+        <!-- 1. Condition + exercises -->
+        <div class="therapy-panel" id="therapy-start">
+          <div class="therapy-steps-bar" aria-hidden="true">
+            <span class="therapy-step is-active">① اكتب حالتك</span>
+            <span class="therapy-step">② اختاري تمرين</span>
+            <span class="therapy-step">③ شغّلي الكاميرا</span>
+          </div>
+          <label class="therapy-label" for="condition-input">وش حالتك أو تشخيصك؟</label>
+          <div class="therapy-search-row">
+            <input type="text" id="condition-input" class="therapy-input" placeholder="مثال: انزلاق غضروفي، ألم ركبة..." autocomplete="off" />
+            <button type="button" class="btn btn-primary" id="condition-search-btn">عرض التمارين</button>
+          </div>
+          <div class="therapy-suggestions">
+            <span>اقتراحات:</span>
+            <button type="button" class="therapy-suggest-chip" data-condition-suggest="انزلاق غضروفي">انزلاق غضروفي</button>
+            <button type="button" class="therapy-suggest-chip" data-condition-suggest="ألم ركبة">ألم ركبة</button>
+            <button type="button" class="therapy-suggest-chip" data-condition-suggest="كتف">كتف</button>
+          </div>
+          <p class="condition-result" id="condition-result" hidden role="status"></p>
+          <div class="exercises-grid" id="exercises-grid" hidden aria-live="polite"></div>
+          <div class="exercise-steps" id="exercise-steps" hidden></div>
+          <p class="camera-select-hint" id="camera-select-hint" hidden></p>
+        </div>
+
+
+        <div class="camera-wrapper">
+          <div class="camera-viewport" id="camera-viewport">
+            <video id="camera-video" autoplay playsinline muted></video>
+            <canvas id="camera-canvas" aria-hidden="true"></canvas>
+
+            <div class="camera-idle" id="camera-idle">
+              <button type="button" class="camera-start-btn" id="camera-start" aria-label="تشغيل الكاميرا">
+                <span class="camera-start-ring"></span>
+                <span class="camera-start-ring camera-start-ring--2"></span>
+                <svg class="camera-start-icon" viewBox="0 0 24 24" width="36" height="36" aria-hidden="true">
+                  <path d="M17 10.5V7a2 2 0 0 0-2-2H5A2 2 0 0 0 3 7v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3.5l4 4v-11l-4 4Z" fill="currentColor"/>
+                </svg>
+              </button>
+              <p class="camera-idle-text" data-i18n="cameraIdleText">اضغط لتشغيل الكاميرا</p>
+              <p class="camera-model-idle" id="camera-model-idle-status">● جاهز</p>
+            </div>
+
+            <div class="camera-live-ui" id="camera-live-ui" hidden>
+              <div class="camera-top-bar">
+                <span class="camera-status" id="camera-status">
+                  <span class="camera-status-dot"></span>
+                  <span data-i18n="cameraActive">الكامéra نشطة</span>
+                </span>
+                <span class="camera-points" id="camera-points" hidden>0 نقطة</span>
+                <span class="camera-model-status" id="camera-model-status" hidden>● جاري تحميل المحلل...</span>
+                <span class="camera-exercise" data-i18n="cameraExercise">تمرين الركبة — تجربة</span>
+              </div>
+              <div class="camera-alert camera-alert--safe" id="camera-alert">
+                <span data-i18n="cameraAlertWaiting">جاري تحليل وضعيتك...</span>
+              </div>
+            </div>
+
+            <div class="camera-loading" id="camera-loading" hidden>
+              <div class="camera-spinner"></div>
+              <p id="camera-loading-msg">جاري طلب إذn الكaméra...</p>
+            </div>
+            <p class="camera-error" id="camera-error" hidden role="alert"></p>
+          </div>
+
+
+          <div class="camera-permission-help" id="camera-permission-help" hidden>
+            <p class="camera-permission-title">الكaméra مرفوضة — كيف تسمح؟</p>
+            <p class="camera-permission-steps">Chrome: 🔒 ← Camera ← Allow &nbsp;|&nbsp; Mac: إعدادات ← الخصوصية ← الكaméra ← Chrome</p>
+            <button type="button" class="btn btn-primary btn-sm" id="camera-retry">حاول مرة أخرى</button>
+          </div>
+
+          <button type="button" class="btn btn-primary btn-lg camera-launch-btn" id="camera-launch" disabled>
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M17 10.5V7a2 2 0 0 0-2-2H5A2 2 0 0 0 3 7v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3.5l4 4v-11l-4 4Z" fill="currentColor"/></svg>
+            <span data-i18n="cameraLaunch">ابدأ التمرين مع الكaméra</span>
+          </button>
+
+          <div class="camera-controls" id="camera-controls" hidden>
+            <button type="button" class="btn btn-primary btn-sm" id="camera-start-analyzer" hidden>
+              🧠 تشغيل المحلل
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" id="camera-retry-model" hidden data-i18n="retryModel">إعادة تحميل المحلل</button>
+            <button type="button" class="btn btn-ghost btn-sm camera-ctrl" id="camera-flip">
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8Zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3Z" fill="currentColor"/></svg>
+              <span data-i18n="cameraFlip">قلب الكامéra</span>
+            </button>
+            <button type="button" class="btn btn-ghost btn-sm camera-ctrl camera-ctrl--stop" id="camera-stop">
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1" fill="currentColor"/></svg>
+              <span data-i18n="cameraStop">إيقاف</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
 
     <!-- Problem -->
     <section id="problem" class="section">
@@ -270,83 +374,6 @@
       </div>
     </section>
 
-    <!-- Camera Demo -->
-    <section id="camera-demo" class="section section--dark camera-section">
-      <div class="container">
-        <div class="section-header section-header--center">
-          <span class="section-tag section-tag--light" data-i18n="cameraTag">جرب الآن</span>
-          <h2 data-i18n="cameraTitle">اختبر الكاميرا الذكية</h2>
-          <p class="section-desc" data-i18n="cameraDesc">اضغط على الزر لتشغيل الكاميرا — سيتعرّف النظام على وضعيتك ويعرض نقاط الحركة على الشاشة.</p>
-        </div>
-
-        <div class="camera-wrapper">
-          <div class="camera-viewport" id="camera-viewport">
-            <video id="camera-video" autoplay playsinline muted></video>
-            <canvas id="camera-canvas" aria-hidden="true"></canvas>
-
-            <div class="camera-idle" id="camera-idle">
-              <button type="button" class="camera-start-btn" id="camera-start" aria-label="تشغيل الكاميرا">
-                <span class="camera-start-ring"></span>
-                <span class="camera-start-ring camera-start-ring--2"></span>
-                <svg class="camera-start-icon" viewBox="0 0 24 24" width="36" height="36" aria-hidden="true">
-                  <path d="M17 10.5V7a2 2 0 0 0-2-2H5A2 2 0 0 0 3 7v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3.5l4 4v-11l-4 4Z" fill="currentColor"/>
-                </svg>
-              </button>
-              <p class="camera-idle-text" data-i18n="cameraIdleText">اضغط لتشغيل الكاميرا</p>
-              <p class="camera-model-idle" id="camera-model-idle-status">● جاهز</p>
-            </div>
-
-            <div class="camera-live-ui" id="camera-live-ui" hidden>
-              <div class="camera-top-bar">
-                <span class="camera-status" id="camera-status">
-                  <span class="camera-status-dot"></span>
-                  <span data-i18n="cameraActive">الكامéra نشطة</span>
-                </span>
-                <span class="camera-points" id="camera-points" hidden>0 نقطة</span>
-                <span class="camera-model-status" id="camera-model-status" hidden>● جاري تحميل المحلل...</span>
-                <span class="camera-exercise" data-i18n="cameraExercise">تمرين الركبة — تجربة</span>
-              </div>
-              <div class="camera-alert camera-alert--safe" id="camera-alert">
-                <span data-i18n="cameraAlertWaiting">جاري تحليل وضعيتك...</span>
-              </div>
-            </div>
-
-            <div class="camera-loading" id="camera-loading" hidden>
-              <div class="camera-spinner"></div>
-              <p id="camera-loading-msg">جاري طلب إذn الكaméra...</p>
-            </div>
-            <p class="camera-error" id="camera-error" hidden role="alert"></p>
-          </div>
-
-
-          <div class="camera-permission-help" id="camera-permission-help" hidden>
-            <p class="camera-permission-title">الكaméra مرفوضة — كيف تسمح؟</p>
-            <p class="camera-permission-steps">Chrome: 🔒 ← Camera ← Allow &nbsp;|&nbsp; Mac: إعدادات ← الخصوصية ← الكaméra ← Chrome</p>
-            <button type="button" class="btn btn-primary btn-sm" id="camera-retry">حاول مرة أخرى</button>
-          </div>
-
-          <button type="button" class="btn btn-primary btn-lg camera-launch-btn" id="camera-launch">
-            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M17 10.5V7a2 2 0 0 0-2-2H5A2 2 0 0 0 3 7v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3.5l4 4v-11l-4 4Z" fill="currentColor"/></svg>
-            <span data-i18n="cameraLaunch">تشغيل الكaméra</span>
-          </button>
-
-          <div class="camera-controls" id="camera-controls" hidden>
-            <button type="button" class="btn btn-primary btn-sm" id="camera-start-analyzer" hidden>
-              🧠 تشغيل المحلل
-            </button>
-            <button type="button" class="btn btn-primary btn-sm" id="camera-retry-model" hidden data-i18n="retryModel">إعادة تحميل المحلل</button>
-            <button type="button" class="btn btn-ghost btn-sm camera-ctrl" id="camera-flip">
-              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8Zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3Z" fill="currentColor"/></svg>
-              <span data-i18n="cameraFlip">قلب الكامéra</span>
-            </button>
-            <button type="button" class="btn btn-ghost btn-sm camera-ctrl camera-ctrl--stop" id="camera-stop">
-              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1" fill="currentColor"/></svg>
-              <span data-i18n="cameraStop">إيقاف</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- Target Conditions -->
     <section class="section section--alt">
@@ -542,7 +569,7 @@
         <a href="#problem" data-i18n="navProblem">المشكلة</a>
         <a href="#solution" data-i18n="navSolution">الحل</a>
         <a href="#how" data-i18n="navHow">كيف يعمل</a>
-        <a href="#camera-demo" data-i18n="navCamera">جرب الكاميرا</a>
+        <a href="#therapy-start" data-i18n="navCamera">ابدأ التأهيل</a>
         <a href="#roadmap" data-i18n="navRoadmap">خارطة الطريق</a>
         <a href="#pricing" data-i18n="navPricing">الباقات</a>
       </div>
@@ -554,6 +581,7 @@
   </footer>
 
   <script src="./script.js"></script>
+  <script type="module" src="./therapy.js"></script>
   <script type="module" src="./camera.js"></script>
 </body>
 </html>

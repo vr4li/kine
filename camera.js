@@ -1,6 +1,8 @@
 /**
- * KineAI — كaméra + محلل (حالة واحدة في كل وقت)
+ * KineAI — كaméra + محلل + تصحيح التمارين
  */
+import { getSelectedExercise } from "./therapy.js";
+import { analyzeExercise } from "./therapy-data.js";
 
 const video = document.getElementById("camera-video");
 const canvas = document.getElementById("camera-canvas");
@@ -13,6 +15,7 @@ const liveUi = document.getElementById("camera-live-ui");
 const permissionHelp = document.getElementById("camera-permission-help");
 const errorEl = document.getElementById("camera-error");
 const alertEl = document.getElementById("camera-alert");
+const exerciseLabel = document.querySelector(".camera-exercise");
 const modelStatusEl = document.getElementById("camera-model-status");
 const idleModelStatus = document.getElementById("camera-model-idle-status");
 const pointsEl = document.getElementById("camera-points");
@@ -49,7 +52,6 @@ const POSE_CONNECTIONS = [
   ["right_hip", "right_knee"], ["right_knee", "right_ankle"],
 ];
 
-/* ---- حالة واحدة فقط ---- */
 const setView = (state) => {
   viewState = state;
   const live = state === "live";
@@ -59,7 +61,6 @@ const setView = (state) => {
 
   viewport?.classList.toggle("is-live", live);
   wrapper?.classList.toggle("is-live", live);
-
   if (idleEl) idleEl.hidden = !idle;
   if (loadingEl) loadingEl.hidden = !loading;
   if (liveUi) liveUi.hidden = !live;
@@ -69,9 +70,16 @@ const setView = (state) => {
   if (errorEl && !err) errorEl.hidden = true;
 };
 
-const setAlert = (text) => {
+const setFeedback = (result) => {
+  const text = document.documentElement.lang === "en" ? result.textEn : result.textAr;
   const span = alertEl?.querySelector("span");
   if (span) span.textContent = text;
+  if (alertEl) {
+    alertEl.className = "camera-alert";
+    if (result.level === "good") alertEl.classList.add("camera-alert--safe");
+    else if (result.level === "bad") alertEl.classList.add("camera-alert--danger");
+    else alertEl.classList.add("camera-alert--waiting");
+  }
 };
 
 const setStatus = (text, type = "ready") => {
@@ -87,10 +95,7 @@ const setStatus = (text, type = "ready") => {
 };
 
 const showError = (text) => {
-  if (errorEl) {
-    errorEl.textContent = text;
-    errorEl.hidden = false;
-  }
+  if (errorEl) { errorEl.textContent = text; errorEl.hidden = false; }
 };
 
 const hideError = () => {
@@ -104,13 +109,14 @@ const resizeCanvas = () => {
   }
 };
 
-const drawPose = (keypoints) => {
+const drawPose = (keypoints, level = "good") => {
   if (!ctx || !canvas.width) return 0;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   const map = {};
   keypoints.forEach((kp) => { map[kp.name] = kp; });
 
-  ctx.strokeStyle = "#00FFAA";
+  const color = level === "bad" ? "#FF4D6A" : level === "warn" ? "#FFB020" : "#00FFAA";
+  ctx.strokeStyle = color;
   ctx.lineWidth = 4;
   POSE_CONNECTIONS.forEach(([a, b]) => {
     const p1 = map[a], p2 = map[b];
@@ -127,7 +133,7 @@ const drawPose = (keypoints) => {
     count++;
     ctx.beginPath();
     ctx.arc(kp.x, kp.y, 8, 0, Math.PI * 2);
-    ctx.fillStyle = "#00FFAA";
+    ctx.fillStyle = color;
     ctx.fill();
   });
 
@@ -144,11 +150,14 @@ const detectLoop = async () => {
     isDetecting = true;
     try {
       const poses = await detector.estimatePoses(video, { flipHorizontal: false, maxPoses: 1 });
-      if (poses[0]?.keypoints?.length) {
-        const n = drawPose(poses[0].keypoints);
-        setAlert(n >= 3
-          ? msg("✓ تم رصد وضعيتك", "✓ Pose detected")
-          : msg("قف أمام الكاميرا كاملاً", "Stand fully in frame"));
+      const ex = getSelectedExercise();
+      if (poses[0]?.keypoints?.length && ex) {
+        const result = analyzeExercise(ex.id, poses[0].keypoints);
+        drawPose(poses[0].keypoints, result.level === "good" ? "good" : result.level === "bad" ? "bad" : "warn");
+        setFeedback(result);
+      } else if (poses[0]?.keypoints?.length) {
+        drawPose(poses[0].keypoints);
+        setFeedback({ level: "warn", textAr: "✓ تم رصد وضعيتك", textEn: "✓ Pose detected" });
       } else {
         ctx?.clearRect(0, 0, canvas.width, canvas.height);
       }
@@ -183,7 +192,7 @@ const loadAnalyzer = async () => {
   analyzerLoading = true;
   hideError();
   setStatus(msg("● جاري تحميل المحلل...", "● Loading..."), "loading");
-  setAlert(msg("⏳ تحميل المحلل — 10–30 ثانية", "⏳ Loading analyzer..."));
+  setFeedback({ level: "warn", textAr: "⏳ تحميل المحلل...", textEn: "⏳ Loading analyzer..." });
   if (startAnalyzerBtn) {
     startAnalyzerBtn.disabled = true;
     startAnalyzerBtn.textContent = msg("⏳ جاري التحميل...", "⏳ Loading...");
@@ -197,16 +206,16 @@ const loadAnalyzer = async () => {
       { modelType: pd.movenet.modelType.SINGLEPOSE_LIGHTNING }
     );
     resizeCanvas();
-    setStatus(msg("● المحلل شغّال ✅", "● Analyzer on ✅"), "ready");
-    setAlert(msg("✓ قف أمام الكاميرا — النقاط الخضراء تظهر", "✓ Green dots on your body"));
+    setStatus(msg("● المحلل يحلّل وضعيتك ✅", "● Analyzing ✅"), "ready");
+    setFeedback({ level: "good", textAr: "✓ ابدأي التمرين — راح أصحّحك", textEn: "✓ Start exercise — I'll correct you" });
     if (startAnalyzerBtn) startAnalyzerBtn.hidden = true;
     if (retryModelBtn) retryModelBtn.hidden = true;
   } catch (err) {
     console.error(err);
     detector = null;
     setStatus(msg("● المحلل فشل", "● Failed"), "failed");
-    setAlert(msg("⚠ اضغط «تشغيل المحلل» مرة أخرى", "⚠ Tap Start Analyzer again"));
-    showError(msg(`المحلل: ${err.message || "تحقق من الإنترنت"}`, `Analyzer: ${err.message || "check internet"}`));
+    setFeedback({ level: "warn", textAr: "⚠ اضغط «تشغيل المحلل»", textEn: "⚠ Tap Start Analyzer" });
+    showError(msg(`المحلل: ${err.message || "تحقق من الإنترنت"}`, `Analyzer: ${err.message}`));
     if (startAnalyzerBtn) {
       startAnalyzerBtn.hidden = false;
       startAnalyzerBtn.disabled = false;
@@ -230,6 +239,14 @@ async function getCameraStream() {
 
 const startCamera = async () => {
   if (isRunning || viewState === "loading") return;
+
+  const ex = getSelectedExercise();
+  if (!ex) {
+    showError(msg("اختاري تمريناً أولاً من القائمة فوق", "Select an exercise first"));
+    document.getElementById("therapy-panel")?.scrollIntoView({ behavior: "smooth" });
+    return;
+  }
+
   hideError();
   setView("loading");
 
@@ -244,6 +261,10 @@ const startCamera = async () => {
     return;
   }
 
+  if (exerciseLabel) {
+    exerciseLabel.textContent = document.documentElement.lang === "en" ? ex.nameEn : ex.nameAr;
+  }
+
   try {
     stream = await getCameraStream();
     video.srcObject = stream;
@@ -254,7 +275,7 @@ const startCamera = async () => {
     isRunning = true;
     setView("live");
     setStatus(msg("● الكاميرا شغّال ✅", "● Camera on ✅"), "ready");
-    setAlert(msg("⏳ جاري تشغيل المحلل تلقائياً...", "⏳ Starting analyzer..."));
+    setFeedback({ level: "warn", textAr: "⏳ جاري تشغيل المحلل...", textEn: "⏳ Starting analyzer..." });
 
     video.onloadedmetadata = resizeCanvas;
     setTimeout(resizeCanvas, 400);
@@ -272,10 +293,10 @@ const startCamera = async () => {
     console.error(err);
     if (err.name === "NotAllowedError") {
       setView("error");
-      showError(msg("الكاميرا مرفوضة — اسمح من 🔒 أو إعدادات Mac", "Camera denied"));
+      showError(msg("الكاميرا مرفوضة — اسمح من 🔒", "Camera denied"));
     } else if (err.name === "NotReadableError") {
       setView("error");
-      showError(msg("الكاميرا مشغولة — أغلق Cursor أو FaceTime", "Camera busy"));
+      showError(msg("الكاميرا مشغولة — أغلق برامج الكاميرا", "Camera busy"));
     } else {
       setView("idle");
       showError(msg(`خطأ: ${err.message}`, `Error: ${err.message}`));
@@ -296,13 +317,8 @@ const stopCamera = () => {
   setView("idle");
   if (pointsEl) pointsEl.hidden = true;
   if (modelStatusEl) modelStatusEl.hidden = true;
-  if (startAnalyzerBtn) {
-    startAnalyzerBtn.hidden = true;
-    startAnalyzerBtn.disabled = false;
-    startAnalyzerBtn.textContent = msg("🧠 تشغيل المحلل", "🧠 Start Analyzer");
-  }
   hideError();
-  setStatus(msg("● اضغط لتشغيل الكاميرا", "● Tap to start"), "loading");
+  setStatus(msg("● اختاري تمريناً واضغطي ابدأ", "● Select exercise & start"), "loading");
 };
 
 const bind = (el, fn) => el?.addEventListener("click", (e) => { e.stopPropagation(); e.preventDefault(); fn(e); });
@@ -322,7 +338,5 @@ bind(flipBtn, async () => {
 window.addEventListener("pagehide", stopCamera);
 
 setView("idle");
-setStatus(msg("● اضغط لتشغيل الكاميرا", "● Tap to start"), "loading");
-
-/* تحميل مسبق للمكتبات */
+setStatus(msg("● اختاري تمريناً أولاً", "● Select exercise first"), "loading");
 ensureTfLibs().catch(() => {});
