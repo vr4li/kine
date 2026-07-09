@@ -242,7 +242,7 @@ const startCamera = async () => {
 
   const ex = getSelectedExercise();
   if (!ex) {
-    showError(msg("اختاري تمريناً أولاً من القائمة فوق", "Select an exercise first"));
+    showError(msg("اختر تمريناً أولاً", "Select an exercise first"));
     document.getElementById("therapy-start")?.scrollIntoView({ behavior: "smooth" });
     return;
   }
@@ -318,7 +318,7 @@ const stopCamera = () => {
   if (pointsEl) pointsEl.hidden = true;
   if (modelStatusEl) modelStatusEl.hidden = true;
   hideError();
-  setStatus(msg("● اختاري تمريناً واضغطي ابدأ", "● Select exercise & start"), "loading");
+  setStatus(msg("● اختر تمريناً ثم «تشغيل الكاميرا»", "● Select exercise & start"), "loading");
 };
 
 const bind = (el, fn) => el?.addEventListener("click", (e) => { e.stopPropagation(); e.preventDefault(); fn(e); });
@@ -338,5 +338,5 @@ bind(flipBtn, async () => {
 window.addEventListener("pagehide", stopCamera);
 
 setView("idle");
-setStatus(msg("● اختاري تمريناً أولاً", "● Select exercise first"), "loading");
+setStatus(msg("● اختر تمريناً أولاً", "● Select exercise first"), "loading");
 ensureTfLibs().catch(() => {});

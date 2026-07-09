@@ -166,21 +166,21 @@
       <div class="container">
         <div class="section-header section-header--center">
           <span class="section-tag section-tag--light" data-i18n="cameraTag">جرب الآن</span>
-          <h2 data-i18n="cameraTitle">اكتب حالتك — تمارين — كاميرا</h2>
-          <p class="section-desc" data-i18n="cameraDesc">اكتب تشخيصك، اختاري تمريناً، ثم شغّلي الكaméra — النظام يحلّل وضعيتك ويصحّحك.</p>
+          <h2 data-i18n="cameraTitle">اذكر تشخيصك — اختر تمرين — تشغيل الكاميرا</h2>
+          <p class="section-desc" data-i18n="cameraDesc">ثلاث خطوات: اذكر تشخيصك، اختر تمريناً، ثم شغّل الكاميرا — النظام يحلّل وضعيتك ويصحّحك.</p>
         </div>
 
         <!-- 1. Condition + exercises -->
         <div class="therapy-panel" id="therapy-start">
           <div class="therapy-steps-bar" aria-hidden="true">
-            <span class="therapy-step is-active">① اكتب حالتك</span>
-            <span class="therapy-step">② اختاري تمرين</span>
-            <span class="therapy-step">③ شغّلي الكاميرا</span>
+            <span class="therapy-step is-active" data-i18n="therapyStep1">① اذكر تشخيصك</span>
+            <span class="therapy-step" data-i18n="therapyStep2">② اختر تمرين</span>
+            <span class="therapy-step" data-i18n="therapyStep3">③ تشغيل الكاميرا</span>
           </div>
-          <label class="therapy-label" for="condition-input">وش حالتك أو تشخيصك؟</label>
+          <label class="therapy-label" for="condition-input" data-i18n="conditionLabel">اذكر تشخيصك</label>
           <div class="therapy-search-row">
-            <input type="text" id="condition-input" class="therapy-input" placeholder="مثال: انزلاق غضروفي، ألم ركبة..." autocomplete="off" />
-            <button type="button" class="btn btn-primary" id="condition-search-btn">عرض التمارين</button>
+            <input type="text" id="condition-input" class="therapy-input" placeholder="مثال: انزلاق غضروفي، ألم ركبة..." data-i18n-placeholder="conditionPlaceholder" autocomplete="off" />
+            <button type="button" class="btn btn-primary" id="condition-search-btn" data-i18n="conditionSearch">ابحث</button>
           </div>
           <div class="therapy-suggestions">
             <span>اقتراحات:</span>
@@ -208,7 +208,7 @@
                   <path d="M17 10.5V7a2 2 0 0 0-2-2H5A2 2 0 0 0 3 7v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3.5l4 4v-11l-4 4Z" fill="currentColor"/>
                 </svg>
               </button>
-              <p class="camera-idle-text" data-i18n="cameraIdleText">اضغط لتشغيل الكاميرا</p>
+              <p class="camera-idle-text" data-i18n="cameraIdleText">تشغيل الكاميرا</p>
               <p class="camera-model-idle" id="camera-model-idle-status">● جاهز</p>
             </div>
 
@@ -243,7 +243,7 @@
 
           <button type="button" class="btn btn-primary btn-lg camera-launch-btn" id="camera-launch" disabled>
             <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M17 10.5V7a2 2 0 0 0-2-2H5A2 2 0 0 0 3 7v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3.5l4 4v-11l-4 4Z" fill="currentColor"/></svg>
-            <span data-i18n="cameraLaunch">ابدأ التمرين مع الكaméra</span>
+            <span data-i18n="cameraLaunch">تشغيل الكاميرا</span>
           </button>
 
           <div class="camera-controls" id="camera-controls" hidden>

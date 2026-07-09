@@ -74,7 +74,7 @@ function selectExercise(id) {
   if (cameraHint) {
     cameraHint.hidden = false;
     cameraHint.textContent = msg(
-      `✓ ${selectedExercise.nameAr} — اضغطي «ابدأ التمرين»`,
+      `✓ ${selectedExercise.nameAr} — اضغط «تشغيل الكاميرا»`,
       `✓ ${selectedExercise.nameEn} — tap Start Exercise`
     );
   }
