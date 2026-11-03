@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
-"""Local dev server with correct MIME types for MediaPipe WASM."""
+"""Local dev server — يخدم مجلد public/ (تصميم دأب)."""
 import http.server
+import os
 import socketserver
 
 PORT = 8080
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "public")
 
 class Handler(http.server.SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory=ROOT, **kwargs)
     extensions_map = {
         **http.server.SimpleHTTPRequestHandler.extensions_map,
         ".wasm": "application/wasm",

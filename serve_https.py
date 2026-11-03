@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 
 PORT = 8443
-DIR = Path(__file__).parent
+DIR = Path(__file__).parent / "public"
 CERT = DIR / "cert.pem"
 KEY = DIR / "key.pem"
 
@@ -28,6 +28,9 @@ def ensure_cert():
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory=str(DIR), **kwargs)
+
     extensions_map = {
         **http.server.SimpleHTTPRequestHandler.extensions_map,
         ".wasm": "application/wasm",
@@ -49,6 +52,9 @@ def local_ip():
 
 
 if __name__ == "__main__":
+    if not DIR.is_dir():
+        print("مجلد public/ غير موجود — شغّلي sync-design.sh أو انسخي index.html إلى public/")
+        raise SystemExit(1)
     os.chdir(DIR)
     ensure_cert()
     ip = local_ip()

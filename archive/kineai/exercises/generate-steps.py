@@ -87,4 +87,4 @@ for name, (ar, en, body) in steps.items():
     (OUT / f"{name}.svg").write_text(svg(ar, en, body))
     print("wrote", name)
 
-python3 /Users/roaa/Desktop/bro.ajlan/exercises/generate-steps.py
+python3 /Users/roaa/Desktop/aidab/exercises/generate-steps.py

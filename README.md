@@ -1,36 +1,33 @@
-# KineAI — تعافي الذكي
+# دأب — خطوة كل يوم
 
-منصة إعادة تأهيل بالذكاء الاصطناعي. تحوّل كاميرا الجوال/الكمبيوتر إلى مساعد حركة يرصد وضعيتك ويعرض نقاط الحركة.
+الموقع **نسخة طبق الأصل** من التصميم في ملف HTML واحد (`index.html`).  
+كل الصفحات والتصميم والسكربت داخل هذا الملف — **لا** تعتمد على `styles.css` أو `script.js` القديمة (KineAI).
 
-## التشغيل محلياً
+## المصدر (للتحديث)
+
+لاستبدال الموقع بتصميم جديد من عندك:
 
 ```bash
+cp ~/Downloads/"دأب (1).html" ~/Desktop/aidab/index.html
+```
+
+ثم أعد النشر على Cloudflare (انظر أدناه).
+
+## تشغيل محلي
+
+```bash
+cd ~/Desktop/aidab
 python3 serve.py
 ```
 
 افتح: [http://localhost:8080](http://localhost:8080)
 
-### الجوال (HTTPS)
+## نشر Cloudflare Pages
 
 ```bash
-python3 serve_https.py
+./deploy-cloudflare.sh
 ```
 
-افتح من الجوال: `https://YOUR-IP:8443`
+## أرشيف
 
-## الملفات
-
-| ملف | الوظيفة |
-|-----|---------|
-| `index.html` | الصفحة الرئيسية |
-| `styles.css` | التصميم |
-| `script.js` | الترجمة والتفاعلات |
-| `camera.js` | الكaméra + محلل MoveNet |
-| `serve.py` | سيرver محلي |
-| `serve_https.py` | سيرver HTTPS للجوال |
-
-## المتطلبات
-
-- Chrome أو Safari حديث
-- إذن الكaméra
-- اتصال إنternet (تحميل محلل الحركة أول مرة)
+ملفات **KineAI** السابقة محفوظة في `archive/kineai/` للرجوع فقط — لا تُستخدم في موقع دأب.

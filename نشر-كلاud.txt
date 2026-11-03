@@ -1,0 +1,35 @@
+# نشر دأب على kine (مرة واحدة — بدون رفع يدوي)
+
+## 1) اربطي GitHub بمشروع kine
+
+Workers & Pages → **kine** → **Settings** → **Builds**  
+→ **Connect to Git** (أو Create deployment → Git)
+
+- Repository: **vr4li/kine**
+- Branch: **main**
+- Framework: **None**
+- Build command: *(فاضي)*
+- **Build output directory:** `public`  ← مهم جداً
+- **Root directory (advanced):** *(فاضي)*
+
+Save → **Retry deployment** أو **Deploy**
+
+## 2) بعدها
+
+كل ما تعدّلين الموقع على GitHub، Cloudflare ينشر تلقائياً.  
+الرابط يظل: **https://kine-enf.pages.dev**
+
+## 3) تحديث التصميم من الماك
+
+```bash
+cd ~/Desktop/aidab
+# عدّلي index.html ثم:
+cp index.html public/index.html
+git add index.html public/index.html
+git commit -m "update site"
+git push
+```
+
+## رفع يدوي (لو Git ما اشتغل)
+
+ارفعي فقط: **Desktop/KINE-ONLY.zip** (ملف zip واحد)

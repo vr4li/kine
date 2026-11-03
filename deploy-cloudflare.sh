@@ -1,5 +1,5 @@
 #!/bin/bash
-# رفع KineAI على Cloudflare Pages
+# رفع موقع دأب (تصميم HTML واحد) على Cloudflare Pages
 set -e
 cd "$(dirname "$0")"
 
@@ -16,15 +16,18 @@ fi
 export PATH="/tmp/node-portable/node-v20.18.0-darwin-arm64/bin:$PATH"
 
 echo ""
-echo "=== Cloudflare Pages — KineAI ==="
+echo "=== Cloudflare Pages — دأب (aidab) ==="
 npx wrangler@3 whoami 2>/dev/null || {
   echo "سجّل دخول Cloudflare من المتصفح..."
   npx wrangler@3 login
 }
 
-echo ""
-echo "جاري الرفع..."
-npx wrangler@3 pages deploy . --project-name=kine --commit-dirty=true
+mkdir -p public
+cp index.html public/index.html
 
 echo ""
-echo "Done! رابطك: https://kine.pages.dev (أو الاسم اللي اخترتيه)"
+echo "جاري الرفع (مجلد public فقط — تصميمك)..."
+npx wrangler@3 pages deploy public --project-name=kine --commit-dirty=true
+
+echo ""
+echo "Done! نفس الرابط: https://kine-enf.pages.dev"

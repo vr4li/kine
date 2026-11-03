@@ -1,0 +1,39 @@
+═══════════════════════════════════════
+  رفع مشروع Kine على GitHub — خطوات بسيطة
+═══════════════════════════════════════
+
+الطريقة 1 — من الموقع (الأسهل)
+─────────────────────────────────
+1. افتحي: https://github.com/new
+2. Repository name: kine
+3. Public ✅
+4. لا تختاري README
+5. Create repository
+
+6. في Terminal:
+   cd ~/Desktop/aidab
+   git remote add origin https://github.com/اسمك/kine.git
+   git push -u origin main
+
+   (استبدلي "اسمك" باسم حسابك في GitHub)
+
+
+الطريقة 2 — رفع الملفات يدوياً
+─────────────────────────────────
+1. https://github.com/new → اسم: kine → Create
+2. Add file → Upload files
+3. اسحبي الملفات:
+   index.html, styles.css, script.js, camera.js
+   serve.py, serve_https.py, README.md
+4. Commit changes
+
+
+إذا طلب Username و Password:
+─────────────────────────────────
+Password = Personal Access Token (مو كلمة مرور GitHub)
+
+اعملي Token من:
+https://github.com/settings/tokens
+→ Generate new token (classic)
+→ صل: repo
+→ انسخي التوكن واستخدميه كـ Password
