@@ -1418,7 +1418,7 @@ e7:['قف وذراعاك إلى جانبك','ارفع ذراعيك عالياً 
 e8:['قف بثبات ومعك المرافق','ارفع ركبة ثم الأخرى كأنك تمشي في مكانك','تابع بإيقاع هادئ'],
 e9:['قف وذراعاك مفتوحتان','ارسم دوائر كبيرة بذراعيك ببطء','أبطئ ثم توقف'],
 e10:['ضع النظارة الموصوفة وتأكد أنها ثابتة','ضع اللصقة على العين التي حدّدها طبيبك','تابع النقطة بعينك دون تحريك رأسك']},
-AMPS=[.45,1,1,.8,1,1.8,1,.9],Q=[],qi=0,reps=0,TGT=10,run=false,paused=false,gap=false,stream=null,sim=true,t0=0,prev=null,act=false,peak=0,quiet=0,lastRep=0,simAmp=1,simCyc=-1,fbI=0,rig1,rig2,raf=0;
+AMPS=[.45,1,1,.8,1,1.8,1,.9],Q=[],qi=0,reps=0,TGT=10,run=false,paused=false,gap=false,stream=null,poseOn=false,sim=true,t0=0,prev=null,act=false,peak=0,quiet=0,lastRep=0,simAmp=1,simCyc=-1,fbI=0,rig1,rig2,raf=0;
 var cv=document.createElement('canvas');cv.width=32;cv.height=24;var cx=cv.getContext('2d',{willReadFrequently:true});
 function mk(s){s.innerHTML='<g stroke="#fff" stroke-width="7.6" stroke-linecap="round" stroke-linejoin="round" fill="none"><line class="tr"/><polyline class="lB"/><polyline class="aB"/><polyline class="lA"/><polyline class="aA"/></g><circle class="hd" r="9.2" fill="#fff"/><g fill="#E07A3F"><circle class="jEa" r="3.4"/><circle class="jEb" r="3.4"/><circle class="jKa" r="3.4"/><circle class="jKb" r="3.4"/><circle class="jSh" r="5.2"/><circle class="jHp" r="5.2"/><circle class="jHa" r="5.8"/><circle class="jHb" r="5.8"/><g class="trl">'+new Array(7).join('<circle r="1.9"/>')+'</g></g>';s._c={};s._H=[];s._t=0;return s}
 function lm(x,y,a,L){var r=a*Math.PI/180;return [x+L*Math.sin(r),y+L*Math.cos(r)]}
