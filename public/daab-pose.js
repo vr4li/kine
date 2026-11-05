@@ -1,4 +1,4 @@
-/** MoveNet — تكرار فقط عند الخطوط الخضراء (خفيف على الجوال) */
+/** MoveNet — عدّ تكرارات من دورة الحركة (رفع → أخضر → نزول = جولة) */
 (function () {
   "use strict";
 
@@ -16,11 +16,18 @@
   var raf = 0;
   var detecting = false;
   var lastEst = 0;
-  var EST_MS = 150;
+  var EST_MS = 120;
   var detectTimer = null;
 
-  var KP_MIN = 0.32;
-  var MIN_VIS = 7;
+  var KP_MIN = 0.28;
+  var MIN_VIS = 6;
+
+  var rep = {
+    phase: "down",
+    sawPeak: false,
+    peakOk: false,
+    lastRep: 0,
+  };
 
   var CONN = [
     ["left_shoulder", "right_shoulder"],
@@ -39,6 +46,12 @@
 
   function msg(ar, en) {
     return langEn ? en : ar;
+  }
+
+  function resetRep() {
+    rep.phase = "down";
+    rep.sawPeak = false;
+    rep.peakOk = false;
   }
 
   function loadScript(src) {
@@ -66,11 +79,9 @@
       .then(function () {
         if (!window.tf || !window.poseDetection) throw new Error("libs");
         return window.tf.ready().then(function () {
-          return window.tf
-            .setBackend("webgl")
-            .catch(function () {
-              return window.tf.setBackend("cpu");
-            });
+          return window.tf.setBackend("webgl").catch(function () {
+            return window.tf.setBackend("cpu");
+          });
         });
       });
   }
@@ -99,83 +110,135 @@
     var lh = kp(map, "left_hip"),
       rh = kp(map, "right_hip");
     if (!ls || !rs || !lh || !rh) return false;
-    if (Math.abs(ls.y - rs.y) > 30) return false;
-    if (Math.abs(lh.y - rh.y) > 30) return false;
+    if (Math.abs(ls.y - rs.y) > 0.08 * (canvas.height || 240)) return false;
     return true;
   }
 
-  function result(level, text, motion) {
-    return {
-      level: level,
-      text: text,
-      motion: level === "good" ? motion || 0.18 : 0,
-    };
+  function armLiftNorm(map) {
+    var h = canvas.height || 240;
+    var ls = kp(map, "left_shoulder"),
+      rs = kp(map, "right_shoulder");
+    var lw = kp(map, "left_wrist"),
+      rw = kp(map, "right_wrist");
+    var ref = ls && rs ? (ls.y + rs.y) / 2 : ls ? ls.y : rs ? rs.y : null;
+    if (ref == null) return null;
+    var best = 0;
+    if (lw) best = Math.max(best, (ref - lw.y) / h);
+    if (rw) best = Math.max(best, (ref - rw.y) / h);
+    return best;
   }
 
-  function analyze(id, keypoints) {
-    var map = {};
-    keypoints.forEach(function (k) {
-      map[k.name] = k;
+  function kneeAngleVal(map) {
+    var hip = kp(map, "left_hip") || kp(map, "right_hip");
+    var knee = kp(map, "left_knee") || kp(map, "right_knee");
+    var ankle = kp(map, "left_ankle") || kp(map, "right_ankle");
+    return angle(hip, knee, ankle);
+  }
+
+  function countRepIfReady() {
+    var n = performance.now();
+    if (n - rep.lastRep < 900) return;
+    rep.lastRep = n;
+    if (onRep) onRep(0.22, true);
+    rep.sawPeak = false;
+    rep.peakOk = false;
+    rep.phase = "down";
+  }
+
+  function repArmLift(lift) {
+    if (lift == null) return;
+    var PEAK = 0.11;
+    var DOWN = 0.045;
+
+    if (lift >= PEAK) {
+      rep.phase = "peak";
+      rep.sawPeak = true;
+      rep.peakOk = true;
+    } else if (lift <= DOWN) {
+      if (rep.sawPeak && rep.peakOk) countRepIfReady();
+      else if (rep.sawPeak && !rep.peakOk && onReject) {
+        onReject(msg("لم تُحسب — ارفع أعلى حتى يصير أخضر", "Not counted — raise higher for green"));
+        rep.sawPeak = false;
+      }
+      rep.phase = "down";
+    } else {
+      rep.phase = "up";
+    }
+  }
+
+  function repKnee(ka) {
+    if (ka == null) return;
+    if (ka >= 152) {
+      rep.phase = "peak";
+      rep.sawPeak = true;
+      rep.peakOk = true;
+    } else if (ka <= 125) {
+      if (rep.sawPeak && rep.peakOk) countRepIfReady();
+      else if (rep.sawPeak && !rep.peakOk && onReject) {
+        onReject(msg("لم تُحسب — مدّ الركبة أكثر في الأعلى", "Not counted — extend knee more at top"));
+        rep.sawPeak = false;
+      }
+      rep.phase = "down";
+    } else {
+      rep.phase = "up";
+    }
+  }
+
+  function analyzeAndRep(id, map) {
+    var vis = 0;
+    map._list.forEach(function (k) {
+      if (k.score >= KP_MIN) vis++;
     });
-    var vis = keypoints.filter(function (k) {
-      return k.score >= KP_MIN;
-    }).length;
     if (vis < MIN_VIS) {
-      return result("warn", msg("قف أمام الكاميرا — جسمك بالإطار", "Stand in frame"));
+      return { level: "warn", text: msg("اقتربي — أظهري الجسم بالكامل", "Show full body in frame") };
     }
     if (!torsoOk(map)) {
-      return result("bad", msg("✗ عدّل وضعيتك — كتفاك مستويين", "✗ Level your shoulders"));
+      return { level: "bad", text: msg("✗ عدّلي وضع الجذع", "✗ Straighten your torso") };
     }
 
     if (id === "e3") {
-      var hip = kp(map, "left_hip") || kp(map, "right_hip");
-      var knee = kp(map, "left_knee") || kp(map, "right_knee");
-      var ankle = kp(map, "left_ankle") || kp(map, "right_ankle");
-      var ka = angle(hip, knee, ankle);
-      if (ka == null) return result("warn", msg("أظهر الركبة", "Show your knee"));
-      if (ka >= 156) return result("good", msg("✓ ركبة مستقيمة", "✓ Straight knee"), 0.22);
-      if (ka >= 142) return result("warn", msg("⚠ مدّ أكثر للأخضر", "⚠ Extend for green"));
-      return result("bad", msg("✗ مدّ الرجل", "✗ Extend leg"));
+      var ka = kneeAngleVal(map);
+      repKnee(ka);
+      if (ka == null) return { level: "warn", text: msg("أظهري الركبة والكعب", "Show knee and ankle") };
+      if (ka >= 150)
+        return { level: "good", text: msg("✓ امتداد ممتاز — أنزلي ببطء", "✓ Great extension — lower slowly") };
+      return { level: "warn", text: msg("↑ مدّي ثم ↓ ارجعي (جولة = مدّ + ثني)", "↑ Extend then ↓ return") };
     }
 
-    if (id === "e1" || id === "e11") {
-      var ls2 = kp(map, "left_shoulder"),
-        rs2 = kp(map, "right_shoulder");
-      var lw = kp(map, "left_wrist"),
-        rw = kp(map, "right_wrist");
-      var ref = ls2 && rs2 ? (ls2.y + rs2.y) / 2 : ls2 ? ls2.y : rs2 ? rs2.y : null;
-      var best = null;
-      if (lw && ref != null) best = Math.max(best || 0, ref - lw.y);
-      if (rw && ref != null) best = Math.max(best || 0, ref - rw.y);
-      if (best == null) return result("warn", msg("أظهر ذراعيك", "Show arms"));
-      if (best >= 40) return result("good", msg("✓ ارتفاع صحيح", "✓ Good height"), 0.24);
-      if (best >= 20) return result("warn", msg("⚠ ارفع للأخضر", "⚠ Raise higher"));
-      return result("bad", msg("✗ ارفع الذراع", "✗ Raise arm"));
+    if (id === "e1" || id === "e11" || id === "e7" || id === "e12") {
+      var lift = armLiftNorm(map);
+      repArmLift(lift);
+      if (lift == null) return { level: "warn", text: msg("أظهري ذراعيك للكاميرا", "Show arms to camera") };
+      if (lift >= 0.11)
+        return { level: "good", text: msg("✓ ممتاز — أنزلي الذراع ببطء", "✓ Great — lower arm slowly") };
+      if (lift >= 0.05)
+        return { level: "warn", text: msg("↑ للأخضر ارفعي، أو ↓ أكملي النزول", "↑ Raise for green, or ↓ lower") };
+      return { level: "warn", text: msg("↑ ارفعي الذراع", "↑ Raise your arm") };
     }
 
     if (id === "e2") {
       var lsh = kp(map, "left_shoulder"),
         le = kp(map, "left_elbow"),
-        lw2 = kp(map, "left_wrist");
-      var ea = angle(lsh, le, lw2) || angle(kp(map, "right_shoulder"), kp(map, "right_elbow"), kp(map, "right_wrist"));
-      if (ea == null) return result("warn", msg("أظهر الكوع", "Show elbow"));
-      if (ea <= 58 || ea >= 152) return result("good", msg("✓ زاوية الكوع", "✓ Elbow angle OK"), 0.2);
-      return result("warn", msg("⚠ اثنِ أو افرد أكثر", "⚠ Bend or extend more"));
+        lw = kp(map, "left_wrist");
+      var ea = angle(lsh, le, lw) || angle(kp(map, "right_shoulder"), kp(map, "right_elbow"), kp(map, "right_wrist"));
+      if (ea == null) return { level: "warn", text: msg("أظهري الكوع", "Show elbow") };
+      if (ea <= 55 || ea >= 155)
+        return { level: "good", text: msg("✓ وضع الكوع — بدّلي الاتجاه", "✓ Switch direction") };
+      return { level: "warn", text: msg("اثنِ أو افردِ الكوع", "Bend or straighten elbow") };
     }
 
-    if (id === "e4" || id === "e5" || id === "e6" || id === "e7" || id === "e8" || id === "e9" || id === "e12") {
-      var ls3 = kp(map, "left_shoulder"),
-        rs3 = kp(map, "right_shoulder");
-      var lw3 = kp(map, "left_wrist"),
-        rw3 = kp(map, "right_wrist");
-      if (!ls3 || !rs3) return result("warn", msg("أظهر جذعك", "Show upper body"));
-      var up =
-        (lw3 && lw3.y < ls3.y - 20) || (rw3 && rw3.y < rs3.y - 20);
-      if (up) return result("good", msg("✓ حركة واضحة", "✓ Clear movement"), 0.2);
-      return result("warn", msg("⚠ أكمل الحركة للأخضر", "⚠ Complete move for green"));
-    }
+    var lift2 = armLiftNorm(map);
+    if (lift2 != null && lift2 >= 0.08)
+      return { level: "good", text: msg("✓ حركة واضحة", "✓ Clear movement") };
+    return { level: "warn", text: msg("↑ نفّذي الحركة كاملة", "↑ Do the full movement") };
+  }
 
-    return result("warn", msg("⚠ الخطوط خضراء = يُحسب التكرار", "⚠ Green lines = rep counts"));
+  function toMap(keypoints) {
+    var map = { _list: keypoints };
+    keypoints.forEach(function (k) {
+      map[k.name] = k;
+    });
+    return map;
   }
 
   function drawPose(keypoints, level) {
@@ -207,8 +270,8 @@
   }
 
   function scaleKeypoints(kps) {
-    var vw = video.videoWidth || 1;
-    var vh = video.videoHeight || 1;
+    var vw = video.videoWidth || canvas.width || 1;
+    var vh = video.videoHeight || canvas.height || 1;
     var sx = canvas.width / vw;
     var sy = canvas.height / vh;
     return kps.map(function (k) {
@@ -226,47 +289,6 @@
     }
   }
 
-  var act = false,
-    quiet = 0,
-    peak = 0,
-    lastRep = 0,
-    goodFrames = 0,
-    wasWarnDuring = false;
-
-  function resetCycle() {
-    act = false;
-    quiet = 0;
-    peak = 0;
-    goodFrames = 0;
-  }
-
-  function motionTick(m, level) {
-    if (level !== "good") {
-      if (act) wasWarnDuring = true;
-      return;
-    }
-    if (m < 0.1) {
-      if (act && ++quiet >= 5) {
-        if (!wasWarnDuring && goodFrames >= 4 && peak >= 0.16) {
-          var n = performance.now();
-          if (n - lastRep > 1300 && onRep) {
-            lastRep = n;
-            onRep(0.22, true);
-          }
-        } else if (wasWarnDuring && onReject) {
-          onReject(msg("لم تُحسب — ابقَ على الخط الأخضر", "Not counted — stay green"));
-        }
-        resetCycle();
-        wasWarnDuring = false;
-      }
-      return;
-    }
-    if (!act) act = true;
-    quiet = 0;
-    goodFrames++;
-    peak = Math.max(peak, m);
-  }
-
   function scheduleDetect() {
     if (!active || detecting || !detector || !video || video.readyState < 2) return;
     var now = performance.now();
@@ -276,7 +298,7 @@
     if (detectTimer) clearTimeout(detectTimer);
     detectTimer = setTimeout(function () {
       detecting = false;
-    }, 2500);
+    }, 2000);
 
     detector
       .estimatePoses(video, { flipHorizontal: true, maxPoses: 1 })
@@ -285,10 +307,10 @@
         resize();
         if (poses[0] && poses[0].keypoints) {
           var kps = scaleKeypoints(poses[0].keypoints);
-          var r = analyze(exId, kps);
+          var map = toMap(kps);
+          var r = analyzeAndRep(exId, map);
           drawPose(kps, r.level);
           if (onFeedback) onFeedback(r);
-          motionTick(r.motion, r.level);
         }
       })
       .catch(function () {})
@@ -319,9 +341,8 @@
       onRep = opts.onRep;
       onReject = opts.onReject;
       active = true;
-      resetCycle();
-      wasWarnDuring = false;
-      lastRep = 0;
+      resetRep();
+      rep.lastRep = 0;
       lastEst = 0;
       canvas.hidden = false;
       resize();
@@ -335,7 +356,6 @@
 
       if (loading) return Promise.resolve(false);
       loading = true;
-
       var loadTimeout = setTimeout(function () {
         loading = false;
       }, 20000);
@@ -344,9 +364,7 @@
         .then(function () {
           return window.poseDetection.createDetector(
             window.poseDetection.SupportedModels.MoveNet,
-            {
-              modelType: window.poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
-            }
+            { modelType: window.poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING }
           );
         })
         .then(function (d) {
@@ -370,8 +388,9 @@
       detecting = false;
       if (ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
       if (canvas) canvas.hidden = true;
-      resetCycle();
+      resetRep();
     },
     resize: resize,
+    resetRep: resetRep,
   };
 })();
