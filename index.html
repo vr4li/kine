@@ -1067,7 +1067,7 @@ function liveAnnounce(key,text,prefix){
  liveDeb=setTimeout(function(){speak(prefix?prefix+' '+text:text)},350);
 }
 function bindLiveRead(){
- var map=[['fb',''],['sPhaseHint',''],['camNote',''],['sBadN','تنبيه'],['sLimitT',''],['sLimitMsg',''],['dTitle',''],['dMsg',''],['sName',''],['sOf',''],['sPlanNote',''],['sReps','عدد التكرارات'],['epNote','']];
+ var map=[['fb',''],['sPhaseHint',''],['camNote',''],['sBadN','تنبيه'],['sLimitT',''],['sLimitMsg',''],['dTitle',''],['dMsg',''],['sName',''],['sOf','']];
  map.forEach(function(pair){
   var el=$(pair[0]);if(!el||el._liveR)return;el._liveR=1;
   function go(){if(el.hidden&&pair[0]!=='fb')return;liveAnnounce(pair[0],liveTxt(el),pair[1])}
