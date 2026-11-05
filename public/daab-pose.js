@@ -28,6 +28,7 @@
     peakOk: false,
     lastRep: 0,
   };
+  var counting = false;
 
   var CONN = [
     ["left_shoulder", "right_shoulder"],
@@ -136,6 +137,7 @@
   }
 
   function countRepIfReady() {
+    if (!counting) return;
     var n = performance.now();
     if (n - rep.lastRep < 900) return;
     rep.lastRep = n;
@@ -184,53 +186,166 @@
     }
   }
 
+  function legAlignOk(map) {
+    function side(a, b, c) {
+      var ka = kp(map, a),
+        kb = kp(map, b),
+        kc = kp(map, c);
+      return !!(ka && kb && kc);
+    }
+    return (
+      side("left_hip", "left_knee", "left_ankle") ||
+      side("right_hip", "right_knee", "right_ankle")
+    );
+  }
+
+  function armAlignOk(map) {
+    function arm(sh, el, wr) {
+      return !!(kp(map, sh) && kp(map, el) && kp(map, wr));
+    }
+    return (
+      arm("left_shoulder", "left_elbow", "left_wrist") ||
+      arm("right_shoulder", "right_elbow", "right_wrist")
+    );
+  }
+
+  function alignBlock(id, map, vis) {
+    if (!torsoOk(map)) {
+      return {
+        level: "bad",
+        text: msg("✗ عدّلي وضع الجذع", "✗ Straighten your torso"),
+        alignReady: false,
+      };
+    }
+    if (id === "e3" || id === "e4") {
+      if (!legAlignOk(map))
+        return {
+          level: "warn",
+          text: msg("أظهري الساق والقدم للكاميرا", "Show leg and foot to camera"),
+          alignReady: false,
+        };
+      return null;
+    }
+    if (id === "e2") {
+      if (!armAlignOk(map))
+        return {
+          level: "warn",
+          text: msg("أظهري الذراع والكوع للكاميرا", "Show arm and elbow to camera"),
+          alignReady: false,
+        };
+      return null;
+    }
+    if (id === "e5" || id === "e6" || id === "e8") {
+      if (vis < MIN_VIS)
+        return {
+          level: "warn",
+          text: msg("اقتربي — أظهري الجسم بالكامل", "Show full body in frame"),
+          alignReady: false,
+        };
+      return null;
+    }
+    if (vis < MIN_VIS && !armAlignOk(map))
+      return {
+        level: "warn",
+        text: msg("اقتربي — أظهري الجسم أو الذراعين", "Show your body or both arms"),
+        alignReady: false,
+      };
+    return null;
+  }
+
+  function alignReadyFor(id, map, vis) {
+    return !alignBlock(id, map, vis);
+  }
+
   function analyzeAndRep(id, map) {
     var vis = 0;
     map._list.forEach(function (k) {
       if (k.score >= KP_MIN) vis++;
     });
-    if (vis < MIN_VIS) {
-      return { level: "warn", text: msg("اقتربي — أظهري الجسم بالكامل", "Show full body in frame") };
-    }
-    if (!torsoOk(map)) {
-      return { level: "bad", text: msg("✗ عدّلي وضع الجذع", "✗ Straighten your torso") };
-    }
+    var block = alignBlock(id, map, vis);
+    if (block) return block;
+    var alignReady = alignReadyFor(id, map, vis);
 
     if (id === "e3") {
       var ka = kneeAngleVal(map);
-      repKnee(ka);
-      if (ka == null) return { level: "warn", text: msg("أظهري الركبة والكعب", "Show knee and ankle") };
+      if (counting) repKnee(ka);
+      if (ka == null)
+        return { level: "warn", text: msg("أظهري الركبة والكعب", "Show knee and ankle"), alignReady: false };
       if (ka >= 150)
-        return { level: "good", text: msg("✓ امتداد ممتاز — أنزلي ببطء", "✓ Great extension — lower slowly") };
-      return { level: "warn", text: msg("↑ مدّي ثم ↓ ارجعي (جولة = مدّ + ثني)", "↑ Extend then ↓ return") };
+        return {
+          level: "good",
+          text: msg("✓ امتداد ممتاز — أنزلي ببطء", "✓ Great extension — lower slowly"),
+          alignReady: alignReady,
+        };
+      return {
+        level: "warn",
+        text: msg("↑ مدّي ثم ↓ ارجعي (جولة = مدّ + ثني)", "↑ Extend then ↓ return"),
+        alignReady: alignReady,
+      };
     }
 
     if (id === "e1" || id === "e11" || id === "e7" || id === "e12") {
       var lift = armLiftNorm(map);
-      repArmLift(lift);
-      if (lift == null) return { level: "warn", text: msg("أظهري ذراعيك للكاميرا", "Show arms to camera") };
+      if (counting) repArmLift(lift);
+      if (lift == null)
+        return { level: "warn", text: msg("أظهري ذراعيك للكاميرا", "Show arms to camera"), alignReady: false };
       if (lift >= 0.11)
-        return { level: "good", text: msg("✓ ممتاز — أنزلي الذراع ببطء", "✓ Great — lower arm slowly") };
+        return {
+          level: "good",
+          text: msg("✓ ممتاز — أنزلي الذراع ببطء", "✓ Great — lower arm slowly"),
+          alignReady: alignReady,
+        };
       if (lift >= 0.05)
-        return { level: "warn", text: msg("↑ للأخضر ارفعي، أو ↓ أكملي النزول", "↑ Raise for green, or ↓ lower") };
-      return { level: "warn", text: msg("↑ ارفعي الذراع", "↑ Raise your arm") };
+        return {
+          level: "warn",
+          text: msg("↑ للأخضر ارفعي، أو ↓ أكملي النزول", "↑ Raise for green, or ↓ lower"),
+          alignReady: alignReady,
+        };
+      return {
+        level: "warn",
+        text: msg("↑ ارفعي الذراع", "↑ Raise your arm"),
+        alignReady: alignReady,
+      };
     }
 
     if (id === "e2") {
       var lsh = kp(map, "left_shoulder"),
         le = kp(map, "left_elbow"),
         lw = kp(map, "left_wrist");
-      var ea = angle(lsh, le, lw) || angle(kp(map, "right_shoulder"), kp(map, "right_elbow"), kp(map, "right_wrist"));
-      if (ea == null) return { level: "warn", text: msg("أظهري الكوع", "Show elbow") };
+      var ea =
+        angle(lsh, le, lw) ||
+        angle(kp(map, "right_shoulder"), kp(map, "right_elbow"), kp(map, "right_wrist"));
+      if (counting) repArmLift(armLiftNorm(map));
+      if (ea == null)
+        return { level: "warn", text: msg("أظهري الكوع", "Show elbow"), alignReady: false };
       if (ea <= 55 || ea >= 155)
-        return { level: "good", text: msg("✓ وضع الكوع — بدّلي الاتجاه", "✓ Switch direction") };
-      return { level: "warn", text: msg("اثنِ أو افردِ الكوع", "Bend or straighten elbow") };
+        return {
+          level: "good",
+          text: msg("✓ وضع الكوع — بدّلي الاتجاه", "✓ Switch direction"),
+          alignReady: alignReady,
+        };
+      return {
+        level: "warn",
+        text: msg("اثنِ أو افردِ الكوع", "Bend or straighten elbow"),
+        alignReady: alignReady,
+      };
+    }
+
+    if (id === "e4" || id === "e5" || id === "e6" || id === "e8" || id === "e9") {
+      var liftG = armLiftNorm(map);
+      if (counting) repArmLift(liftG);
     }
 
     var lift2 = armLiftNorm(map);
+    if (counting && id !== "e4" && id !== "e5" && id !== "e6" && id !== "e8" && id !== "e9")
+      repArmLift(lift2);
     if (lift2 != null && lift2 >= 0.08)
-      return { level: "good", text: msg("✓ حركة واضحة", "✓ Clear movement") };
-    return { level: "warn", text: msg("↑ نفّذي الحركة كاملة", "↑ Do the full movement") };
+      return { level: "good", text: msg("✓ حركة واضحة", "✓ Clear movement"), alignReady: alignReady };
+    return {
+      level: "warn",
+      text: msg("↑ نفّذي الحركة كاملة", "↑ Do the full movement"),
+      alignReady: alignReady,
+    };
   }
 
   function toMap(keypoints) {
@@ -341,6 +456,7 @@
       onRep = opts.onRep;
       onReject = opts.onReject;
       active = true;
+      counting = false;
       resetRep();
       rep.lastRep = 0;
       lastEst = 0;
@@ -392,5 +508,9 @@
     },
     resize: resize,
     resetRep: resetRep,
+    setCounting: function (on) {
+      counting = !!on;
+      if (on) resetRep();
+    },
   };
 })();
