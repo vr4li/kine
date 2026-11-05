@@ -836,8 +836,9 @@ apply(get())})();
 <div class="card" style="margin:24px 0"><h3>تمارين هذه الجلسة</h3><ol class="list" id="sPlan"></ol><p class="small" id="sPlanNote" style="margin-top:10px"></p></div>
 <p class="quote">نسخة تجريبية: إن سمح المتصفح بالكاميرا نقيس كمية حركتك ونعدّ بها التكرارات، وإلا نعرض محاكاة. لا يُحفظ أي فيديو. التطبيق الحقيقي يستخدم نموذج ذكاء اصطناعي يقدّر وضعية الجسم على الجهاز، وهدف التكرارات هنا مثال يحدده المختص.</p>
 <div id="sLimit" hidden><h3 id="sLimitT">وصل المستخدم للحد المسموح</h3><p id="sLimitMsg"></p><div class="cta"><button class="btn ghost" id="sExtra" type="button">أسمح بجلسة إضافية الآن</button><button class="btn" id="sClr" type="button" hidden>تواصلت مع المختص، استأنف الجلسات</button></div></div>
-<div class="card" id="sCamBox" style="margin:20px 0"><h3>الكاميرا</h3><p class="small">بعد اختيار تمارينك، اسمح بالكاميرا هنا — ستظهر في الجلسة مع نقاط الحركة.</p><div class="sess" style="height:min(42vw,220px);min-height:160px"><div class="pane" style="grid-column:1/-1"><span class="lbl">معاينة</span><video id="camPrev" autoplay playsinline muted style="display:none"></video><p class="small" id="camPrevMsg" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:12px;text-align:center">اضغط «تفعيل الكاميرا»</p></div></div><div class="cta" style="margin-top:12px"><button class="btn ghost" id="sCamOn" type="button">تفعيل الكاميرا</button></div></div>
-<div class="cta"><button class="btn help" id="sStart" type="button">ابدأ الجلسة</button></div></div>
+<div class="cta" style="flex-direction:column;align-items:stretch;gap:10px;margin:20px 0 16px"><button class="btn help" id="sStart" type="button">ابدأ الجلسة</button><p class="small" id="sStartHint" style="text-align:center;margin:0;line-height:1.6">سيطلب المتصفح <strong>إذن الكاميرا</strong> عند البدء لعدّ التكرارات وتحليل الحركة (بدون حفظ فيديو).</p></div>
+<div class="card" id="sCamBox" style="margin:0 0 8px;opacity:.95"><h3>معاينة الكاميرا <span class="small" style="font-weight:600;color:var(--muted)">(اختياري)</span></h3><p class="small">لستِ مجبرة على هذا القسم — الكاميرا تُشغَّل من <strong>«ابدأ الجلسة»</strong> أعلاه. المعاينة فقط إن أردتِ التأكد من الإضاءة والإطار.</p><div class="sess" style="height:min(42vw,220px);min-height:160px"><div class="pane" style="grid-column:1/-1"><span class="lbl">معاينة</span><video id="camPrev" autoplay playsinline muted style="display:none"></video><p class="small" id="camPrevMsg" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:12px;text-align:center;color:var(--muted)">معاينة اختيارية — ليست خطوة البدء</p></div></div><div class="cta" style="margin-top:12px;justify-content:flex-start"><button class="btn ghost" id="sCamOn" type="button" style="font-size:calc(.88rem*var(--fz))">جرّب المعاينة الآن</button></div></div>
+</div>
 <div id="sRun" hidden>
 <div class="shead"><div><b id="sName"></b> <span class="small" id="sOf"></span></div><div class="cn"><span id="sReps">0</span> من <span id="sT">10</span></div></div>
 <div class="prog" style="margin-bottom:14px"><i id="sBar"></i></div>
@@ -1566,7 +1567,7 @@ function recSess(ok){if(sesRec||!sesT)return;sesRec=true;curSid='';if(guest&&!ac
 var previewStream=null;
 function bindCamPreview(){var b=$('sCamOn');if(!b||b._ok)return;b._ok=1;b.onclick=async function(){var pv=$('camPrev'),msg=$('camPrevMsg');if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){if(msg)msg.textContent='المتصفح لا يدعم الكاميرا';return}
  try{if(!previewStream){previewStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});stream=previewStream}
- pv.srcObject=previewStream;await pv.play();pv.style.display='block';if(msg)msg.hidden=true;b.textContent='الكاميرا جاهزة'}catch(e){if(msg){msg.hidden=false;msg.textContent='لم يُسمح بالكاميرا — من إعدادات المتصفح'}}}}
+ pv.srcObject=previewStream;await pv.play();pv.style.display='block';if(msg)msg.hidden=true;b.textContent='المعاينة جاهزة'}catch(e){if(msg){msg.hidden=false;msg.textContent='لم يُسمح بالكاميرا — من إعدادات المتصفح'}}}}
 function onSessionPage(){bindCamPreview();plan()}
 
 
