@@ -1090,7 +1090,8 @@ function onPage(id){if(id===lastPg)return;lastPg=id;hush();liveLast={};
  else if(id==='stars')speak('عندك '+S.stars+' نجوم');
  else if(id==='session')speak('صفحة الجلسة. اضغط ابدأ الجلسة عندما تكون جاهزاً');
  else{var pg=document.querySelector('.page[data-page="'+id+'"]');if(pg&&!pg.hidden){var h=pg.querySelector('h1,h2');var p=pg.querySelector('p');var m=(h?liveTxt(h):'')+(p?'. '+liveTxt(p):'');if(m)speak(m)}}
-syncSnd();
+}
+syncSnd();bindLiveRead();
 /* ===== الجولة التعريفية ===== */
 var tour=q('tour'),spot=q('tSpot'),tcard=q('tCard'),TS=[],ti=0,tourOn=false,tEl=null;
 function signedIn(){return !!(acct||guest)}
