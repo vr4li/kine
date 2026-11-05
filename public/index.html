@@ -1048,7 +1048,7 @@ document.addEventListener('click',function(e){var a=e.target.closest&&e.target.c
 
 /* ===== الصوت ===== */
 var q=function(i){return document.getElementById(i)},snd=true,voices=[],AC=null,lastPg='';
-try{if(localStorage.getItem('daab-sound')==='0')snd=false}catch(e){}
+try{var sv=localStorage.getItem('daab-sound');if(sv==='1')snd=true;else snd=false}catch(e){snd=false}
 function loadVoices(){try{voices=speechSynthesis.getVoices()||[]}catch(e){}}
 if('speechSynthesis' in window){loadVoices();try{speechSynthesis.onvoiceschanged=loadVoices}catch(e){}}
 function arVoice(){for(var i=0;i<voices.length;i++)if(/^ar/i.test(voices[i].lang))return voices[i];return null}
@@ -1056,25 +1056,16 @@ function enVoice(){var f=null;for(var i=0;i<voices.length;i++){if(/^en[-_]US/i.t
 function hush(){try{speechSynthesis.cancel()}catch(e){}}
 function chunks(t){var a=String(t).replace(/\s+/g,' ').trim().match(/[^.؟?!،:؛]+[.؟?!،:؛]?/g)||[],o=[],c='';a.forEach(function(x){if((c+x).length>150&&c){o.push(c);c=x}else c+=x});if(c)o.push(c);return o}
 
-var liveLast={},liveDeb=0;
 function liveTxt(el){return el?String(el.textContent||'').replace(/\s+/g,' ').trim():''}
-function liveAnnounce(key,text,prefix){
- if(!snd||!text)return;
- text=String(text).replace(/\s+/g,' ').trim();
- if(!text||liveLast[key]===text)return;
- liveLast[key]=text;
- clearTimeout(liveDeb);
- liveDeb=setTimeout(function(){speak(prefix?prefix+' '+text:text)},350);
-}
-function bindLiveRead(){
- var map=[['fb',''],['sPhaseHint',''],['camNote',''],['sBadN','تنبيه'],['sLimitT',''],['sLimitMsg',''],['dTitle',''],['dMsg',''],['sName',''],['sOf','']];
- map.forEach(function(pair){
-  var el=$(pair[0]);if(!el||el._liveR)return;el._liveR=1;
-  function go(){if(el.hidden&&pair[0]!=='fb')return;liveAnnounce(pair[0],liveTxt(el),pair[1])}
-  new MutationObserver(go).observe(el,{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:['hidden']});
-  go();
- });
- var btn=$('sPhaseNext');if(btn&&!btn._liveR){btn._liveR=1;new MutationObserver(function(){liveAnnounce('sPhaseNext',liveTxt(btn),'زر')}).observe(btn,{childList:true,characterData:true,subtree:true})}
+var sayLast='',sayAt=0;
+function sayMsg(t,force,minGap){
+ if(!t||(!snd&&!force))return;
+ t=String(t).replace(/\s+/g,' ').trim();
+ if(!t)return;
+ var now=Date.now(),gap=minGap==null?2800:minGap;
+ if(!force&&t===sayLast&&now-sayAt<gap)return;
+ if(!force&&now-sayAt<1200)return;
+ sayLast=t;sayAt=now;speak(t,!!force);
 }
 function speak(t,force,done){
  if(!t||!('speechSynthesis' in window)||(!snd&&!force)){if(done)done();return}
@@ -1083,15 +1074,15 @@ function tone(f,d,w){if(!snd)return;try{AC=AC||new(window.AudioContext||window.w
 function ding(){tone(760,.12)}
 function chime(){tone(660,.16);tone(880,.16,.15);tone(1175,.32,.3)}
 function syncSnd(){var b=q('tSound');if(b){b.setAttribute('aria-pressed',snd);b.title=snd?'الصوت مفعّل، اضغط لإيقافه':'الصوت متوقف، اضغط لتفعيله'}}
-q('tSound').onclick=function(){snd=!snd;try{localStorage.setItem('daab-sound',snd?'1':'0')}catch(e){}syncSnd();if(snd){ding();liveLast={};bindLiveRead();speak('تم تشغيل القراءة الصوتية. سأقرأ لك التعليمات والرسائل والأزرار أثناء الجلسة.',true)}else{hush();liveLast={}}};
-function onPage(id){if(id===lastPg)return;lastPg=id;hush();liveLast={};
+q('tSound').onclick=function(){snd=!snd;try{localStorage.setItem('daab-sound',snd?'1':'0')}catch(e){}syncSnd();if(snd){ding();sayLast='';speak('تم تشغيل القراءة الصوتية. سأقرأ التعليمات والرسائل.',true)}else{hush();sayLast=''}};
+function onPage(id){if(id===lastPg)return;lastPg=id;hush();sayLast='';
  if(!snd){syncSnd();return}
  if(id==='kids')speak('أهلاً يا '+kidName()+'! جاهز نتحرك اليوم؟');
  else if(id==='stars')speak('عندك '+S.stars+' نجوم');
  else if(id==='session')speak('صفحة الجلسة. اضغط ابدأ الجلسة عندما تكون جاهزاً');
  else{var pg=document.querySelector('.page[data-page="'+id+'"]');if(pg&&!pg.hidden){var h=pg.querySelector('h1,h2');var p=pg.querySelector('p');var m=(h?liveTxt(h):'')+(p?'. '+liveTxt(p):'');if(m)speak(m)}}
 }
-syncSnd();bindLiveRead();
+syncSnd();
 /* ===== الجولة التعريفية ===== */
 var tour=q('tour'),spot=q('tSpot'),tcard=q('tCard'),TS=[],ti=0,tourOn=false,tEl=null;
 function signedIn(){return !!(acct||guest)}
@@ -1520,7 +1511,7 @@ function plan(){var ids=queue(),saved=(guest&&!acct)?S.mine.some(isCam):(dayOn(S
 
 function needsManualAlign(id){return id==="e10"||!poseOn||sim}
 function alignPrompt(id){if(id==="e10")return{fb:"تأكّد من النظارة واللصقة — ثم «جاهز للجولة»",hint:"جهّز النظارة واللصقة",sp:"تأكّد من النظارة واللصقة ثم ابدأ"};if(id==="e3"||id==="e4")return{fb:"أظهر الساق والقدم في الكاميرا — انتظر ✓",hint:"عدّل وضع الساق",sp:"أظهر ساقك للكاميرا"};if(id==="e2")return{fb:"أظهر الذراع والكوع — انتظر ✓",hint:"عدّل وضع الذراع",sp:"أظهر ذراعك للكاميرا"};if(id==="e5"||id==="e6"||id==="e8")return{fb:"أظهر جسمك كاملًا — انتظر ✓",hint:"اقترب حتى يظهر الجسم كاملًا",sp:"أظهر جسمك كاملًا أمام الكاميرا"};return{fb:"أظهر جسمك أو ذراعيك — انتظر ✓",hint:"عدّل وضعك أمام الكاميرا",sp:"عدّل وضعك أمام الكاميرا"}}
-function poseFeedback(r){var f=$("fb");if(!f||gap||needsManualAlign(Q[qi]))return;if(sessPhase==="instr"||sessPhase==="ready")return;if(sessPhase==="count"){f.textContent=r.text;f.className="fb "+(r.level==="good"?"ok":"warn");return}if(sessPhase==="align"){if(r.alignReady){alignOk++;f.textContent="✓ الوضع جيد — جاري التحضير...";f.className="fb ok";if(alignOk>=10)beginCountdown()}else{alignOk=0;f.textContent=r.text;f.className="fb "+(r.level==="bad"?"warn":"warn")}}}
+function poseFeedback(r){var f=$("fb");if(!f||gap||needsManualAlign(Q[qi]))return;if(sessPhase==="instr"||sessPhase==="ready")return;if(sessPhase==="count"){f.textContent=r.text;f.className="fb "+(r.level==="good"?"ok":"warn");sayMsg(r.text,false,5000);return}if(sessPhase==="align"){if(r.alignReady){alignOk++;f.textContent="✓ الوضع جيد — جاري التحضير...";f.className="fb ok";if(alignOk>=10)beginCountdown();else if(alignOk===1)sayMsg(f.textContent,true)}else{alignOk=0;f.textContent=r.text;f.className="fb "+(r.level==="bad"?"warn":"warn");sayMsg(r.text,false,4000)}}}
 function paintInstStep(){var id=Q[qi],steps=stepsOf(id),li=$("sSteps").children;[].forEach.call(li,function(e,i){e.className=i===instStep?"on":""});var tx=steps[instStep]||"";$("fb").textContent=(instStep+1)+" / "+steps.length+" — "+tx;$("fb").className="fb";$("sPhaseHint").textContent="اقرأ الخطوة ثم «التالي»";$("sPhaseNext").textContent=instStep>=steps.length-1?"ضبط الوضعية":"الخطوة التالية";$("sPhaseBar").hidden=false;$("sPhaseNext").hidden=false;speak(tx)}
 function beginAlign(){sessPhase="align";alignOk=0;if(window.DaabPose&&DaabPose.setCounting)DaabPose.setCounting(false);var p=alignPrompt(Q[qi]);if(needsManualAlign(Q[qi])){$("sPhaseHint").textContent=p.hint;$("fb").textContent=p.fb;$("fb").className="fb";$("sPhaseNext").hidden=false;$("sPhaseNext").textContent="جاهز للجولة";speak(p.sp);return}$("sPhaseNext").hidden=true;$("sPhaseHint").textContent="عدّل وضعك حتى تظهر ✓";$("fb").textContent=p.fb;$("fb").className="fb";speak(p.sp)}
 function beginCountdown(){if(sessPhase!=="align")return;sessPhase="ready";alignOk=0;var n=3;function tick(){$("fb").textContent=n>0?"الجولة تبدأ بعد "+n+"...":"ابدئي!";$("fb").className="fb ok";if(n>0){speak(n+"");n--;setTimeout(tick,900)}else{sessPhase="count";if(Q[qi]!=="e10"&&window.DaabPose&&DaabPose.setCounting)DaabPose.setCounting(true);$("sPhaseBar").hidden=true;$("sPhaseNext").hidden=false;speak("ابدئي");t0=performance.now();if(Q[qi]==="e10"){$("fb").textContent="تابع الدائرة بعينك الكسولة";eyeC=-1;eyeAn="ok"}}}tick()}
