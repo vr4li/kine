@@ -1048,18 +1048,19 @@ document.addEventListener('click',function(e){if(!e.target.closest('#cgSave'))re
 document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a||e.defaultPrevented)return;var h=a.getAttribute('href');if(h.length<2)return;e.preventDefault();if(location.hash===h)route();else location.hash=h});
 
 /* ===== الصوت ===== */
-var q=function(i){return document.getElementById(i)},snd=true,voices=[],AC=null,lastPg='';
-try{var sv=localStorage.getItem('daab-sound');if(sv==='1')snd=true;else snd=false}catch(e){snd=false}
+var q=function(i){return document.getElementById(i)},snd=true,voices=[],AC=null,lastPg='',spPrimed=false;
+try{var sv=localStorage.getItem('daab-sound');if(sv==='0')snd=false;else if(sv==='1')snd=true;else snd=true}catch(e){snd=true}
 function loadVoices(){try{voices=speechSynthesis.getVoices()||[]}catch(e){}}
-if('speechSynthesis' in window){loadVoices();try{speechSynthesis.onvoiceschanged=loadVoices}catch(e){}}
+if('speechSynthesis' in window){loadVoices();speechSynthesis.onvoiceschanged=function(){loadVoices();drainSpeak()}}
 function arVoice(){for(var i=0;i<voices.length;i++)if(/^ar/i.test(voices[i].lang))return voices[i];return null}
 function enVoice(){var f=null;for(var i=0;i<voices.length;i++){if(/^en[-_]US/i.test(voices[i].lang))return voices[i];if(!f&&/^en/i.test(voices[i].lang))f=voices[i]}return f}
 var spQ=[],spBusy=false;
 function hush(){spQ=[];spBusy=false;try{speechSynthesis.cancel()}catch(e){}}
 function chunks(t){var a=String(t).replace(/\s+/g,' ').trim().match(/[^.؟?!،:؛]+[.؟?!،:؛]?/g)||[],o=[],c='';a.forEach(function(x){if((c+x).length>150&&c){o.push(c);c=x}else c+=x});if(c)o.push(c);return o.length?o:[String(t).trim()]}
-function primeSpeech(){if(!('speechSynthesis' in window))return;loadVoices();try{speechSynthesis.resume()}catch(e){}}
+function primeSpeech(){if(!('speechSynthesis' in window))return;loadVoices();try{speechSynthesis.resume()}catch(e){}if(!spPrimed){spPrimed=true;try{var w=new SpeechSynthesisUtterance('\u200b');w.volume=0.01;w.onend=function(){loadVoices()};setTimeout(function(){try{speechSynthesis.speak(w)}catch(e){}},0)}catch(e){}}}
 function speakAloud(t){if(!snd||!t)return;speak(String(t),true)}
-function drainSpeak(){if(spBusy||!spQ.length)return;var job=spQ.shift();if(!snd&&!job.force){drainSpeak();return}spBusy=true;try{primeSpeech();var E=document.documentElement.lang==='en',ar=!E||/[\u0600-\u06FF]/.test(job.c),v=ar?arVoice():enVoice(),u=new SpeechSynthesisUtterance(job.c);u.lang=ar?'ar-SA':'en-US';u.rate=ar?.92:1;if(v)u.voice=v;u.onend=u.onerror=function(){spBusy=false;if(job.done)try{job.done()}catch(e){}drainSpeak()};speechSynthesis.speak(u)}catch(e){spBusy=false;if(job.done)job.done();drainSpeak()}}
+function drainSpeak(){if(spBusy||!spQ.length)return;var job=spQ.shift();if(!snd&&!job.force){drainSpeak();return}if(!spPrimed&&!job.force){spQ.unshift(job);return}spBusy=true;try{primeSpeech();var E=document.documentElement.lang==='en',ar=!E||/[\u0600-\u06FF]/.test(job.c),v=ar?arVoice():enVoice(),u=new SpeechSynthesisUtterance(job.c);u.lang=ar?'ar-SA':'en-US';u.rate=ar?0.92:1;u.volume=1;if(v)u.voice=v;u.onend=u.onerror=function(){spBusy=false;if(job.done)try{job.done()}catch(e){}drainSpeak()};setTimeout(function(){try{speechSynthesis.speak(u)}catch(e){spBusy=false;if(job.done)job.done();drainSpeak()}},0)}catch(e){spBusy=false;if(job.done)job.done();drainSpeak()}}
+document.addEventListener('pointerdown',function(){primeSpeech();if(spQ.length)drainSpeak()},{capture:true,passive:true});
 
 function liveTxt(el){return el?String(el.textContent||'').replace(/\s+/g,' ').trim():''}
 var sayLast='',sayAt=0;
@@ -1078,8 +1079,9 @@ function speak(t,force,done){
 function tone(f,d,w){if(!snd)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain(),t0=AC.currentTime+(w||0);o.frequency.value=f;g.gain.setValueAtTime(.0001,t0);g.gain.exponentialRampToValueAtTime(.18,t0+.02);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g);g.connect(AC.destination);o.start(t0);o.stop(t0+d+.03)}catch(e){}}
 function ding(){tone(760,.12)}
 function chime(){tone(660,.16);tone(880,.16,.15);tone(1175,.32,.3)}
-function syncSnd(){var b=q('tSound');if(b){b.setAttribute('aria-pressed',snd);b.title=snd?'الصوت مفعّل، اضغط لإيقافه':'الصوت متوقف، اضغط لتفعيله'}}
+function syncSnd(){var b=q('tSound');if(b){b.setAttribute('aria-pressed',snd);b.setAttribute('aria-label',snd?'الصوت مفعّل، اضغط لإيقافه':'الصوت متوقف، اضغط لتفعيل القراءة');b.title=snd?'الصوت مفعّل، اضغط لإيقافه':'الصوت متوقف — اضغط مرة لتفعيل القراءة الصوتية'}}
 q('tSound').onclick=function(){primeSpeech();snd=!snd;try{localStorage.setItem('daab-sound',snd?'1':'0')}catch(e){}syncSnd();if(snd){ding();sayLast='';speak('تم تشغيل القراءة الصوتية. سأقرأ التعليمات والرسائل.',true);if(typeof run!=='undefined'&&run){var f=$('fb');if(f&&f.textContent)speakAloud(f.textContent)}}else{hush();sayLast=''}};
+if(!('speechSynthesis' in window)&&q('tSound')){q('tSound').disabled=true;q('tSound').title='المتصفح لا يدعم القراءة الصوتية — جرّب Safari أو Chrome'}
 function onPage(id){if(id===lastPg)return;lastPg=id;hush();sayLast='';
  if(!snd){syncSnd();return}
  if(id==='kids')speak('أهلاً يا '+kidName()+'! جاهز نتحرك اليوم؟');
@@ -1519,7 +1521,7 @@ function eyeUiCount(on){var bar=$('sPhaseBar'),btn=$('sPhaseNext'),hint=$('sPhas
 function alignPrompt(id){if(id==="e10")return{fb:"تأكّد من النظارة واللصقة — ثم «جاهز للجولة»",hint:"جهّز النظارة واللصقة",sp:"تأكّد من النظارة واللصقة ثم ابدأ"};if(id==="e3"||id==="e4")return{fb:"أظهر الساق والقدم في الكاميرا — انتظر ✓",hint:"عدّل وضع الساق",sp:"أظهر ساقك للكاميرا"};if(id==="e2")return{fb:"أظهر الذراع والكوع — انتظر ✓",hint:"عدّل وضع الذراع",sp:"أظهر ذراعك للكاميرا"};if(id==="e5"||id==="e6"||id==="e8")return{fb:"أظهر جسمك كاملًا — انتظر ✓",hint:"اقترب حتى يظهر الجسم كاملًا",sp:"أظهر جسمك كاملًا أمام الكاميرا"};return{fb:"أظهر جسمك أو ذراعيك — انتظر ✓",hint:"عدّل وضعك أمام الكاميرا",sp:"عدّل وضعك أمام الكاميرا"}}
 function poseFeedback(r){var f=$("fb");if(!f||gap||needsManualAlign(Q[qi]))return;if(sessPhase==="instr"||sessPhase==="ready")return;if(sessPhase==="count"){f.textContent=r.text;f.className="fb "+(r.level==="good"?"ok":"warn");sayMsg(r.text,false,5000);return}if(sessPhase==="align"){if(r.alignReady){alignOk++;f.textContent="✓ الوضع جيد — جاري التحضير...";f.className="fb ok";if(alignOk>=10)beginCountdown();else if(alignOk===1)sayMsg(f.textContent,true)}else{alignOk=0;f.textContent=r.text;f.className="fb "+(r.level==="bad"?"warn":"warn");sayMsg(r.text,false,4000)}}}
 function paintInstStep(){var id=Q[qi],steps=stepsOf(id),li=$("sSteps").children;[].forEach.call(li,function(e,i){e.className=i===instStep?"on":""});var tx=steps[instStep]||"";$("fb").textContent=(instStep+1)+" / "+steps.length+" — "+tx;$("fb").className="fb";$("sPhaseHint").textContent="اقرأ الخطوة ثم «التالي»";$("sPhaseNext").textContent=instStep>=steps.length-1?"ضبط الوضعية":"الخطوة التالية";$("sPhaseBar").hidden=false;$("sPhaseNext").hidden=false;speakAloud('الخطوة '+(instStep+1)+' من '+steps.length+'. '+tx)}
-function beginAlign(){sessPhase="align";alignOk=0;if(window.DaabPose&&DaabPose.setCounting)DaabPose.setCounting(false);var p=alignPrompt(Q[qi]);if(needsManualAlign(Q[qi])){$("sPhaseHint").textContent=p.hint;$("fb").textContent=p.fb;$("fb").className="fb";$("sPhaseNext").hidden=false;$("sPhaseNext").textContent="جاهز للجولة";speakAloud(p.fb);return}$("sPhaseNext").hidden=true;$("sPhaseHint").textContent="عدّل وضعك حتى تظهر ✓";$("fb").textContent=p.fb;$("fb").className="fb";speak(p.sp)}
+function beginAlign(){sessPhase="align";alignOk=0;if(window.DaabPose&&DaabPose.setCounting)DaabPose.setCounting(false);var p=alignPrompt(Q[qi]);if(needsManualAlign(Q[qi])){$("sPhaseHint").textContent=p.hint;$("fb").textContent=p.fb;$("fb").className="fb";$("sPhaseNext").hidden=false;$("sPhaseNext").textContent="جاهز للجولة";speakAloud(p.fb);return}$("sPhaseNext").hidden=true;$("sPhaseHint").textContent="عدّل وضعك حتى تظهر ✓";$("fb").textContent=p.fb;$("fb").className="fb";speakAloud(p.sp||p.fb)}
 function beginCountdown(){if(sessPhase!=="align")return;sessPhase="ready";alignOk=0;var n=3;function tick(){var msg=n>0?"الجولة تبدأ بعد "+n+"...":"ابدئي!";$("fb").textContent=msg;$("fb").className="fb ok";speakAloud(msg);if(n>0){n--;setTimeout(tick,900)}else{sessPhase="count";if(Q[qi]!=="e10"&&window.DaabPose&&DaabPose.setCounting)DaabPose.setCounting(true);if(Q[qi]!=="e10"){$("sPhaseBar").hidden=true;$("sPhaseNext").hidden=false}else{eyeUiCount(true)}t0=performance.now();if(Q[qi]==="e10"){$("fb").textContent="تابع الدائرة بعينك الكسولة";eyeC=-1;eyeAn="ok";eyeLastRep=0;speakAloud($("fb").textContent)}}}tick()}
 function startExercisePhases(id){sessPhase="instr";instStep=0;alignOk=0;eyeC=-1;if(window.DaabPose&&DaabPose.setCounting)DaabPose.setCounting(false);paintInstStep()}
 
