@@ -76,7 +76,12 @@ header .wrap{max-width:1280px}
 .ex-pills .pill b{display:block;font-size:calc(12px*var(--fz));margin-bottom:2px;opacity:.85}
 .ex-pills .pill.dur{background:rgba(230,126,34,.14);color:var(--ink-o)}
 .ex-pills .pill.rep{background:var(--green);color:#fff}
-.ex-guide .ex-who{padding:0 16px 12px;font-size:calc(14px*var(--fz))}
+.ex-guide .ex-desc{margin:0 16px 10px;font-size:calc(15px*var(--fz));line-height:1.65;color:var(--ink)}
+.ex-guide .ex-detail{padding:0 16px 10px;font-size:calc(14px*var(--fz))}
+.ex-guide .ex-detail ul{margin:6px 0 0;padding-inline-start:18px}
+.ex-guide .ex-track{margin:0 16px 10px}
+.ex-guide .top .imp{margin-inline-start:auto;font-size:calc(12px*var(--fz))}
+.ex-guide .mus:not(.mus-illus){margin:0 16px 12px;padding:12px;border-radius:14px;background:var(--bg)}
 .ex-guide .lbtns{padding:0 16px 16px}
 .tools{display:flex;align-items:center;gap:6px}
 .tools .btn{padding:6px 12px;font-size:calc(14px*var(--fz));display:inline-flex;align-items:center;gap:6px}
@@ -1417,8 +1422,8 @@ function musBlock(id,compact){var m=MUS[musRefId(id)];if(!m)return '';var svg=mu
 function exOrd(id){var n=parseInt(String(id).replace(/\D/g,''),10);return isNaN(n)?0:n}
 function guideMeta(x){if(!x)return {dur:'—',rep:'—'};if(x.cat==='eye')return {dur:'ثبات 5–10 ثوانٍ بمتابعة هادئة',rep:'6–10 تكرارات'};if(x.cat==='kid'||x.dn)return {dur:'ثبات 15–30 ثانية',rep:'8–10 تكرارات'};if(x.cat==='bal')return {dur:'ثبات 3–5 ثوانٍ',rep:'10–12 تكراراً'};return {dur:'ثبات 2–5 ثوانٍ',rep:'10–15 تكراراً'}}
 function guideSteps(id){var st=stepsOf(id);return st.length?st.slice(0,3):[]}
-function exGuideCard(x,sgIds,lbl){var gm=guideMeta(x),st=guideSteps(x.id),n=exOrd(x.id);
- return '<article class="ex ex-guide"><div class="top"><span class="cat">'+CATS[x.cat]+'</span>'+(sgIds.indexOf(x.id)>-1?'<span class="cat sugb">مقترح لحالتك</span>':'')+downBadge(x)+rxBadge(x)+eyeBadge(x)+'</div><div class="ex-illus-wrap"><span class="ex-num">'+n+'</span>'+musBlock(x.id,true)+'</div><h4>'+x.n+'</h4>'+(st.length?'<ol class="ex-steps">'+st.map(function(t){return '<li>'+t+'</li>'}).join('')+'</ol>':'<p class="ex-who">'+x.s+'</p>')+'<div class="ex-pills"><span class="pill dur"><b>المدة</b>'+gm.dur+'</span><span class="pill rep"><b>التكرار</b>'+gm.rep+'</span></div><p class="small ex-who"><b>من يحتاجه؟</b> '+x.w.slice(0,2).join(' · ')+'</p>'+libBtns(x.id,'grid',lbl)+'</article>'}
+function exGuideCard(x,sgIds,lbl){var gm=guideMeta(x),st=guideSteps(x.id),n=exOrd(x.id),imp='';for(var i=1;i<=3;i++)imp+='<i class="'+(i<=x.imp?'on':'')+'"></i>';
+ return '<article class="ex ex-guide"><div class="top"><span class="cat">'+CATS[x.cat]+'</span>'+(sgIds.indexOf(x.id)>-1?'<span class="cat sugb">مقترح لحالتك</span>':'')+downBadge(x)+rxBadge(x)+eyeBadge(x)+'<span class="imp"><span aria-hidden="true" style="display:inline-flex;gap:4px">'+imp+'</span>الأهمية: '+IMP[x.imp]+'</span></div><div class="ex-illus-wrap"><span class="ex-num">'+n+'</span>'+musBlock(x.id,true)+'</div><h4>'+x.n+'</h4>'+(st.length?'<ol class="ex-steps">'+st.map(function(t){return '<li>'+t+'</li>'}).join('')+'</ol>':'')+'<p class="ex-desc">'+x.s+'</p><div class="ex-pills"><span class="pill dur"><b>المدة</b>'+gm.dur+'</span><span class="pill rep"><b>التكرار</b>'+gm.rep+'</span></div>'+musBlock(x.id)+'<div class="ex-detail"><b>من يحتاجه؟</b><ul>'+x.w.map(function(w){return '<li>'+w+'</li>'}).join('')+'</ul></div><p class="small ex-track">'+x.t+'</p>'+libBtns(x.id,'grid',lbl)+'</article>'}
 /* ===== موعد التمرين عند إضافته من المكتبة ===== */
 var addTouched=false,addId='',addWhere='',addDays=[],addT={time:'16:00',dur:15,per:1,gap:180},addMsg='';
 function exDays(id){return SCH().map(function(d,i){return d.on&&d.ex.indexOf(id)>-1?i:-1}).filter(function(i){return i>-1})}
@@ -1482,7 +1487,7 @@ document.addEventListener('click',function(e){var t=e.target.closest('#cdEdit,#c
  if(!v.length){$('cdMsg').textContent='اختر حالة واحدة على الأقل، أو «حالة أخرى أو لا أعرف بعد».';return}
  S.cond=v;save();cdEdit=false;renderLib()});
 document.addEventListener('click',function(e){var b=e.target.closest('[data-jump]');if(!b)return;var el=$(b.dataset.jump);if(!el)return;var rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;el.scrollIntoView({behavior:rm?'auto':'smooth',block:'start'});var h=el.querySelector('h2');if(h){h.setAttribute('tabindex','-1');h.focus({preventScroll:true})}});
-cleanMine();scrubSched();sessionInit();renderLib();paintPlan();
+cleanMine();scrubSched();sessionInit();paintPlan();
 var tab='login',aMsg=$('aMsg');
 function cdUI(v,su){var row=$('cdRow'),kid=v==='cchild';row.hidden=!(su&&v);if(!v)return;var k=kid?'child':'adult';
  if(cdK!==k){[].forEach.call($('cdSign').querySelectorAll('input:checked'),function(i){if(cdSel.indexOf(i.dataset.cds)<0)cdSel.push(i.dataset.cds)});cdK=k;$('cdSign').innerHTML=cdChecks(cdSel,k,'data-cds')}
@@ -1617,7 +1622,8 @@ STEPS.e22=['جهّز اللصقة والنظارة ثم اجلس مستقيما�
 STEPS.e23=['تأكد أن العين السليمة مغطّاة','تابع النقطة وهي تتحرك للأعلى والأسفل','لا تحرّك رأسك — حركة العين فقط'];
 STEPS.e24=['ضع النظارة واللصقة الموصوفتين','تابع الدائرة بعينك الكسولة دون تحريك رأسك','اضغط «أنهيت متابعة الدائرة» بعد كل دورة كاملة'];
 
-function stepsOf(id){if(isEyeEx(id))return STEPS[id]||eyeSteps();return STEPS[id]||STEPS[poseRefId(id)]||[]}
+function stepsOf(id){if(typeof STEPS==='undefined'||!STEPS)return [];if(isEyeEx(id))return STEPS[id]||(typeof eyeSteps==='function'?eyeSteps():[]);return STEPS[id]||STEPS[poseRefId(id)]||[]}
+renderLib();
 function mkEye(s,main){var lx=S.lazy==='left'?37:63,gx=lx===63?37:63;
  s.innerHTML='<circle cx="50" cy="58" r="33" fill="#F5F2EA"/>'+(main?'<circle cx="50" cy="58" r="42" fill="none" stroke="#fff" stroke-opacity=".2" stroke-width="1.2" stroke-dasharray="2 4"/>':'')+'<path d="M38 78q12 8 24 0" fill="none" stroke="#0B4A42" stroke-width="2.6" stroke-linecap="round"/><ellipse cx="37" cy="55" rx="8" ry="5.5" fill="#fff" stroke="#0B4A42" stroke-width="1.4"/><ellipse cx="63" cy="55" rx="8" ry="5.5" fill="#fff" stroke="#0B4A42" stroke-width="1.4"/><circle class="pg" cx="'+gx+'" cy="55" r="3.2" fill="#0B4A42"/><circle class="pl" cx="'+lx+'" cy="55" r="3.2" fill="#0B4A42"/><g class="pt" style="transition:opacity .3s"><rect x="'+(gx-12)+'" y="45" width="24" height="20" rx="8" fill="#E07A3F"/><path d="M'+(gx-9)+' 48l18 14M'+(gx+9)+' 48L'+(gx-9)+' 62" stroke="#F5F2EA" stroke-width="1.2" opacity=".5"/></g><g class="wp" style="opacity:0;transition:opacity .3s"><rect x="'+(lx-12)+'" y="45" width="24" height="20" rx="8" fill="#E07A3F"/><path d="M'+(lx-9)+' 48l18 14M'+(lx+9)+' 48L'+(lx-9)+' 62" stroke="#F5F2EA" stroke-width="1.2" opacity=".5"/></g><g class="gl" fill="rgba(255,255,255,.25)" stroke="#2A3744" stroke-width="2.6" stroke-linecap="round" style="transition:opacity .3s"><circle cx="37" cy="55" r="11.5"/><circle cx="63" cy="55" r="11.5"/><path d="M48.5 53q1.5-2 3 0M25.5 53L17 50M74.5 53L83 50" fill="none"/></g>'+(main?'<circle class="tg" r="6" cx="50" cy="16" fill="#E07A3F" stroke="#fff" stroke-width="1.6"/>':'');
  s._e={pl:s.querySelector('.pl'),pg:s.querySelector('.pg'),pt:s.querySelector('.pt'),wp:s.querySelector('.wp'),gl:s.querySelector('.gl'),tg:s.querySelector('.tg'),lx:lx};return s}
