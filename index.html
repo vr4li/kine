@@ -672,8 +672,8 @@ apply(get())})();
 <fieldset class="fld rl" id="cdRow" hidden style="display:block"><legend id="cdT">الحالة التي يتمرّن لها</legend><p class="small" id="cdN" style="margin-bottom:6px">اختر كل ما ينطبق. نقترح بها التمارين المناسبة في المكتبة، ويمكن تعديلها لاحقاً.</p><div class="cdl" id="cdSign"></div></fieldset>
 <div class="fld kidbox" id="cpRow" hidden><b id="cpT">بيانات من ترافقه</b>
 <label class="fld" style="margin-top:10px"><span id="wNameL">اسم من ترافقه</span><input id="wName" autocomplete="off"></label>
-<label class="fld" id="wCodeRow" hidden>رمز المرافق (4 أرقام)<input id="cCode" type="password" inputmode="numeric" maxlength="4" dir="ltr" autocomplete="off"></label>
-<p class="small" id="wCodeNote" hidden>الرمز تقفل به واجهة الطفل، ولا يخرج الطفل منها أو يبدّل الوضع إلا بإدخاله. اختره ولا تخبر به الطفل.</p></div>
+<label class="fld" id="wCodeRow" hidden>رمز المرافق (4 أرقام)<input id="cCode" type="password" inputmode="numeric" maxlength="4" dir="ltr" autocomplete="new-password" aria-describedby="wCodeNote"></label>
+<p class="small" id="wCodeNote" hidden>اختره الآن عند إنشاء الحساب — أنت وحدك من يعرفه. يقفل واجهة الطفل، وإنهاء الجلسة، والخروج من وضع الطفل.</p></div>
 <div class="fld" id="adRow" hidden><label class="chk"><input type="checkbox" id="aComp"> لدي مرافق (اختياري)</label>
 <div id="aCompRow" hidden><label class="fld">اسم المرافق<input id="aCompName" autocomplete="off"></label>
 <label class="fld">البريد الإلكتروني للمرافق<input id="aCompMail" type="email" dir="ltr" autocomplete="off"></label>
@@ -901,6 +901,9 @@ var S={mode:'',mine:[],stars:0},acct=null,guest=false,unlocked=false,pendingStop
 function db(){try{return JSON.parse(localStorage.getItem('daab-users')||'{}')}catch(e){return{}}}
 function wr(u){try{localStorage.setItem('daab-users',JSON.stringify(u))}catch(e){}}
 var PK=['mine','sched','plan','stars','log','xu','lazy','codeH','codeS','fb','hold','cond','hist','docNote','since'],wForm=false,wDelArm=0;
+function hasCompanionPin(){return !!(S.pinH||S.codeH)}
+function pinPrompt(){return hasCompanionPin()?'أدخل الرمز الذي اخترته عند إنشاء حساب المرافق.':'لا يوجد رمز محفوظ بعد. للتجربة كضيف فقط: 1234'}
+async function pinOk(v){if(S.pinH&&S.pinS&&await hpw(v,S.pinS)===S.pinH)return true;if(S.codeH&&S.codeS&&await hpw(v,S.codeS)===S.codeH)return true;return !hasCompanionPin()&&v==='1234'}
 function escH(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function wStash(){var w=S.wards&&S.wards[S.wi];if(!w)return;var d={};PK.forEach(function(k){if(S[k]!==undefined)d[k]=S[k]});w.d=d}
 function wLoad(i){var w=S.wards[i];S.wi=i;PK.forEach(function(k){delete S[k]});var d=w.d||{};PK.forEach(function(k){if(d[k]!==undefined)S[k]=d[k]});S.mine=S.mine||[];S.stars=S.stars||0;S.ward={name:w.name,kind:w.kind};if(S.role==='companion')S.hasComp=(w.kind==='adult');cleanMine();scrubSched()}
@@ -908,9 +911,9 @@ function wNew(name,kind,codeH,codeS){var w={id:'w'+Date.now().toString(36)+Math.
 var GUEST_KEY='daab-guest-snap';
 function guestSnapSave(){if(!guest||acct)return;try{localStorage.setItem(GUEST_KEY,JSON.stringify({mine:S.mine||[],cond:S.cond||[],mode:S.mode||'',stars:S.stars||0}))}catch(e){}}
 function guestSnapLoad(){if(!guest||acct)return;try{var g=JSON.parse(localStorage.getItem(GUEST_KEY)||'null');if(!g||!g.mine)return;S.mine=(g.mine||[]).filter(validEx);if(g.cond)S.cond=g.cond;if(g.mode)S.mode=g.mode;if(g.stars)S.stars=g.stars}catch(e){}}
-function save(){if(guest&&!acct){guestSnapSave();return}if(!acct)return;var u=db();if(u[acct]){wStash();u[acct].data=S;wr(u)}}
+function save(){if(guest&&!acct){guestSnapSave();return}if(!acct)return;var u=db();if(u[acct]){wStash();u[acct].data=S;if(S.pinH){u[acct].pinH=S.pinH;u[acct].pinS=S.pinS}wr(u)}}
 async function hpw(p,salt){var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+p));return [].map.call(new Uint8Array(b),function(x){return ('0'+x.toString(16)).slice(-2)}).join('')}
-function begin(mail){var u=db();acct=mail;guest=false;S=u[mail].data||{};if(S.role==='companion'){if(!S.wards&&S.ward){S.wards=[wNew(S.ward.name,S.ward.kind)];S.wi=0;wStash()}if(S.wards&&S.wards.length)wLoad(Math.min(S.wi||0,S.wards.length-1))}S.mode=S.mode||'';S.mine=S.mine||[];S.stars=S.stars||0;cleanMine();scrubSched();try{localStorage.setItem('daab-session',mail)}catch(e){}}
+function begin(mail){var u=db(),rec=u[mail]||{};acct=mail;guest=false;S=rec.data||{};S.pinH=rec.pinH||S.pinH||'';S.pinS=rec.pinS||S.pinS||'';if(S.role==='companion'){if(!S.wards&&S.ward){var w0=wNew(S.ward.name,S.ward.kind);if(S.codeH&&S.codeS){w0.d.codeH=S.codeH;w0.d.codeS=S.codeS}S.wards=[w0];S.wi=0;wStash()}if(S.wards&&S.wards.length)wLoad(Math.min(S.wi||0,S.wards.length-1));if(!S.pinH&&S.codeH){S.pinH=S.codeH;S.pinS=S.codeS;save()}}S.mode=S.mode||'';S.mine=S.mine||[];S.stars=S.stars||0;cleanMine();scrubSched();try{localStorage.setItem('daab-session',mail)}catch(e){}}
 function sessionInit(){try{var m=localStorage.getItem('daab-session');if(m&&db()[m])begin(m)}catch(e){}}
 function endSession(){acct=null;guest=false;unlocked=false;S={mode:'',mine:[],stars:0};try{localStorage.removeItem('daab-session')}catch(e){}}
 function acctUI(){var g=function(i){return document.getElementById(i)},w=g('acctWrap');if(!w)return;var on=!!(acct||guest),R={child:'طفل',companion:'مرافق',adult:'مريض بالغ'},u=acct?(db()[acct]||{}):{};
@@ -1231,9 +1234,9 @@ setInterval(function(){var pg=document.querySelector('.page.on'),id=pg?pg.datase
 function needHelp(){safeReason='help';safePaused=true;paused=true;companionAlert('help');$('helpOv').hidden=false;speak('توقفنا. نادِ من معك. لا بأس أبداً، نكمل حين تكون جاهزاً.')}
 $('sHelp').onclick=needHelp;$('helpOk').onclick=function(){$('helpOv').hidden=true;safeTouch();speak('رائع، نكمل معاً.')};
 $('saOk').onclick=function(){hideSafeAl();speak('شكراً، تابعوا معاً بهدوء.')};
-$('acctBtn').addEventListener('click',function(e){if(getMode()==='child'&&!unlocked){e.preventDefault();$('code').value='';$('codeMsg').textContent=S.codeH?'اكتب الرمز الذي اختاره المرافق عند إنشاء الحساب.':'للتجربة: 1234';$('lockOv').hidden=false;$('code').focus()}});
+$('acctBtn').addEventListener('click',function(e){if(getMode()==='child'&&!unlocked){e.preventDefault();$('code').value='';$('codeMsg').textContent=pinPrompt();$('lockOv').hidden=false;$('code').focus()}});
 $('codeNo').onclick=function(){$('lockOv').hidden=true;pendingStop=false};
-$('codeOk').onclick=async function(){var okc=S.codeH?(await hpw($('code').value,S.codeS)===S.codeH):$('code').value==='1234';if(okc){$('lockOv').hidden=true;if(pendingStop&&run){pendingStop=false;unlocked=false;safeReason='stop';finish(false,'stop');return}unlocked=true;if(location.hash==='#account')route();else location.hash='#account'}else $('codeMsg').textContent=S.codeH?'الرمز غير صحيح.':'الرمز غير صحيح. جرّب 1234'};
+$('codeOk').onclick=async function(){var okc=await pinOk($('code').value);if(okc){$('lockOv').hidden=true;if(pendingStop&&run){pendingStop=false;unlocked=false;safeReason='stop';finish(false,'stop');return}unlocked=true;if(location.hash==='#account')route();else location.hash='#account'}else $('codeMsg').textContent=hasCompanionPin()?'الرمز غير صحيح.':'الرمز غير صحيح. جرّب 1234 للتجربة كضيف فقط.'};
 var CATS={all:'الكل',up:'الطرف العلوي',low:'الطرف السفلي',bal:'التوازن',kid:'تمارين الأطفال',eye:'تمارين العين'},IMP={3:'أساسي',2:'مهم',1:'داعم'},CAM='التتبع: عدّ بالكاميرا على جهازك',REM='التتبع: تذكير وتسجيل الالتزام',EYE='التتبع: الكاميرا تتحقق من النظارة واللصقة وحركة العين',flt='all';
 function downBadge(x){return x&&x.dn?'<span class="cat downb">متلازمة داون</span>':''}
 function rxBadge(x){return x&&x.rx?'<span class="cat rxb">بعد الجراحة / تأهيل</span>':''}
@@ -1405,9 +1408,9 @@ function cdUI(v,su){var row=$('cdRow'),kid=v==='cchild';row.hidden=!(su&&v);if(!
  $('cdT').textContent=v==='adult'?'الحالة التي تتمرّن لها':kid?'حالة الطفل الذي ترافقه':'حالة البالغ الذي ترافقه'}
 function cdPick(){return [].map.call(document.querySelectorAll('#cdSign input:checked'),function(i){return i.dataset.cds})}
 function roleUI(){var r=document.querySelector('input[name=role]:checked'),v=r?r.value:'',su=tab==='signup',comp=v==='cchild'||v==='cadult',kid=v==='cchild';
- $('cpRow').hidden=!(su&&comp);cdUI(v,su);$('wCodeRow').hidden=!(su&&kid);$('wCodeNote').hidden=$('wCodeRow').hidden;
+ $('cpRow').hidden=!(su&&comp);cdUI(v,su);$('wCodeRow').hidden=!(su&&comp);$('wCodeNote').hidden=$('wCodeRow').hidden;
  $('cpT').textContent=kid?'بيانات الطفل الذي ترافقه':comp?'بيانات البالغ الذي ترافقه':'بيانات من ترافقه';$('wNameL').textContent=kid?'اسم الطفل':comp?'اسم البالغ':'اسم من ترافقه';
- $('roleNote').textContent=kid?'الطفل لا ينشئ حساباً بنفسه: يسجّله مرافقه البالغ، ويدخل واجهته من حسابك، وتقفلها برمز لا يعرفه.':comp?'البالغ الذي ترافقه يدخل واجهته من حسابك، ويُطبَّق عليه الجدول وحدّ الجلسات الذي تضعه أنت، وتصلك تنبيهاته.':v==='adult'?'حسابك لك أنت، ويمكنك إضافة مرافق اختياري.':'اختر دورك أولاً. الطفل لا ينشئ حساباً بنفسه: يسجّله مرافقه البالغ.';
+ $('roleNote').textContent=kid?'الطفل لا ينشئ حساباً بنفسه: يسجّله مرافقه البالغ، ويدخل واجهته من حسابك، وتقفلها برمز تختاره الآن ولا يعرفه.':comp?'اختر رمز مرافق من 4 أرقام — أنت وحدك من يعرفه. يُستخدم لقفل واجهة الطفل وإنهاء الجلسة والخروج من وضع الطفل.':v==='adult'?'حسابك لك أنت، ويمكنك إضافة مرافق اختياري.':'اختر دورك أولاً. الطفل لا ينشئ حساباً بنفسه: يسجّله مرافقه البالغ.';
  $('adRow').hidden=!(su&&v==='adult');$('aCompRow').hidden=!($('aComp').checked&&su&&v==='adult');$('roleNote').hidden=!su;
  $('mailLbl').textContent=su?'بريدك الإلكتروني (تصلك عليه التنبيهات)':'البريد الإلكتروني';$('mailNote').hidden=!su}
 [].forEach.call(document.querySelectorAll('input[name=role]'),function(i){i.addEventListener('change',roleUI)});$('aComp').onchange=roleUI;
@@ -1450,10 +1453,11 @@ $('authForm').addEventListener('submit',async function(e){e.preventDefault();
    if(role==='companion'){
     var wn=$('wName').value.trim(),wk={value:rv==='cchild'?'child':'adult'},cc=$('cCode').value;
     if(wn.length<2){aMsg.textContent=rv==='cchild'?'اكتب اسم الطفل (حرفان على الأقل).':'اكتب اسم البالغ الذي ترافقه (حرفان على الأقل).';return}
-    if(wk.value==='child'&&!/^\d{4}$/.test(cc)){aMsg.textContent='اختر رمز مرافق من 4 أرقام لقفل واجهة الطفل.';return}
-    S.ward={name:wn,kind:wk.value};
-    if(wk.value==='child'){S.codeS=Math.random().toString(36).slice(2);S.codeH=await hpw(cc,S.codeS)}else S.hasComp=true;
-    S.wards=[wNew(wn,wk.value)];S.wi=0;wStash();
+    if(!/^\d{4}$/.test(cc)){aMsg.textContent='اختر رمز مرافق من 4 أرقام عند إنشاء الحساب. لا تخبر به الطفل.';return}
+    var pinSalt=Math.random().toString(36).slice(2),pinHash=await hpw(cc,pinSalt);
+    S.pinH=pinHash;S.pinS=pinSalt;S.ward={name:wn,kind:wk.value};
+    if(wk.value==='child'){S.codeS=pinSalt;S.codeH=pinHash;S.wards=[wNew(wn,wk.value,pinHash,pinSalt)]}else{S.hasComp=true;delete S.codeH;delete S.codeS;S.wards=[wNew(wn,wk.value)]}
+    S.wi=0;wStash();
    }else if($('aComp').checked){
     var cn=$('aCompName').value.trim(),cm=$('aCompMail').value.trim().toLowerCase();
     if(cn.length<2){aMsg.textContent='اكتب اسم المرافق.';return}
@@ -1461,7 +1465,7 @@ $('authForm').addEventListener('submit',async function(e){e.preventDefault();
     S.hasComp=true;S.compName=cn;S.compMail=cm;
    }
    S.role=role;S.mode=role;
-   u[mail]={name:nm,salt:salt,hash:await hpw(pw,salt),data:S};wr(u);begin(mail);
+   u[mail]={name:nm,salt:salt,hash:await hpw(pw,salt),data:S,pinH:S.pinH||'',pinS:S.pinS||''};wr(u);begin(mail);
   }else{
    var r=u[mail];
    if(!r||r.hash!==await hpw(pw,r.salt)){aMsg.textContent='البريد أو كلمة المرور غير صحيحة.';return}
@@ -1626,7 +1630,7 @@ $('sStart').onclick=async function(){primeSpeech();var qq=queue();if(!qq.length)
  if(stream){sim=false;v.style.display='block';$('rig2').style.display='none';$('camNote').textContent='جاري تحميل المحلل…';if(!isEyeEx(Q[qi])&&window.DaabPose){setTimeout(function(){DaabPose.start(v,$('camPose'),pid,{onFeedback:function(r){poseFeedback(r)},onRep:function(pk,ok){if(sessPhase==='count'&&ok!==false)rep(pk)},onReject:function(txt){if(sessPhase!=='count')return;var f=$('fb');if(!f||gap)return;badN++;var bn=$('sBadN');bn.hidden=false;bn.textContent='حركات لم تُحسب: '+badN;f.textContent=txt;f.className='fb warn';if(!window._rejT||Date.now()-window._rejT>4000){window._rejT=Date.now();speak(txt)}}}).then(function(ok){poseOn=!!ok;$('camNote').textContent=ok?'محلل الحركة — الخط الأخضر يحسب التكرار':'تقدير حركة (بدون نموذج)';if(!ok)sim=true;else if(run&&!isEyeEx(Q[qi])&&window.DaabPose&&DaabPose.setCounting)DaabPose.setCounting(sessPhase==='count')})},0)}}
  else{$('camNote').textContent='تعذّرت الكاميرا، نعرض محاكاة'}
  loadEx();run=true;safeReason='';safeReset();if(!raf)raf=requestAnimationFrame(loop);window.scrollTo(0,0)};
-$('sStop').onclick=function(){if(childSafeOn()&&run){pendingStop=true;$('code').value='';$('codeMsg').textContent=S.codeH?'اكتب رمز المرافق لإنهاء الجلسة.':'للتجربة: 1234';$('lockOv').hidden=false;$('code').focus();return}finish(false,childSafeOn()?'stop':'')};$('sAgain').onclick=function(){if(getMode()==='child'&&!gate().ok){location.hash='#rest';return}showP('sSetup');plan()};
+$('sStop').onclick=function(){if(childSafeOn()&&run){pendingStop=true;$('code').value='';$('codeMsg').textContent=hasCompanionPin()?'أدخل رمز المرافق لإنهاء الجلسة.':pinPrompt();$('lockOv').hidden=false;$('code').focus();return}finish(false,childSafeOn()?'stop':'')};$('sAgain').onclick=function(){if(getMode()==='child'&&!gate().ok){location.hash='#rest';return}showP('sSetup');plan()};
 /* ===== تقييم الجلسة والألم ===== */
 var fb={r:0,p:'',sy:[],n:'',ok:true},clrArm=0;
 function fbKid(){return getMode()==='child'}
