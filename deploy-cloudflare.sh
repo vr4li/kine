@@ -24,6 +24,7 @@ npx wrangler@3 whoami 2>/dev/null || {
 
 mkdir -p public
 cp index.html public/index.html
+cp -f public/daab-pose.js daab-pose.js 2>/dev/null || cp -f daab-pose.js public/daab-pose.js 2>/dev/null || true
 
 echo ""
 echo "جاري الرفع (مجلد public فقط — تصميمك)..."

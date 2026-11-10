@@ -1625,7 +1625,7 @@ function onSessionPage(){plan()}
 if(!$('sPhaseNext')._b){$('sPhaseNext')._b=1;$('sPhaseNext').onclick=function(){if(!run||gap)return;var steps=stepsOf(Q[qi]),id=Q[qi];if(sessPhase==='count'&&isEyeEx(id)){eyeRep();return}if(sessPhase==='instr'){if(instStep<steps.length-1){instStep++;paintInstStep()}else beginAlign()}else if(sessPhase==='align'&&needsManualAlign(id))beginCountdown()}}
 $('sStart').onclick=async function(){primeSpeech();var qq=queue();if(!qq.length){plan();speakAloud('أضف تماريناً من المكتبة أولاً ثم ابدأ الجلسة');return}if(qq.some(isEyeEx)&&!S.lazy){plan();speakAloud('اختر العين الكسولة قبل بدء تمرين العين');return}var g=gate();if(!g.ok&&getMode()==='child'){location.hash='#rest';return}if(!g.ok&&g.why==='hold'){plan();return}logSession();Q=qq.slice();sesT=Date.now();sesRec=false;sessEnd=(guest&&!acct)?0:Date.now()+SCH()[new Date().getDay()].dur*60000;qi=0;paused=false;gap=false;poseOn=false;showP('sRun');rigMode='';rig1=mk($('rig1'));rig2=mk($('rig2'));sim=true;var v=$('cam');v.style.display='none';$('rig2').style.display='block';$('camNote').textContent='محاكاة تجريبية';
  if(stream){v.srcObject=stream;try{await v.play()}catch(e){}}
- else{try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});v.srcObject=stream;await v.play()}catch(e){}}
+ else{try{stream=await Promise.race([navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false}),new Promise(function(_,rj){setTimeout(function(){rj(new Error('timeout'))},12000)})]);v.srcObject=stream;await v.play()}catch(e){$('camNote').textContent=e&&e.message==='timeout'?'انتظار الكاميرا طال. اسمح بالكاميرا أو نكمل بالمحاكاة.':$('camNote').textContent}}
  var pid=poseRefId(Q[qi]);
  if(stream){sim=false;v.style.display='block';$('rig2').style.display='none';$('camNote').textContent='جاري تحميل المحلل…';if(!isEyeEx(Q[qi])&&window.DaabPose){setTimeout(function(){DaabPose.start(v,$('camPose'),pid,{onFeedback:function(r){poseFeedback(r)},onRep:function(pk,ok){if(sessPhase==='count'&&ok!==false)rep(pk)},onReject:function(txt){if(sessPhase!=='count')return;var f=$('fb');if(!f||gap)return;badN++;var bn=$('sBadN');bn.hidden=false;bn.textContent='حركات لم تُحسب: '+badN;f.textContent=txt;f.className='fb warn';if(!window._rejT||Date.now()-window._rejT>4000){window._rejT=Date.now();speak(txt)}}}).then(function(ok){poseOn=!!ok;$('camNote').textContent=ok?'محلل الحركة — الخط الأخضر يحسب التكرار':'تقدير حركة (بدون نموذج)';if(!ok)sim=true;else if(run&&!isEyeEx(Q[qi])&&window.DaabPose&&DaabPose.setCounting)DaabPose.setCounting(sessPhase==='count')})},0)}}
  else{$('camNote').textContent='تعذّرت الكاميرا، نعرض محاكاة'}
@@ -1829,13 +1829,14 @@ function fixTitle(){var t=document.title,n=trTitle(t);if(n!==t)document.title=n}
 function paint(){H.lang=en?'en':'ar';H.dir=en?'ltr':'rtl';
  B.lang=en?'ar':'en';B.setAttribute('aria-label',en?'التبديل إلى العربية':'Switch to English');B.title=en?'العربية':'English'}
 function apply(){busy=true;try{if(en){walk(document.body);fixTitle()}else{restore(document.body);var p=document.querySelector('.page.on');if(p&&p.dataset.title)document.title=p.dataset.title}paint()}finally{busy=false;ob.takeRecords()}}
-var ob=new MutationObserver(function(ms){if(!en||busy)return;busy=true;try{ms.forEach(function(m){if(m.type==='childList'){m.addedNodes.forEach(walk)}else if(m.type==='characterData'){if(m.target.parentNode){T.delete(m.target);node(m.target)}}else if(m.type==='attributes'){attrs(m.target)}});fixTitle()}finally{busy=false;ob.takeRecords()}})
+var obT=0;function obFlush(){obT=0;if(!en||busy)return;busy=true;try{fixTitle()}finally{busy=false;try{ob.takeRecords()}catch(e){}}}
+var ob=new MutationObserver(function(ms){if(!en||busy)return;busy=true;try{ms.forEach(function(m){if(m.type==='childList'){m.addedNodes.forEach(walk)}else if(m.type==='characterData'){if(m.target.parentNode){T.delete(m.target);node(m.target)}}else if(m.type==='attributes'){attrs(m.target)}})}finally{busy=false;if(obT)clearTimeout(obT);obT=setTimeout(obFlush,80)}})
  ob.observe(document.documentElement,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:AT});
 B.addEventListener('click',function(){en=!en;try{localStorage.setItem(K,en?'en':'ar')}catch(e){}apply()});
 try{en=localStorage.getItem(K)==='en'}catch(e){}
 apply();
 })();
 </script>
-<script src="daab-pose.js?v=5"></script>
+<script src="daab-pose.js?v=6"></script>
 </body>
 </html>
