@@ -25,7 +25,9 @@ section{padding:72px 0;border-top:1px solid var(--line)}
 .page>section:first-child{border-top:0}
 section[id]{scroll-margin-top:84px}
 header .wrap{max-width:1280px}
-.hero-guide{padding:0;border-top:0}
+.guide-home{padding:0;border-top:0}
+html[data-mode=child] .guide-home{display:none}
+.guide-home-t{font-size:calc(clamp(26px,4vw,36px)*var(--fz));color:#fff;margin:0 0 8px}
 .guide-cover{position:relative;background:var(--green);color:#fff;padding:56px 0 48px;overflow:hidden}
 .guide-cover::before,.guide-cover::after{content:"";position:absolute;border:2px solid rgba(255,255,255,.12);border-radius:50%;pointer-events:none}
 .guide-cover::before{width:min(520px,90vw);height:min(520px,90vw);left:-12%;top:-35%}
@@ -50,9 +52,7 @@ header .wrap{max-width:1280px}
 .gpill{display:inline-block;padding:8px 18px;border-radius:999px;font-weight:600;font-size:calc(14px*var(--fz))}
 .gpill.o{background:var(--orange);color:#fff}
 .gpill.g{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);color:#fff}
-.hero-demo{padding:48px 0 72px;border-top:0}
-.hero-demo .wrap{display:grid;grid-template-columns:.9fr 1.1fr;gap:40px;align-items:center}
-@media(max-width:860px){.guide-cats{grid-template-columns:1fr 1fr}.hero-demo .wrap{grid-template-columns:1fr}}
+@media(max-width:860px){.guide-cats{grid-template-columns:1fr 1fr}}
 .guide-bar{background:#fff;border-radius:20px;padding:0;margin:0 0 28px;overflow:hidden;box-shadow:0 1px 0 var(--line)}
 .guide-bar-hd{display:flex;align-items:center;gap:14px;background:var(--green);color:#fff;padding:16px 22px}
 .guide-sec-n{display:grid;place-items:center;min-width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);font:700 calc(18px*var(--fz)) var(--fh)}
@@ -612,15 +612,25 @@ apply(get())})();
 <main>
 <!-- HOME -->
 <div class="page" data-page="home" data-title="دأب — خطوة كل يوم">
-<section class="hero hero-guide"><div class="guide-cover"><div class="wrap">
+<section class="hero"><div class="wrap">
+<div><h1 class="word"><svg viewBox="30 20 670 430" role="img" aria-label="دأب"><use href="#word" x="30" y="20" width="670" height="430"/></svg></h1><p class="tag">خطوة كل يوم</p>
+<p class="lead">متابعة تمارينك المنزلية وخطة علاجك. يحدد مختصك الخطة، وتنفّذها في بيتك بكاميرا هاتفك، ويصله تقرير من صفحة واحدة.</p>
+<div class="cta"><a class="btn" href="#contact">اطلب عرضاً لعيادتك</a><a class="btn ghost" href="#how">شاهد كيف يعمل</a><a class="btn ghost" href="#guideHome">الدليل المصوّر</a><a class="btn ghost" href="#session">جرّب جلسة تمرين</a></div>
+<p class="latin">DA'AB</p></div>
+<div class="phone" aria-label="مثال على جلسة تمرين"><div class="screen">
+<div class="hsplit"><div class="pane"><span class="lbl">شرح التمرين</span><svg class="hr" id="heroVid" viewBox="0 0 100 120" aria-hidden="true"></svg></div><div class="pane"><span class="lbl">أنت تتمرن</span><svg class="hr" id="heroYou" viewBox="0 0 100 120" aria-hidden="true"></svg></div></div>
+<div class="count"><span id="n">0</span> <small>من 10 تكرارات</small></div>
+<p class="msg" id="msg" aria-live="polite">جاهز؟ نبدأ بهدوء</p>
+<div class="prog"><i id="bar"></i></div>
+</div></div>
+</div></section>
+<section class="guide-home" id="guideHome"><div class="guide-cover"><div class="wrap">
 <p class="guide-latin">DA'AB</p>
 <div class="brand-row"><div class="guide-icon" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#logo2"/></svg></div></div>
-<h1 class="word"><svg viewBox="30 20 670 430" role="img" aria-label="دأب"><use href="#word" x="30" y="20" width="670" height="430"/></svg></h1>
-<p class="tag">خطوة كل يوم</p>
-<p class="lead">متابعة تمارينك المنزلية وخطة علاجك</p>
+<h2 class="word"><svg viewBox="30 20 670 430" role="img" aria-hidden="true"><use href="#word" x="30" y="20" width="670" height="430"/></svg></h2>
 <div class="guide-rule" role="presentation"></div>
-<h2>دليل التمارين العلاجية المصوّرة</h2>
-<p class="sub">تمارين مرتبة ومنسّقة للبالغين والأطفال والرضع — في المكتبة والجلسة بنفس أسلوب الدليل</p>
+<h3 class="guide-home-t">دليل التمارين العلاجية المصوّرة</h3>
+<p class="sub">تمارين مرتبة ومنسّقة للبالغين والأطفال والرضع — في المكتبة بنفس تنسيق الدليل: خطوات، مدة، وتكرار.</p>
 <div class="guide-cats" role="list" aria-label="فئات الدليل">
 <div class="gcat" role="listitem"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#logo2"/></svg><b>للرضع</b></div>
 <div class="gcat" role="listitem"><svg viewBox="0 0 100 110" aria-hidden="true"><use href="#fig"/></svg><b>للأطفال</b></div>
@@ -628,16 +638,7 @@ apply(get())})();
 <div class="gcat" role="listitem"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#logo2"/></svg><b>مرافق ومختص</b></div>
 </div>
 <div class="guide-pills"><span class="gpill o">٦ أقسام</span><span class="gpill g">خطوات واضحة</span><span class="gpill g">المدة والتكرار لكل تمرين</span></div>
-</div></div>
-<div class="hero-demo"><div class="wrap">
-<div><p class="lead">يحدد مختصك الخطة، وتنفّذها في بيتك بكاميرا هاتفك، ويصله تقرير من صفحة واحدة.</p>
-<div class="cta"><a class="btn" href="#contact">اطلب عرضاً لعيادتك</a><a class="btn ghost" href="#how">شاهد كيف يعمل</a><a class="btn ghost" href="#library">استعرض الدليل</a><a class="btn ghost" href="#session">جرّب جلسة تمرين</a></div></div>
-<div class="phone" aria-label="مثال على جلسة تمرين"><div class="screen">
-<div class="hsplit"><div class="pane"><span class="lbl">شرح التمرين</span><svg class="hr" id="heroVid" viewBox="0 0 100 120" aria-hidden="true"></svg></div><div class="pane"><span class="lbl">أنت تتمرن</span><svg class="hr" id="heroYou" viewBox="0 0 100 120" aria-hidden="true"></svg></div></div>
-<div class="count"><span id="n">0</span> <small>من 10 تكرارات</small></div>
-<p class="msg" id="msg" aria-live="polite">جاهز؟ نبدأ بهدوء</p>
-<div class="prog"><i id="bar"></i></div>
-</div></div>
+<div class="cta" style="margin-top:22px"><a class="btn help" href="#library">افتح مكتبة الدليل المصوّر</a></div>
 </div></div></section>
 <section><div class="wrap"><h2>بين الجلسات، لا أحد يرى شيئاً</h2><div class="rule"></div>
 <div class="g3"><div class="card"><h3>المريض وحده</h3><p>يؤدي التمرين دون أن يعرف إن كان صحيحاً.</p></div><div class="card"><h3>الطبيب لا يرى</h3><p>ويعتمد على وصف شفهي لما حدث في البيت.</p></div><div class="card"><h3>الأهل عاجزون</h3><p>لا يعرفون كيف يطمئنون على التمرين ولا كيف يخبرون الطبيب.</p></div></div>
