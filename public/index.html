@@ -160,6 +160,7 @@ html[data-mode=child] .k section{border:0;padding:44px 0 100px}
 @media(max-width:560px){.badges{grid-template-columns:1fr 1fr}}
 .ov{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:24px;background:rgba(11,74,66,.94);text-align:center;color:#F5F2EA}
 .safe-al{position:fixed;inset:0;z-index:130;display:grid;place-items:center;padding:24px;background:rgba(224,122,63,.94);text-align:center;color:#fff;animation:safePulse 1.4s ease-in-out infinite}
+.safe-al[hidden]{display:none!important;animation:none}
 .safe-al h2{color:#fff}
 @keyframes safePulse{50%{opacity:.88}}
 #safeBan{border-color:var(--orange)}
@@ -1045,7 +1046,7 @@ function route(){
  var cur=pages.filter(function(p){return p.dataset.page===h})[0]||pages[0];
  pages.forEach(function(p){p.classList.toggle('on',p===cur)});placeReport(cur);
  links.forEach(function(a){a.getAttribute('href')==='#'+cur.dataset.page?a.setAttribute('aria-current','page'):a.removeAttribute('aria-current')});
- acctUI();document.documentElement.setAttribute('data-page',cur.dataset.page);if(cur.dataset.page!=='session')stopSess();document.title=cur.dataset.title;var tg=al&&h===ALIAS[raw]?document.getElementById(raw):null;if(tg)tg.scrollIntoView();else window.scrollTo(0,0);onPage(cur.dataset.page);
+ acctUI();document.documentElement.setAttribute('data-page',cur.dataset.page);if(cur.dataset.page!=='session'){hideSafeAl();$('helpOv').hidden=true;safeStage=0;safePaused=false;pendingStop=false;stopSess()}document.title=cur.dataset.title;var tg=al&&h===ALIAS[raw]?document.getElementById(raw):null;if(tg)tg.scrollIntoView();else window.scrollTo(0,0);onPage(cur.dataset.page);
   if(cur.dataset.page==='rest')paintRest(true);else if(cur.dataset.page==='kids')paintKids();else if(cur.dataset.page==='companion'||cur.dataset.page==='adult')paintPlan();
  paintWsw();if(cur.dataset.page==='cond')paintCg();
 }
@@ -1095,11 +1096,12 @@ function childSafeOn(){return getMode()==='child'}
 function whyLabel(w){return {absent:'خرج من الإطار أو توقّف',help:'طلب مساعدة',stop:'إنهاء الجلسة',leave:'غادر الصفحة',time:'انتهى وقت الجلسة'}[w]||''}
 function rpSessLine(r){if(!r.H.length)return '';var inc=r.H.filter(function(h){return !h.ok}),s=r.ok+' من '+r.H.length+' جلسة اكتملت';if(r.H.length>1)s=r.ok+' من '+r.H.length+' جلسات اكتملت';if(!inc.length)return s;var bits=inc.map(function(h){var m=Math.round(Math.max(1,(h.e-h.t)/60000));return m+' دقيقة'+(whyLabel(h.why)?' ('+whyLabel(h.why)+')':'')});s+='، وتوقفت '+(inc.length===1?'واحدة بعد '+bits[0]:inc.length+' بعد '+bits.join('، '));return s}
 var SAFE_SOFT=8000,SAFE_ALERT=45000,SAFE_END=180000,lastSafeSeen=0,safeStage=0,safePaused=false,safeReason='',safeSpoke=0;
+function onSessPg(){return document.documentElement.getAttribute('data-page')==='session'}
 function hideSafeAl(){var e=$('safeAl');if(e)e.hidden=true;var b=$('safeBan');if(b)b.hidden=true}
-function companionAlert(kind){var e=$('safeAl');if(!e)return;e.hidden=false;$('saTitle').textContent=kind==='help'?'طلب مساعدة — المرافق':'تنبيه المرافق';$('saMsg').textContent=kind==='help'?'الطفل ضغط «أحتاج مساعدة». تحقّق منه الآن على الجهاز.':'الطفل غاب عن الكاميرا أو توقّف عن الحركة. تحقّق منه الآن.';alertChime()}
+function companionAlert(kind){if(!onSessPg()||!run||!childSafeOn())return;var e=$('safeAl');if(!e)return;e.hidden=false;$('saTitle').textContent=kind==='help'?'طلب مساعدة — المرافق':'تنبيه المرافق';$('saMsg').textContent=kind==='help'?'الطفل ضغط «أحتاج مساعدة». تحقّق منه الآن على الجهاز.':'الطفل غاب عن الكاميرا أو توقّف عن الحركة. تحقّق منه الآن.';alertChime()}
 function safeReset(){lastSafeSeen=Date.now();safeStage=0;safeSpoke=0;if(safePaused&&$('helpOv').hidden){paused=false;safePaused=false}hideSafeAl()}
 function safeTouch(){if(!childSafeOn()||!run)return;lastSafeSeen=Date.now();if(safeStage>=1&&$('helpOv').hidden){safeStage=0;safePaused=false;paused=false;hideSafeAl()}}
-function safeTick(){if(!childSafeOn()||!run||gap)return;if(!$('helpOv').hidden)return;if(sessPhase!=='count'&&sessPhase!=='align')return;var now=Date.now(),abs=now-lastSafeSeen;if(abs<SAFE_SOFT)return;if(safeStage<1){safeStage=1;safePaused=true;paused=true;var f=$('fb');if(f){f.textContent='أين ذهبت؟ نكمل معاً';f.className='fb ok'}if(!safeSpoke){safeSpoke=1;speak('أين ذهبت؟ نكمل معاً')}return}if(safeStage<2&&abs>=SAFE_ALERT){safeStage=2;companionAlert('absent');$('safeBan').hidden=false;return}if(safeStage<3&&abs>=SAFE_END){safeStage=3;safeReason='absent';finish(false,'absent')}}
+function safeTick(){if(!onSessPg()||!childSafeOn()||!run||gap)return;if(!$('helpOv').hidden)return;if(sessPhase!=='count'&&sessPhase!=='align')return;var now=Date.now(),abs=now-lastSafeSeen;if(abs<SAFE_SOFT)return;if(safeStage<1){safeStage=1;safePaused=true;paused=true;var f=$('fb');if(f){f.textContent='أين ذهبت؟ نكمل معاً';f.className='fb ok'}if(!safeSpoke){safeSpoke=1;speak('أين ذهبت؟ نكمل معاً')}return}if(safeStage<2&&abs>=SAFE_ALERT){safeStage=2;companionAlert('absent');$('safeBan').hidden=false;return}if(safeStage<3&&abs>=SAFE_END){safeStage=3;safeReason='absent';finish(false,'absent')}}
 function syncSnd(){var b=q('tSound');if(b){b.setAttribute('aria-pressed',snd);b.setAttribute('aria-label',snd?'الصوت مفعّل، اضغط لإيقافه':'الصوت متوقف، اضغط لتفعيل القراءة');b.title=snd?'الصوت مفعّل، اضغط لإيقافه':'الصوت متوقف — اضغط مرة لتفعيل القراءة الصوتية'}}
 q('tSound').onclick=function(){primeSpeech();snd=!snd;try{localStorage.setItem('daab-sound',snd?'1':'0')}catch(e){}syncSnd();if(snd){ding();sayLast='';speak('تم تشغيل القراءة الصوتية. سأقرأ التعليمات والرسائل.',true);if(typeof run!=='undefined'&&run){var f=$('fb');if(f&&f.textContent)speakAloud(f.textContent)}}else{hush();sayLast=''}};
 if(!('speechSynthesis' in window)&&q('tSound')){q('tSound').disabled=true;q('tSound').title='المتصفح لا يدعم القراءة الصوتية — جرّب Safari أو Chrome'}
@@ -1233,7 +1235,7 @@ $('compForm').addEventListener('submit',function(e){e.preventDefault();var n=$('
 setInterval(function(){var pg=document.querySelector('.page.on'),id=pg?pg.dataset.page:'';if(id==='rest')paintRest(false);else if(id==='kids')paintKids();else if(id==='companion')paintPlan()},20000);
 function needHelp(){safeReason='help';safePaused=true;paused=true;companionAlert('help');$('helpOv').hidden=false;speak('توقفنا. نادِ من معك. لا بأس أبداً، نكمل حين تكون جاهزاً.')}
 $('sHelp').onclick=needHelp;$('helpOk').onclick=function(){$('helpOv').hidden=true;safeTouch();speak('رائع، نكمل معاً.')};
-$('saOk').onclick=function(){hideSafeAl();speak('شكراً، تابعوا معاً بهدوء.')};
+$('saOk').onclick=function(){hideSafeAl();if(run&&onSessPg())safeTouch();speak('شكراً، تابعوا معاً بهدوء.')};
 $('acctBtn').addEventListener('click',function(e){if(getMode()==='child'&&!unlocked){e.preventDefault();$('code').value='';$('codeMsg').textContent=pinPrompt();$('lockOv').hidden=false;$('code').focus()}});
 $('codeNo').onclick=function(){$('lockOv').hidden=true;pendingStop=false};
 $('codeOk').onclick=async function(){var okc=await pinOk($('code').value);if(okc){$('lockOv').hidden=true;if(pendingStop&&run){pendingStop=false;unlocked=false;safeReason='stop';finish(false,'stop');return}unlocked=true;if(location.hash==='#account')route();else location.hash='#account'}else $('codeMsg').textContent=hasCompanionPin()?'الرمز غير صحيح.':'الرمز غير صحيح. جرّب 1234 للتجربة كضيف فقط.'};
@@ -1585,7 +1587,7 @@ function loadEx(){var id=Q[qi];setRig(id);tgt=isEyeEx(id)?6:TGT;reps=0;
 function loop(ts){raf=requestAnimationFrame(loop);if(!run)return;var t=(ts-t0)/1000,id=Q[qi],pid=poseRefId(id);if(t<0)return;if(isEyeEx(id)){if(sessPhase==='count')eyeDraw(t);return}draw(rig1,pose(pid,t,1));
  var li=$('sSteps').children;if(sessPhase==='count'&&!isEyeEx(id)){var ph=(t%3)/3,k=ph<.15?0:ph<.55?1:2;[].forEach.call(li,function(e,i){e.className=i===k?'on':''})}else if(sessPhase==='instr'){[].forEach.call(li,function(e,i){e.className=i===instStep?'on':''})};
  if(sim){var c=Math.floor(t/3);if(c!==simCyc){simCyc=c;simAmp=AMPS[Math.floor(Math.random()*AMPS.length)]}draw(rig2,pose(pid,Math.max(0,t-.4),simAmp))}}
-function tick(){if(run&&childSafeOn())safeTick();if(!run||paused||gap)return;if(poseOn&&!isEyeEx(Q[qi]))return;if(sessEnd&&Date.now()>sessEnd){sessEnd=0;finish(false,childSafeOn()?'time':'');return}var en=0,t=(performance.now()-t0)/1000;if(isEyeEx(Q[qi])){if(sessPhase==='count')eyeTick(t);return}
+function tick(){if(run&&childSafeOn()&&onSessPg())safeTick();if(!run||paused||gap)return;if(poseOn&&!isEyeEx(Q[qi]))return;if(sessEnd&&Date.now()>sessEnd){sessEnd=0;finish(false,childSafeOn()?'time':'');return}var en=0,t=(performance.now()-t0)/1000;if(isEyeEx(Q[qi])){if(sessPhase==='count')eyeTick(t);return}
  if(sim){var ph=(Math.max(0,t-.4)%3)/3;en=ph<.6?simAmp*.2*Math.sin(Math.PI*ph/.6)+.01:.01}
  else{try{cx.drawImage($('cam'),0,0,32,24);var d=cx.getImageData(0,0,32,24).data;if(prev){var c=0;for(var i=0;i<d.length;i+=4)if(Math.abs(d[i]-prev[i])+Math.abs(d[i+1]-prev[i+1])+Math.abs(d[i+2]-prev[i+2])>60)c++;en=c/768}prev=d}catch(e){}}
  $('meter').style.width=Math.min(100,en*300)+'%';
