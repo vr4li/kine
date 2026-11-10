@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--fz:1;--fb:"IBM Plex Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif;--fh:"IBM Plex Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif;--green:#0B4A42;--green2:#587F78;--mist:#DCE5E2;--orange:#E07A3F;--ink-o:#A94E1B;--bg:#F5F2EA;--card:#fff;--ink:#3A4A5C;--line:#E0DACB;--cream:#F5F2EA;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-html{scroll-padding-top:env(safe-area-inset-top,0px);background:#F5F2EA}
+:root{--fz:1;--fb:"IBM Plex Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif;--fh:"IBM Plex Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif;--green:#0C3D31;--green2:#587F78;--mist:#D8E6E4;--illus:#D0E2E2;--orange:#E67E22;--ink-o:#B45309;--bg:#F7F4ED;--card:#fff;--ink:#3A4A5C;--line:#E0DACB;--cream:#F7F4ED;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
 *{box-sizing:border-box}
 button,input,select,textarea{font-family:inherit}
 body{margin:0;background:#F5F2EA;color:var(--ink);font:400 calc(17px*var(--fz))/1.8 var(--fb)}
@@ -25,6 +25,59 @@ section{padding:72px 0;border-top:1px solid var(--line)}
 .page>section:first-child{border-top:0}
 section[id]{scroll-margin-top:84px}
 header .wrap{max-width:1280px}
+.hero-guide{padding:0;border-top:0}
+.guide-cover{position:relative;background:var(--green);color:#fff;padding:56px 0 48px;overflow:hidden}
+.guide-cover::before,.guide-cover::after{content:"";position:absolute;border:2px solid rgba(255,255,255,.12);border-radius:50%;pointer-events:none}
+.guide-cover::before{width:min(520px,90vw);height:min(520px,90vw);left:-12%;top:-35%}
+.guide-cover::after{width:min(380px,70vw);height:min(380px,70vw);right:-8%;bottom:-40%}
+.guide-cover .wrap{position:relative;z-index:1}
+.guide-latin{font:600 13px/1 var(--fb);letter-spacing:.45em;color:rgba(255,255,255,.72);margin:0 0 18px;direction:ltr;text-align:start}
+.guide-cover .brand-row{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}
+.guide-icon{display:grid;place-items:center;width:52px;height:52px;border-radius:14px;background:var(--orange);flex:none}
+.guide-icon svg{width:34px;height:34px}
+.guide-cover h1.word{margin:0}
+.guide-cover .word svg{display:block;width:min(280px,72vw);height:auto;filter:brightness(0) invert(1)}
+.guide-cover .tag{color:#fff;margin:10px 0 6px;font-size:calc(22px*var(--fz))}
+.guide-cover .lead{color:rgba(255,255,255,.9);max-width:42ch;margin:0 0 20px}
+.guide-rule{height:3px;width:120px;background:var(--orange);border-radius:2px;margin:18px 0 22px}
+.guide-cover h2{font-size:calc(clamp(26px,4vw,36px)*var(--fz));color:#fff;margin:0 0 8px}
+.guide-cover .sub{color:rgba(255,255,255,.85);font-size:calc(17px*var(--fz));margin:0 0 24px}
+.guide-cats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:8px 0 22px}
+.gcat{background:#fff;border-radius:16px;padding:14px 10px 12px;text-align:center;color:var(--green);min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px}
+.gcat svg{width:72px;height:auto;flex:1;display:block;margin-top:4px}
+.gcat b{font-size:calc(15px*var(--fz));color:var(--green)}
+.guide-pills{display:flex;flex-wrap:wrap;gap:10px}
+.gpill{display:inline-block;padding:8px 18px;border-radius:999px;font-weight:600;font-size:calc(14px*var(--fz))}
+.gpill.o{background:var(--orange);color:#fff}
+.gpill.g{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);color:#fff}
+.hero-demo{padding:48px 0 72px;border-top:0}
+.hero-demo .wrap{display:grid;grid-template-columns:.9fr 1.1fr;gap:40px;align-items:center}
+@media(max-width:860px){.guide-cats{grid-template-columns:1fr 1fr}.hero-demo .wrap{grid-template-columns:1fr}}
+.guide-bar{background:#fff;border-radius:20px;padding:0;margin:0 0 28px;overflow:hidden;box-shadow:0 1px 0 var(--line)}
+.guide-bar-hd{display:flex;align-items:center;gap:14px;background:var(--green);color:#fff;padding:16px 22px}
+.guide-sec-n{display:grid;place-items:center;min-width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);font:700 calc(18px*var(--fz)) var(--fh)}
+.guide-bar-hd h2{font-size:calc(22px*var(--fz));color:#fff;margin:0}
+.guide-bar-hd p{margin:4px 0 0;font-size:calc(15px*var(--fz));opacity:.9}
+.guide-note{margin:0;padding:14px 22px 16px;border-inline-start:4px solid var(--orange);background:var(--bg);font-weight:600;color:var(--green);font-size:calc(15px*var(--fz))}
+.guide-foot{margin-top:28px;padding:14px 18px;border-radius:14px;background:var(--mist);font-size:calc(14px*var(--fz));color:var(--green);text-align:center}
+.lib.guide-lib{gap:22px}
+.ex.ex-guide{padding:0;overflow:hidden;display:flex;flex-direction:column;background:var(--card)}
+.ex-guide .top{padding:14px 16px 0;margin:0}
+.ex-guide .ex-illus-wrap{position:relative;margin:12px 16px 0;background:var(--illus);border-radius:16px;min-height:168px;display:grid;place-items:center;padding:12px}
+.ex-guide .ex-num{position:absolute;top:10px;inset-inline-end:10px;width:34px;height:34px;border-radius:50%;background:var(--orange);color:#fff;font:700 calc(16px*var(--fz)) var(--fh);display:grid;place-items:center;z-index:2}
+.ex-guide .mus-illus{margin:0;background:transparent;padding:0;width:100%;justify-content:center;display:flex}
+.ex-guide .mus-illus svg{width:min(130px,70%);height:auto}
+.ex-guide h4{margin:14px 16px 8px;font-size:calc(21px*var(--fz));color:var(--green)}
+.ex-guide .ex-steps{margin:0 16px 12px;padding:0;list-style:none;counter-reset:gs}
+.ex-guide .ex-steps li{counter-increment:gs;font-size:calc(14px*var(--fz));padding:4px 0;color:var(--ink);display:flex;gap:8px;align-items:flex-start}
+.ex-guide .ex-steps li::before{content:counter(gs);flex:none;width:22px;height:22px;border-radius:50%;background:var(--mist);color:var(--green);font-weight:700;font-size:calc(12px*var(--fz));display:grid;place-items:center;margin-top:2px}
+.ex-pills{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:auto;border-top:1px solid var(--line)}
+.ex-pills .pill{padding:12px 14px;font-size:calc(13px*var(--fz));line-height:1.5}
+.ex-pills .pill b{display:block;font-size:calc(12px*var(--fz));margin-bottom:2px;opacity:.85}
+.ex-pills .pill.dur{background:rgba(230,126,34,.14);color:var(--ink-o)}
+.ex-pills .pill.rep{background:var(--green);color:#fff}
+.ex-guide .ex-who{padding:0 16px 12px;font-size:calc(14px*var(--fz))}
+.ex-guide .lbtns{padding:0 16px 16px}
 .tools{display:flex;align-items:center;gap:6px}
 .tools .btn{padding:6px 12px;font-size:calc(14px*var(--fz));display:inline-flex;align-items:center;gap:6px}
 .tools{position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));flex-direction:column;gap:10px;z-index:35}
@@ -56,7 +109,7 @@ html[data-mode=child] #tCard h3{font-size:calc(26px*var(--fz))}html[data-mode=ch
 .lead{font-size:calc(19px*var(--fz));max-width:62ch}
 .rule{width:56px;height:4px;background:var(--orange);border-radius:2px;margin:14px 0 28px}
 .small{font-size:calc(15px*var(--fz));opacity:.85}
-header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:#F5F2EA;border-bottom:1px solid var(--line)}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
 .bar{display:flex;align-items:center;justify-content:space-between;min-height:68px;gap:12px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 calc(34px*var(--fz)) var(--fh);color:var(--green)}
 .brand svg{width:38px;height:38px}.brand svg.wm{width:auto;height:30px;aspect-ratio:670/430}
@@ -554,18 +607,33 @@ apply(get())})();
 <main>
 <!-- HOME -->
 <div class="page" data-page="home" data-title="دأب — خطوة كل يوم">
-<section class="hero"><div class="wrap">
-<div><h1 class="word"><svg viewBox="30 20 670 430" role="img" aria-label="دأب"><use href="#word" x="30" y="20" width="670" height="430"/></svg></h1><p class="tag">خطوة كل يوم</p>
-<p class="lead">متابعة تمارينك المنزلية وخطة علاجك. يحدد مختصك الخطة، وتنفّذها في بيتك بكاميرا هاتفك، ويصله تقرير من صفحة واحدة.</p>
-<div class="cta"><a class="btn" href="#contact">اطلب عرضاً لعيادتك</a><a class="btn ghost" href="#how">شاهد كيف يعمل</a><a class="btn ghost" href="#session">جرّب جلسة تمرين</a></div>
-<p class="latin">DA’AB</p></div>
+<section class="hero hero-guide"><div class="guide-cover"><div class="wrap">
+<p class="guide-latin">DA'AB</p>
+<div class="brand-row"><div class="guide-icon" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#logo2"/></svg></div></div>
+<h1 class="word"><svg viewBox="30 20 670 430" role="img" aria-label="دأب"><use href="#word" x="30" y="20" width="670" height="430"/></svg></h1>
+<p class="tag">خطوة كل يوم</p>
+<p class="lead">متابعة تمارينك المنزلية وخطة علاجك</p>
+<div class="guide-rule" role="presentation"></div>
+<h2>دليل التمارين العلاجية المصوّرة</h2>
+<p class="sub">تمارين مرتبة ومنسّقة للبالغين والأطفال والرضع — في المكتبة والجلسة بنفس أسلوب الدليل</p>
+<div class="guide-cats" role="list" aria-label="فئات الدليل">
+<div class="gcat" role="listitem"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#logo2"/></svg><b>للرضع</b></div>
+<div class="gcat" role="listitem"><svg viewBox="0 0 100 110" aria-hidden="true"><use href="#fig"/></svg><b>للأطفال</b></div>
+<div class="gcat" role="listitem"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#logo2"/></svg><b>للبالغين</b></div>
+<div class="gcat" role="listitem"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#logo2"/></svg><b>مرافق ومختص</b></div>
+</div>
+<div class="guide-pills"><span class="gpill o">٦ أقسام</span><span class="gpill g">خطوات واضحة</span><span class="gpill g">المدة والتكرار لكل تمرين</span></div>
+</div></div>
+<div class="hero-demo"><div class="wrap">
+<div><p class="lead">يحدد مختصك الخطة، وتنفّذها في بيتك بكاميرا هاتفك، ويصله تقرير من صفحة واحدة.</p>
+<div class="cta"><a class="btn" href="#contact">اطلب عرضاً لعيادتك</a><a class="btn ghost" href="#how">شاهد كيف يعمل</a><a class="btn ghost" href="#library">استعرض الدليل</a><a class="btn ghost" href="#session">جرّب جلسة تمرين</a></div></div>
 <div class="phone" aria-label="مثال على جلسة تمرين"><div class="screen">
 <div class="hsplit"><div class="pane"><span class="lbl">شرح التمرين</span><svg class="hr" id="heroVid" viewBox="0 0 100 120" aria-hidden="true"></svg></div><div class="pane"><span class="lbl">أنت تتمرن</span><svg class="hr" id="heroYou" viewBox="0 0 100 120" aria-hidden="true"></svg></div></div>
 <div class="count"><span id="n">0</span> <small>من 10 تكرارات</small></div>
 <p class="msg" id="msg" aria-live="polite">جاهز؟ نبدأ بهدوء</p>
 <div class="prog"><i id="bar"></i></div>
 </div></div>
-</div></section>
+</div></div></section>
 <section><div class="wrap"><h2>بين الجلسات، لا أحد يرى شيئاً</h2><div class="rule"></div>
 <div class="g3"><div class="card"><h3>المريض وحده</h3><p>يؤدي التمرين دون أن يعرف إن كان صحيحاً.</p></div><div class="card"><h3>الطبيب لا يرى</h3><p>ويعتمد على وصف شفهي لما حدث في البيت.</p></div><div class="card"><h3>الأهل عاجزون</h3><p>لا يعرفون كيف يطمئنون على التمرين ولا كيف يخبرون الطبيب.</p></div></div>
 <p class="quote">اليوم يتابع الأخصائي مرضاه بورقة تمارين أو فيديو على واتساب أو اتصال هاتفي. دأب لا يطلب منه ترك ما يعرفه، بل يوفّر وقته ويعطيه صورة واضحة عن الالتزام.</p></div></section>
@@ -819,7 +887,12 @@ apply(get())})();
 
 <!-- LIBRARY -->
 <div class="page" data-page="library" data-title="مكتبة التمارين — دأب">
-<section><div class="wrap"><h1>مكتبة التمارين</h1><div class="rule"></div><div class="wsw" style="margin:0 0 16px"></div>
+<section><div class="wrap"><h1>مكتبة التمارين</h1><div class="rule"></div>
+<div class="guide-bar" role="region" aria-label="دليل التمارين">
+<div class="guide-bar-hd"><span class="guide-sec-n">١</span><div><h2>الدليل المصوّر — اختر ما يناسبك</h2><p>بطاقات بنفس تنسيق دليل دأب: خطوات، مدة، وتكرار</p></div></div>
+<p class="guide-note">اقرأ هذه الإرشادات قبل أي ممارسة. استشر أخصائي العلاج الطبيعي أو طبيبك، خاصة مع الأطفال والرضع.</p>
+</div>
+<div class="wsw" style="margin:0 0 16px"></div>
 <p class="lead">تصفّح التمارين، واعرف من يحتاج كل تمرين، وأضف ما يناسبك إلى قائمتك ليعتمدها مختصك.</p>
 <nav class="jump" id="jumpNav" aria-label="انتقل إلى قسم في المكتبة"><b>انتقل إلى:</b><button class="chip" type="button" data-jump="secCnd" id="jCnd">حالتي</button><button class="chip" type="button" data-jump="sugSec" id="jSug" hidden>مقترحات لحالتك</button><button class="chip" type="button" data-jump="secMine">تماريني</button><button class="chip" type="button" data-jump="secAll">كل التمارين</button></nav></div></section>
 <section id="secCnd"><div class="wrap"><h2 id="cndH">الحالة</h2><div class="rule"></div><div id="cndBox"></div></div></section>
@@ -828,7 +901,8 @@ apply(get())})();
 <section id="secAll"><div class="wrap"><h2>كل التمارين</h2><div class="rule"></div><p class="small" style="margin:6px 0 14px">الرسوم توضيحية مبسطة لتعريفك بالعضلة المستهدفة، وليست تشريحاً دقيقاً ولا بديلاً عن شرح مختصك.</p><div class="srch" role="search"><label for="lq">ابحث عن المرض أو الحالة</label>
 <div class="sbox"><input id="lq" type="search" inputmode="search" autocomplete="off" placeholder="ابحث باسم التمرين أو الحالة"><button class="btn ghost" id="lqx" type="button" hidden>مسح</button></div>
 <p class="small" id="lqn" role="status" aria-live="polite"></p></div>
-<span class="lbl">التصنيف</span><div id="chips" class="chips" role="group" aria-label="التصنيف"></div><div id="grid" class="lib"></div></div></section>
+<span class="lbl">التصنيف</span><div id="chips" class="chips" role="group" aria-label="التصنيف"></div><div id="grid" class="lib guide-lib"></div>
+<p class="guide-foot" role="note">دأب — خطوة كل يوم · استشر أخصائي العلاج الطبيعي أو طبيبك قبل البدء</p></div></section>
 <section><div class="wrap"><p class="quote">المكتبة للتعريف فقط، لا تشخّص ولا تصف علاجاً. «الأهمية» تقدير عام لمكانة التمرين في خطط الحالات المشابهة، والمختص هو من يحدد ما يناسبك وعدد التكرارات. ولا يبدأ أي تمرين تضيفه قبل اعتماد المختص له.</p></div></section>
 </div>
 
@@ -1335,10 +1409,16 @@ e9:{v:F,m:['delt'],s:['trap'],l:[['الدالية بكل رؤوسها (الكت�
 e10:{eye:1,v:'مهمة التزام',l:[['لا تمرين حركي: يذكّرك دأب بالوصفة ويسجّل التزامك',1]]}};
 MUS.e11={v:F,m:['delt'],s:['trap'],l:[['الدالية (الكتفان)',1],['شبه المنحرفة وتثبيت الكتف',0]]};
 MUS.e12={v:F,m:['delt'],s:['trap','core'],l:[['الدالية (الكتفان)',1],['شبه المنحرفة وتثبيت الكتف',0],['عضلات الجذع',0]]};
-function musBlock(id){var m=MUS[musRefId(id)];if(!m)return '';var svg,sec=m.l.some(function(r){return !r[1]});
- if(m.eye)svg='<path d="M10 100Q60 50 110 100Q60 150 10 100Z" fill="#fff"/><circle cx="60" cy="100" r="19" fill="#0B4A42"/><circle cx="60" cy="100" r="7.5" fill="#E07A3F"/>';
- else svg=BODY+(m.v===B?SPINE:'')+'<g fill="#F2B08A" stroke="#F2B08A">'+m.s.map(function(k){return MZ[k]}).join('')+'</g><g fill="#E07A3F" stroke="#E07A3F">'+m.m.map(function(k){return MZ[k]}).join('')+'</g>';
- return '<div class="mus"><svg viewBox="0 0 120 200" role="img" aria-label="'+(m.eye?'رسم عين':'رسم يبيّن العضلات المستهدفة: '+m.l.map(function(r){return r[0]}).join('، '))+'">'+svg+'</svg><div><b>'+(m.eye?'لا عضلات هنا':'العضلات المستهدفة')+'</b><ul>'+m.l.map(function(r){return '<li><i class="'+(r[1]?'':'s')+'"></i>'+r[0]+'</li>'}).join('')+'</ul><span class="mcap">'+m.v+(sec&&!m.eye?' · الغامق رئيسية والفاتح داعمة':'')+'</span></div></div>'}
+function musSvg(id){var m=MUS[musRefId(id)];if(!m)return '';var svg;if(m.eye)svg='<path d="M10 100Q60 50 110 100Q60 150 10 100Z" fill="#fff"/><circle cx="60" cy="100" r="19" fill="#0C3D31"/><circle cx="60" cy="100" r="7.5" fill="#E67E22"/>';
+ else svg=BODY+(m.v===B?SPINE:'')+'<g fill="#F2B08A" stroke="#F2B08A">'+m.s.map(function(k){return MZ[k]}).join('')+'</g><g fill="#E67E22" stroke="#E67E22">'+m.m.map(function(k){return MZ[k]}).join('')+'</g>';
+ return '<svg viewBox="0 0 120 200" role="img" aria-hidden="true">'+svg+'</svg>'}
+function musBlock(id,compact){var m=MUS[musRefId(id)];if(!m)return '';var svg=musSvg(id),inner=svg.replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'');if(compact)return '<div class="mus mus-illus">'+svg+'</div>';
+ return '<div class="mus"><svg viewBox="0 0 120 200" role="img" aria-label="'+(m.eye?'رسم عين':'رسم يبيّن العضلات المستهدفة: '+m.l.map(function(r){return r[0]}).join('، '))+'">'+inner+'</svg><div><b>'+(m.eye?'لا عضلات هنا':'العضلات المستهدفة')+'</b><ul>'+m.l.map(function(r){return '<li><i class="'+(r[1]?'':'s')+'"></i>'+r[0]+'</li>'}).join('')+'</ul><span class="mcap">'+m.v+(m.l.some(function(r){return !r[1]})&&!m.eye?' · الغامق رئيسية والفاتح داعمة':'')+'</span></div></div>'}
+function exOrd(id){var n=parseInt(String(id).replace(/\D/g,''),10);return isNaN(n)?0:n}
+function guideMeta(x){if(!x)return {dur:'—',rep:'—'};if(x.cat==='eye')return {dur:'ثبات 5–10 ثوانٍ بمتابعة هادئة',rep:'6–10 تكرارات'};if(x.cat==='kid'||x.dn)return {dur:'ثبات 15–30 ثانية',rep:'8–10 تكرارات'};if(x.cat==='bal')return {dur:'ثبات 3–5 ثوانٍ',rep:'10–12 تكراراً'};return {dur:'ثبات 2–5 ثوانٍ',rep:'10–15 تكراراً'}}
+function guideSteps(id){var st=stepsOf(id);return st.length?st.slice(0,3):[]}
+function exGuideCard(x,sgIds,lbl){var gm=guideMeta(x),st=guideSteps(x.id),n=exOrd(x.id);
+ return '<article class="ex ex-guide"><div class="top"><span class="cat">'+CATS[x.cat]+'</span>'+(sgIds.indexOf(x.id)>-1?'<span class="cat sugb">مقترح لحالتك</span>':'')+downBadge(x)+rxBadge(x)+eyeBadge(x)+'</div><div class="ex-illus-wrap"><span class="ex-num">'+n+'</span>'+musBlock(x.id,true)+'</div><h4>'+x.n+'</h4>'+(st.length?'<ol class="ex-steps">'+st.map(function(t){return '<li>'+t+'</li>'}).join('')+'</ol>':'<p class="ex-who">'+x.s+'</p>')+'<div class="ex-pills"><span class="pill dur"><b>المدة</b>'+gm.dur+'</span><span class="pill rep"><b>التكرار</b>'+gm.rep+'</span></div><p class="small ex-who"><b>من يحتاجه؟</b> '+x.w.slice(0,2).join(' · ')+'</p>'+libBtns(x.id,'grid',lbl)+'</article>'}
 /* ===== موعد التمرين عند إضافته من المكتبة ===== */
 var addTouched=false,addId='',addWhere='',addDays=[],addT={time:'16:00',dur:15,per:1,gap:180},addMsg='';
 function exDays(id){return SCH().map(function(d,i){return d.on&&d.ex.indexOf(id)>-1?i:-1}).filter(function(i){return i>-1})}
@@ -1382,8 +1462,7 @@ function renderLib(){
  $('sugSec').hidden=!cs.length;
  $('sugH').textContent=getMode()==='companion'&&ward?'مقترحات لحالة '+ward:'مقترحات لحالتك';$('jSug').hidden=!cs.length;$('jSug').textContent=$('sugH').textContent;$('jCnd').textContent=$('cndH').textContent;
  $('sugList').innerHTML=SG.length?SG.map(function(s){var x=byId(s.id),on=S.mine.indexOf(s.id)>-1;return '<div class="mine sug"><span><b>'+x.n+'</b><small>مناسب لـ: '+s.why.join('، ')+'</small></span>'+libBtns(s.id,'sug',lbl)+'</div>'}).join(''):'<p class="small">لا يوجد في المكتبة حالياً تمرين مخصص لهذه الحالة. مختصك هو من يحدد ما يناسبك.</p>';
- var LL=EX.filter(function(x){return (flt==='all'||x.cat===flt)&&libMatch(x)}).sort(function(a,b){var p=sgIds.indexOf(a.id)>-1?0:1,q=sgIds.indexOf(b.id)>-1?0:1;return p-q});libInfo(LL.length);$('grid').innerHTML=(LL.length?'':libEmpty())+LL.map(function(x){var on=S.mine.indexOf(x.id)>-1,d='';for(var i=1;i<=3;i++)d+='<i class="'+(i<=x.imp?'on':'')+'"></i>';
-  return '<article class="ex"><div class="top"><span class="cat">'+CATS[x.cat]+'</span>'+(sgIds.indexOf(x.id)>-1?'<span class="cat sugb">مقترح لحالتك</span>':'')+downBadge(x)+rxBadge(x)+eyeBadge(x)+'<span class="imp"><span aria-hidden="true" style="display:inline-flex;gap:4px">'+d+'</span>الأهمية: '+IMP[x.imp]+'</span></div><h4>'+x.n+'</h4><p>'+x.s+'</p>'+musBlock(x.id)+'<div><b>من يحتاجه؟</b><ul>'+x.w.map(function(w){return '<li>'+w+'</li>'}).join('')+'</ul></div><p class="small">'+x.t+'</p>'+libBtns(x.id,'grid',lbl)+'</article>'}).join('');
+ var LL=EX.filter(function(x){return (flt==='all'||x.cat===flt)&&libMatch(x)}).sort(function(a,b){var p=sgIds.indexOf(a.id)>-1?0:1,q=sgIds.indexOf(b.id)>-1?0:1;return p-q||exOrd(a.id)-exOrd(b.id)});libInfo(LL.length);$('grid').innerHTML=(LL.length?'':libEmpty())+LL.map(function(x){return exGuideCard(x,sgIds,lbl)}).join('');
  $('myN').textContent=S.mine.length?'('+S.mine.length+')':'';
  $('gNote').innerHTML=acct?'تُحفظ قائمتك وحالتك في حسابك.':'ضيف: تُحفظ قائمة تمارينك على هذا الجهاز. <a href="#auth">سجّل الدخول</a> لحفظها مع حسابك.';
  cleanMine();
