@@ -742,7 +742,8 @@ apply(get())})();
 
 <!-- AUTH -->
 <div class="page" data-page="auth" data-title="الدخول — دأب">
-<section><div class="wrap"><h1>أهلاً بك في دأب</h1><div class="rule"></div><p class="lead">كيف تحب تدخل؟</p>
+<section><div class="wrap"><h1>أهلاً بك في دأب</h1><div class="rule"></div><p class="lead">تسجّل الدخول من <b>الجوال أو اللابتوب أو الآيباد</b>: البريد وكلمة المرور على الجهاز الذي أنشأت فيه الحساب. وإن كان حسابك على جهاز آخر، انقله برمز النقل أدناه ثم ادخل بنفس البريد.</p>
+<p class="small" style="margin:-4px 0 18px;color:var(--green2);font-weight:600">في هذه النسخة يُحفظ الحساب على الجهاز ولا يوجد خادم — لذلك «دخول» بالبريد وحده على جهاز جديد لا يكفي بدون استيراد الرمز مرة واحدة.</p>
 <div class="g2" style="margin-top:28px">
 <div class="card"><h3>ضيف</h3><p>جرّب الموقع فوراً دون حساب. <b>لا نحفظ أي بيانات</b>: قائمة تمارينك ونجومك تختفي عند إغلاق الصفحة.</p><div class="cta"><button class="btn ghost" id="guestBtn" type="button">أكمل كضيف</button></div></div>
 <div class="card"><h3>تسجيل الدخول</h3>
@@ -765,13 +766,13 @@ apply(get())})();
 <label class="fld">كلمة المرور<input id="aPass" type="password" dir="ltr" autocomplete="current-password"></label>
 <p id="aMsg" class="small" role="alert" style="min-height:26px;color:var(--ink-o)"></p>
 <button class="btn" id="aGo" type="submit">دخول</button></form>
-<p class="small" style="margin-top:14px">عند تسجيل الدخول تُحفظ قائمة تمارينك ونجومك وآخر وضع اخترته، وتجدها عند رجوعك.</p>
-<details class="card" style="margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:16px"><summary style="cursor:pointer;font-weight:600;color:var(--green)">حسابك على اللابتوب؟ انقله إلى هذا الجوال</summary>
-<p class="small" style="margin:10px 0 8px">من اللابتوب: حسابي → إنشاء رمز النقل. الصق الرمز هنا مع كلمة المرور.</p>
-<label class="fld">رمز النقل<textarea id="acImportInAuth" rows="3" dir="ltr" autocomplete="off"></textarea></label>
-<label class="fld">كلمة المرور<input id="acImportPwAuth" type="password" dir="ltr" autocomplete="current-password"></label>
-<button class="btn ghost" id="acImportBtnAuth" type="button">استيراد الحساب</button>
-<p class="small" id="acXferMsgAuth" role="alert" style="min-height:22px;margin-top:8px;color:var(--ink-o)"></p></details></div></div>
+<p class="small" style="margin-top:14px">على <b>هذا الجهاز</b> (جوال، لابتوب، أو آيباد): عند تسجيل الدخول تُحفظ قائمة تمارينك ونجومك وآخر وضع اخترته.</p></div></div>
+<div class="card" id="authXferCard" style="margin-top:22px;border:2px solid var(--mist)"><h3>حسابك على جوال أو لابتوب أو آيباد آخر؟</h3>
+<ol class="list" style="margin:10px 0 14px"><li>على الجهاز <b>القديم</b>: سجّل دخولك → <b>حسابي</b> → <b>إنشاء رمز النقل</b> وانسخ الرمز.</li><li>على الجهاز <b>الجديد</b> (أي متصفح): الصق الرمز أدناه مع <b>نفس كلمة المرور</b> واضغط استيراد.</li><li>بعدها استخدم <b>دخول</b> أعلاه بالبريد وكلمة المرور كالمعتاد على هذا الجهاز.</li></ol>
+<label class="fld">رمز النقل<textarea id="acImportInAuth" rows="3" dir="ltr" autocomplete="off" placeholder="الصق الرمز من حسابي على اللابتوب أو الآيباد أو جوال آخر"></textarea></label>
+<label class="fld">كلمة المرور (نفس كلمة الحساب)<input id="acImportPwAuth" type="password" dir="ltr" autocomplete="current-password"></label>
+<button class="btn help" id="acImportBtnAuth" type="button">استيراد الحساب على هذا الجهاز</button>
+<p class="small" id="acXferMsgAuth" role="alert" style="min-height:22px;margin-top:10px;color:var(--ink-o)"></p></div>
 <p class="quote">هذا حساب تجريبي: يُحفظ على جهازك وفي هذا المتصفح فقط، ولا يُرسل إلى أي خادم، ولن يظهر على جهاز آخر. الحسابات الحقيقية تحتاج خادماً وموافقة صريحة على حفظ البيانات، ولا سيما بيانات الأطفال. والتنبيهات تُرسل إلى بريد المرافق عند وجود خادم، ولا يُرسل في هذه النسخة أي بريد فعلي.</p></div></section>
 </div>
 
@@ -805,8 +806,8 @@ apply(get())})();
 <div class="card"><h3>إدارة الحساب</h3><p>بدّل الوضع ليناسب من يستخدم دأب الآن، أو اخرج من الحساب.</p>
 <div class="cta"><a class="btn" id="acSwitch" href="#mode">تبديل الوضع</a><button class="btn ghost" id="acOut" type="button">تسجيل الخروج</button></div>
 <div class="cta" style="margin-top:14px"><a class="btn ghost" id="acLogin" href="#auth">سجّل الدخول لحفظ بياناتك</a></div></div>
-<div class="card" id="acXfer" data-acct hidden style="margin-top:20px;grid-column:1/-1"><h3>نقل الحساب إلى جوال أو لابتوب آخر</h3>
-<p class="small">الحساب يُحفظ على هذا المتصفح فقط — ليس على السحابة. لذلك نفس البريد على الجوال قد لا يجد الحساب. انسخ الرمز من هنا والصقه على الجهاز الآخر.</p>
+<div class="card" id="acXfer" data-acct hidden style="margin-top:20px;grid-column:1/-1"><h3>نقل الحساب إلى جوال أو لابتوب أو آيباد آخر</h3>
+<p class="small">الحساب يُحفظ على هذا المتصفح فقط — ليس على السحابة. لذلك «دخول» بالبريد على جوال أو آيباد أو لابتوب جديد يحتاج مرة واحدة لصق رمز النقل هناك.</p>
 <div class="cta" style="margin-top:10px"><button class="btn ghost" id="acExport" type="button">إنشاء رمز النقل</button></div>
 <label class="fld" id="acPackRow" hidden style="margin-top:12px">رمز النقل (انسخه كاملاً)<textarea id="acPack" rows="4" dir="ltr" readonly></textarea></label>
 <hr style="margin:18px 0;border:0;border-top:1px solid var(--line)">
@@ -1554,8 +1555,8 @@ $('wcDel').onclick=function(){var b=this;if(!wDelArm){wDelArm=1;b.textContent='�
 document.addEventListener('click',function(e){var b=e.target.closest('[data-ward]');if(!b)return;var k=b.dataset.ward,n=$('wpName').value.trim();S.role='companion';var nmW=n||(k==='child'?'بطل':'البالغ');S.ward={name:nmW,kind:k};S.hasComp=(k==='adult');S.wards=[wNew(nmW,k)];S.wi=0;wStash();S.mode='companion';unlocked=false;save();$('wardPick').hidden=true;if(location.hash==='#companion')route();else location.hash='#companion'});
 $('wpCancel').onclick=function(){$('wardPick').hidden=true};
 $('acOut').onclick=function(){endSession();paint();renderLib();if(location.hash==='#home')route();else location.hash='#home'};
-async function acctImport(code,pw,msgEl,clear){if(!code||!pw){msgEl.textContent='ألصق رمز النقل وأدخل كلمة المرور.';return}if(!(window.crypto&&crypto.subtle)){msgEl.textContent='هذا المتصفح لا يدعم استيراد الحساب (جرّب Chrome أو Safari حديثاً).';return}try{var pack=xferUnpack(code);if(!pack||pack.v!==1||!pack.m||!pack.r||!pack.r.salt||!pack.r.hash)throw 0;if(await hpw(pw,pack.r.salt)!==pack.r.hash){msgEl.textContent='كلمة المرور لا تطابق الحساب داخل الرمز.';return}var u=db();u[pack.m]=pack.r;wr(u);if(clear)clear();begin(pack.m);$('authForm').reset();aMsg.textContent='';acctUI();afterAuth();msgEl.textContent='تم. يمكنك الآن استخدام حسابك على هذا الجهاز.'}catch(x){msgEl.textContent='الرمز غير صالح. انسخه كاملاً من «حسابي» على الجهاز الآخر.'}}
-$('acExport').onclick=async function(){if(!acct)return;var r=db()[acct];if(!r){$('acXferMsg').textContent='لا يوجد حساب للتصدير.';return}var code=xferPack({v:1,m:acct,r:r,t:Date.now()});$('acPack').value=code;$('acPackRow').hidden=false;try{if(navigator.clipboard&&navigator.clipboard.writeText)await navigator.clipboard.writeText(code);$('acXferMsg').textContent='تم إنشاء الرمز ونسخه. الصقه في «حسابي» على الجوال ثم اضغط استيراد.'}catch(x){$('acXferMsg').textContent='تم إنشاء الرمز. انسخه يدوياً من المربع أعلاه.'}};
+async function acctImport(code,pw,msgEl,clear){if(!code||!pw){msgEl.textContent='ألصق رمز النقل وأدخل كلمة المرور.';return}if(!(window.crypto&&crypto.subtle)){msgEl.textContent='هذا المتصفح لا يدعم استيراد الحساب (جرّب Chrome أو Safari حديثاً).';return}try{var pack=xferUnpack(code);if(!pack||pack.v!==1||!pack.m||!pack.r||!pack.r.salt||!pack.r.hash)throw 0;if(await hpw(pw,pack.r.salt)!==pack.r.hash){msgEl.textContent='كلمة المرور لا تطابق الحساب داخل الرمز.';return}var u=db();u[pack.m]=pack.r;wr(u);if(clear)clear();begin(pack.m);$('authForm').reset();aMsg.textContent='';acctUI();afterAuth();msgEl.textContent='تم. ادخل الآن بالبريد وكلمة المرور على هذا الجهاز (جوال، لابتوب، أو آيباد).'}catch(x){msgEl.textContent='الرمز غير صالح. انسخه كاملاً من «حسابي» على الجهاز الآخر.'}}
+$('acExport').onclick=async function(){if(!acct)return;var r=db()[acct];if(!r){$('acXferMsg').textContent='لا يوجد حساب للتصدير.';return}var code=xferPack({v:1,m:acct,r:r,t:Date.now()});$('acPack').value=code;$('acPackRow').hidden=false;try{if(navigator.clipboard&&navigator.clipboard.writeText)await navigator.clipboard.writeText(code);$('acXferMsg').textContent='تم إنشاء الرمز ونسخه. على الجوال أو اللابتوب أو الآيباد الجديد: افتح الدخول → الصق الرمز في الاستيراد.'}catch(x){$('acXferMsg').textContent='تم إنشاء الرمز. انسخه يدوياً من المربع أعلاه.'}};
 $('acImportBtn').onclick=function(){acctImport($('acImportIn').value,$('acImportPw').value.trim(),$('acXferMsg'),function(){$('acImportIn').value='';$('acImportPw').value=''})};
 $('acImportBtnAuth').onclick=function(){acctImport($('acImportInAuth').value,$('acImportPwAuth').value.trim(),$('acXferMsgAuth'),function(){$('acImportInAuth').value='';$('acImportPwAuth').value=''})};
 $('authForm').addEventListener('submit',async function(e){e.preventDefault();
@@ -1589,7 +1590,7 @@ $('authForm').addEventListener('submit',async function(e){e.preventDefault();
    u[mail]={name:nm,salt:salt,hash:await hpw(pw,salt),data:S,pinH:S.pinH||'',pinS:S.pinS||''};wr(u);begin(mail);
   }else{
    var r=u[mail],h=r?await hpw(pw,r.salt):'';
-   if(!r){aMsg.textContent='لا يوجد حساب بهذا البريد على هذا الجهاز. الحساب محفوظ محلياً على كل متصفح — من اللابتوب افتح «حسابي» → «إنشاء رمز النقل» والصقه هنا في الاستيراد، أو أنشئ حساباً جديداً على الجوال.';return}
+   if(!r){aMsg.textContent='لا يوجد حساب بهذا البريد على هذا الجهاز (جوال/لابتوب/آيباد). من الجهاز القديم: حسابي → إنشاء رمز النقل، ثم الصق الرمز في «استيراد الحساب» أسفل هذه الصفحة، أو أنشئ حساباً جديداً إن لم يكن لديك حساب بعد.';return}
    if(r.hash!==h){aMsg.textContent='كلمة المرور غير صحيحة. تأكد من الكتابة من جديد (بدون مسافات زائدة في البداية أو النهاية).';return}
    begin(mail);
   }
