@@ -44,15 +44,16 @@ html[data-mode=child] .guide-home{display:none}
 .guide-rule{height:3px;width:120px;background:var(--orange);border-radius:2px;margin:18px 0 22px}
 .guide-cover h2{font-size:calc(clamp(26px,4vw,36px)*var(--fz));color:#fff;margin:0 0 8px}
 .guide-cover .sub{color:rgba(255,255,255,.85);font-size:calc(17px*var(--fz));margin:0 0 24px}
-.guide-cats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:8px 0 22px}
+.guide-cats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:8px 0 22px}
 .gcat{background:#fff;border-radius:16px;padding:14px 10px 12px;text-align:center;color:var(--green);min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px}
 .gcat svg{width:72px;height:auto;flex:1;display:block;margin-top:4px}
+.gcat--child svg{width:56px}
 .gcat b{font-size:calc(15px*var(--fz));color:var(--green)}
 .guide-pills{display:flex;flex-wrap:wrap;gap:10px}
 .gpill{display:inline-block;padding:8px 18px;border-radius:999px;font-weight:600;font-size:calc(14px*var(--fz))}
 .gpill.o{background:var(--orange);color:#fff}
 .gpill.g{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);color:#fff}
-@media(max-width:860px){.guide-cats{grid-template-columns:1fr 1fr}}
+@media(max-width:860px){.guide-cats{grid-template-columns:1fr}}
 .guide-bar{background:#fff;border-radius:20px;padding:0;margin:0 0 28px;overflow:hidden;box-shadow:0 1px 0 var(--line)}
 .guide-bar-hd{display:flex;align-items:center;gap:14px;background:var(--green);color:#fff;padding:16px 22px}
 .guide-sec-n{display:grid;place-items:center;min-width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);font:700 calc(18px*var(--fz)) var(--fh)}
@@ -60,29 +61,34 @@ html[data-mode=child] .guide-home{display:none}
 .guide-bar-hd p{margin:4px 0 0;font-size:calc(15px*var(--fz));opacity:.9}
 .guide-note{margin:0;padding:14px 22px 16px;border-inline-start:4px solid var(--orange);background:var(--bg);font-weight:600;color:var(--green);font-size:calc(15px*var(--fz))}
 .guide-foot{margin-top:28px;padding:14px 18px;border-radius:14px;background:var(--mist);font-size:calc(14px*var(--fz));color:var(--green);text-align:center}
-.lib.guide-lib{gap:22px}
-.ex.ex-guide{padding:0;overflow:hidden;display:flex;flex-direction:column;background:var(--card)}
-.ex-guide .top{padding:14px 16px 0;margin:0}
-.ex-guide .ex-illus-wrap{position:relative;margin:12px 16px 0;background:var(--illus);border-radius:16px;min-height:168px;display:grid;place-items:center;padding:12px}
-.ex-guide .ex-num{position:absolute;top:10px;inset-inline-end:10px;width:34px;height:34px;border-radius:50%;background:var(--orange);color:#fff;font:700 calc(16px*var(--fz)) var(--fh);display:grid;place-items:center;z-index:2}
+.lib.guide-lib{gap:24px}
+@media(min-width:861px) and (max-width:1180px){.lib.guide-lib{grid-template-columns:1fr}}
+.ex.ex-guide{padding:0;overflow:hidden;display:flex;flex-direction:column;background:var(--card);--ex-pad:20px}
+.ex-guide .top{padding:16px var(--ex-pad) 0;margin:0}
+.ex-guide .ex-tags{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ex-guide .top .imp{margin:12px 0 0;padding-top:12px;border-top:1px solid var(--line);width:100%;font-size:calc(13px*var(--fz));flex-wrap:wrap;gap:8px}
+.ex-guide .ex-illus-wrap{position:relative;margin:14px var(--ex-pad) 0;background:var(--illus);border-radius:16px;min-height:168px;display:grid;place-items:center;padding:14px}
+.ex-guide .ex-num{position:absolute;top:12px;inset-inline-end:12px;width:34px;height:34px;border-radius:50%;background:var(--orange);color:#fff;font:700 calc(16px*var(--fz)) var(--fh);display:grid;place-items:center;z-index:2}
 .ex-guide .mus-illus{margin:0;background:transparent;padding:0;width:100%;justify-content:center;display:flex}
 .ex-guide .mus-illus svg{width:min(130px,70%);height:auto}
-.ex-guide h4{margin:14px 16px 8px;font-size:calc(21px*var(--fz));color:var(--green)}
-.ex-guide .ex-steps{margin:0 16px 12px;padding:0;list-style:none;counter-reset:gs}
-.ex-guide .ex-steps li{counter-increment:gs;font-size:calc(14px*var(--fz));padding:4px 0;color:var(--ink);display:flex;gap:8px;align-items:flex-start}
-.ex-guide .ex-steps li::before{content:counter(gs);flex:none;width:22px;height:22px;border-radius:50%;background:var(--mist);color:var(--green);font-weight:700;font-size:calc(12px*var(--fz));display:grid;place-items:center;margin-top:2px}
-.ex-pills{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:auto;border-top:1px solid var(--line)}
-.ex-pills .pill{padding:12px 14px;font-size:calc(13px*var(--fz));line-height:1.5}
-.ex-pills .pill b{display:block;font-size:calc(12px*var(--fz));margin-bottom:2px;opacity:.85}
+.ex.ex-guide h4{margin:18px var(--ex-pad) 12px;padding:0;padding-inline:6px;font-size:calc(21px*var(--fz));line-height:1.5;color:var(--green);overflow-wrap:anywhere;max-width:100%;box-sizing:border-box}
+.ex-guide .ex-steps{margin:0 var(--ex-pad) 14px;padding:0;list-style:none;counter-reset:gs}
+.ex-guide .ex-steps li{counter-increment:gs;font-size:calc(14px*var(--fz));padding:6px 0;color:var(--ink);display:flex;gap:10px;align-items:flex-start;line-height:1.55}
+.ex-guide .ex-steps li::before{content:counter(gs);flex:none;width:22px;height:22px;border-radius:50%;background:var(--mist);color:var(--green);font-weight:700;font-size:calc(12px*var(--fz));display:grid;place-items:center;margin-top:3px}
+.ex-pills{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;margin-top:8px;border-top:1px solid var(--line)}
+.ex-pills .pill{padding:14px 16px;font-size:calc(13px*var(--fz));line-height:1.55;min-width:0;overflow-wrap:anywhere}
+.ex-pills .pill b{display:block;font-size:calc(12px*var(--fz));margin-bottom:4px;opacity:.85}
 .ex-pills .pill.dur{background:rgba(230,126,34,.14);color:var(--ink-o)}
 .ex-pills .pill.rep{background:var(--green);color:#fff}
-.ex-guide .ex-desc{margin:0 16px 10px;font-size:calc(15px*var(--fz));line-height:1.65;color:var(--ink)}
-.ex-guide .ex-detail{padding:0 16px 10px;font-size:calc(14px*var(--fz))}
-.ex-guide .ex-detail ul{margin:6px 0 0;padding-inline-start:18px}
-.ex-guide .ex-track{margin:0 16px 10px}
-.ex-guide .top .imp{margin-inline-start:auto;font-size:calc(12px*var(--fz))}
-.ex-guide .mus:not(.mus-illus){margin:0 16px 12px;padding:12px;border-radius:14px;background:var(--bg)}
-.ex-guide .lbtns{padding:0 16px 16px}
+.ex-guide .ex-desc{margin:0 var(--ex-pad) 14px;font-size:calc(15px*var(--fz));line-height:1.7;color:var(--ink)}
+.ex-guide .ex-detail{margin:0 var(--ex-pad) 14px;padding:14px 16px;font-size:calc(14px*var(--fz));line-height:1.6;border-radius:14px;background:var(--bg)}
+.ex-guide .ex-detail ul{margin:8px 0 0;padding-inline-start:20px}
+.ex-guide .ex-detail li{padding:3px 0}
+.ex-guide .ex-track{margin:0 var(--ex-pad) 14px;line-height:1.6}
+.ex-guide .mus:not(.mus-illus){margin:14px var(--ex-pad);padding:14px 16px;border-radius:14px;background:var(--bg);align-items:flex-start;gap:14px}
+.ex-guide .mus:not(.mus-illus)>div{flex:1;min-width:0}
+.ex-guide .mus:not(.mus-illus) ul li{align-items:flex-start;line-height:1.5;padding:4px 0}
+.ex-guide .lbtns{padding:4px var(--ex-pad) 18px;gap:10px}
 .tools{display:flex;align-items:center;gap:6px}
 .tools .btn{padding:6px 12px;font-size:calc(14px*var(--fz));display:inline-flex;align-items:center;gap:6px}
 .tools{position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));flex-direction:column;gap:10px;z-index:35}
@@ -235,7 +241,7 @@ html[data-mode=child] .k section{border:0;padding:44px 0 100px}
 .cat{display:inline-block;font-size:calc(14px*var(--fz));padding:2px 12px;border-radius:999px;background:var(--mist);color:var(--green);font-weight:600}
 .imp{display:inline-flex;align-items:center;gap:8px;font-size:calc(14px*var(--fz));font-weight:600;color:var(--ink-o)}
 .imp i{width:10px;height:10px;border-radius:50%;background:var(--line)}.imp i.on{background:var(--orange)}
-.ex h4{margin:4px 0 0;font:700 calc(24px*var(--fz)) var(--fh);color:var(--green)}
+.ex:not(.ex-guide) h4{margin:4px 0 0;font:700 calc(24px*var(--fz)) var(--fh);color:var(--green)}
 .ex ul{margin:4px 0 0;padding-inline-start:20px}
 .ex .btn{margin-top:auto;align-self:flex-start;padding:10px 22px}
 .ex .btn.added{background:transparent;color:var(--green)}
@@ -598,6 +604,8 @@ apply(get())})();
 <symbol id="logoo" viewBox="0 0 150 150"><rect width="150" height="150" rx="27" fill="#E07A3F"/><use href="#figg" color="#0B4A42"/></symbol>
 <symbol id="word" viewBox="30 20 670 430" fill="currentColor"><path d="M306.2 252.9L304.6 250.9L301.9 250.9L296.6 252.9L270.4 257.6L260.1 261.2L259.1 262.9L259.1 314.3L256.4 317.0L69.2 317.0L64.6 320.3L40.7 359.8L40.0 362.5L42.7 364.4L294.6 364.4L302.2 363.1L305.2 360.8L306.6 357.5Z"/><path d="M368.0 96.9L325.5 106.5L323.5 108.8L322.8 113.2L323.2 332.9L326.8 347.9L331.1 354.8L342.7 363.5L356.4 367.1L368.0 366.8L383.6 363.5L395.5 355.8L400.8 349.2L400.8 346.9L398.8 345.5L390.6 347.9L385.9 347.9L376.6 344.5L373.3 340.2L371.0 332.6L371.0 100.2Z"/><path d="M305.2 77.8L385.2 77.8L394.0 61.0L361.5 61.0Q351.0 61.0 349.5 50.2Q348.5 35.2 362.8 32.2Q372.8 30.8 379.0 37.8Q374.0 25.2 359.0 23.5Q332.8 24.0 328.0 61.0L315.2 61.0Z"/><path d="M411.1 362.1L411.8 363.5L415.8 364.4L677.4 364.1L682.3 361.8L684.7 358.1L684.7 323.3L683.7 311.0L679.0 291.7L670.4 275.2L657.8 262.5L650.1 257.6L640.5 253.9L625.6 250.6L611.0 249.3L488.5 248.6L487.5 245.6L501.8 215.7L501.4 211.4L499.1 210.8L494.8 216.1L448.6 292.7L448.3 295.1L449.3 296.1L606.0 296.4L621.6 297.7L629.2 300.7L632.2 303.4L636.9 311.0L636.5 315.7L634.9 317.0L440.0 317.0L435.0 322.0Z"/><path d="M163.5 397.0L156.9 400.6L151.5 406.6L149.2 412.3L148.6 415.9L148.9 419.9L151.9 427.2L157.2 432.2L163.8 435.5L173.1 435.5L180.8 431.5L186.1 425.5L187.7 419.2L187.1 410.9L185.7 407.3L182.1 402.6L177.1 398.6L171.1 396.6Z"/></symbol>
 <symbol id="logo2" viewBox="0 0 100 100"><rect width="100" height="100" rx="26" fill="#0B4A42" style="fill:var(--lg-bg,#0B4A42)"/><g fill="none" stroke="#fff" style="stroke:var(--lg-fg,#fff)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M35 38V62M35 62L27 84M35 62L43 84M35 46L50 58L62 56"/><path d="M69 52V66M69 66L63 84M69 66L75 84M69 56L62 56"/></g><circle cx="35" cy="27" r="9" fill="#fff" style="fill:var(--lg-fg,#fff)"/><circle cx="69" cy="42" r="7" fill="#E07A3F" style="fill:var(--lg-ac,#E07A3F)"/><circle cx="35" cy="46" r="3.5" fill="#E07A3F" style="fill:var(--lg-ac,#E07A3F)"/><circle cx="62" cy="56" r="3.5" fill="#E07A3F" style="fill:var(--lg-ac,#E07A3F)"/></symbol>
+<symbol id="gcatChild" viewBox="0 0 80 96"><g fill="none" stroke="#0B4A42" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"><path d="M40 36V54M40 54L33 76M40 54L47 76M40 42L51 49"/></g><circle cx="40" cy="24" r="12" fill="#0B4A42"/><circle cx="40" cy="42" r="3.5" fill="#E07A3F"/><circle cx="51" cy="49" r="3.5" fill="#E07A3F"/></symbol>
+<symbol id="gcatAdult" viewBox="0 0 80 96"><g fill="none" stroke="#0B4A42" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"><path d="M40 38V66M40 66L31 90M40 66L49 90M40 48L56 60"/></g><circle cx="40" cy="26" r="10" fill="#0B4A42"/><circle cx="40" cy="48" r="3.5" fill="#E07A3F"/><circle cx="56" cy="60" r="3.5" fill="#E07A3F"/></symbol>
 </svg>
 
 <header><div class="wrap bar">
@@ -615,7 +623,7 @@ apply(get())})();
 <section class="hero"><div class="wrap">
 <div><h1 class="word"><svg viewBox="30 20 670 430" role="img" aria-label="دأب"><use href="#word" x="30" y="20" width="670" height="430"/></svg></h1><p class="tag">خطوة كل يوم</p>
 <p class="lead">متابعة تمارينك المنزلية وخطة علاجك. يحدد مختصك الخطة، وتنفّذها في بيتك بكاميرا هاتفك، ويصله تقرير من صفحة واحدة.</p>
-<div class="cta"><a class="btn" href="#contact">اطلب عرضاً لعيادتك</a><a class="btn ghost" href="#how">شاهد كيف يعمل</a><a class="btn ghost" href="#guideHome">الدليل المصوّر</a><a class="btn ghost" href="#session">جرّب جلسة تمرين</a></div>
+<div class="cta"><a class="btn" href="#contact">اطلب عرضاً لعيادتك</a><a class="btn ghost" href="#how">شاهد كيف يعمل</a><a class="btn ghost" href="daab-exercise-guide.pdf" target="_blank" rel="noopener">الدليل المصوّر</a><a class="btn ghost" href="#session">جرّب جلسة تمرين</a></div>
 <p class="latin">DA'AB</p></div>
 <div class="phone" aria-label="مثال على جلسة تمرين"><div class="screen">
 <div class="hsplit"><div class="pane"><span class="lbl">شرح التمرين</span><svg class="hr" id="heroVid" viewBox="0 0 100 120" aria-hidden="true"></svg></div><div class="pane"><span class="lbl">أنت تتمرن</span><svg class="hr" id="heroYou" viewBox="0 0 100 120" aria-hidden="true"></svg></div></div>
@@ -630,15 +638,14 @@ apply(get())})();
 <h2 class="word"><svg viewBox="30 20 670 430" role="img" aria-hidden="true"><use href="#word" x="30" y="20" width="670" height="430"/></svg></h2>
 <div class="guide-rule" role="presentation"></div>
 <h3 class="guide-home-t">دليل التمارين العلاجية المصوّرة</h3>
-<p class="sub">تمارين مرتبة ومنسّقة للبالغين والأطفال والرضع — في المكتبة بنفس تنسيق الدليل: خطوات، مدة، وتكرار.</p>
+<p class="sub">تمارين مرتبة ومنسّقة للبالغين والأطفال — في المكتبة بنفس تنسيق الدليل: خطوات، مدة، وتكرار.</p>
 <div class="guide-cats" role="list" aria-label="فئات الدليل">
-<div class="gcat" role="listitem"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#logo2"/></svg><b>للرضع</b></div>
-<div class="gcat" role="listitem"><svg viewBox="0 0 100 110" aria-hidden="true"><use href="#fig"/></svg><b>للأطفال</b></div>
-<div class="gcat" role="listitem"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#logo2"/></svg><b>للبالغين</b></div>
+<div class="gcat gcat--child" role="listitem"><svg viewBox="0 0 80 96" aria-hidden="true"><use href="#gcatChild"/></svg><b>للأطفال</b></div>
+<div class="gcat" role="listitem"><svg viewBox="0 0 80 96" aria-hidden="true"><use href="#gcatAdult"/></svg><b>للبالغين</b></div>
 <div class="gcat" role="listitem"><svg viewBox="0 0 100 100" aria-hidden="true"><use href="#logo2"/></svg><b>مرافق ومختص</b></div>
 </div>
 <div class="guide-pills"><span class="gpill o">٦ أقسام</span><span class="gpill g">خطوات واضحة</span><span class="gpill g">المدة والتكرار لكل تمرين</span></div>
-<div class="cta" style="margin-top:22px"><a class="btn help" href="#library">افتح مكتبة الدليل المصوّر</a></div>
+<div class="cta" style="margin-top:22px"><a class="btn help" href="daab-exercise-guide.pdf" target="_blank" rel="noopener">افتح مكتبة الدليل المصوّر</a></div>
 </div></div></section>
 <section><div class="wrap"><h2>بين الجلسات، لا أحد يرى شيئاً</h2><div class="rule"></div>
 <div class="g3"><div class="card"><h3>المريض وحده</h3><p>يؤدي التمرين دون أن يعرف إن كان صحيحاً.</p></div><div class="card"><h3>الطبيب لا يرى</h3><p>ويعتمد على وصف شفهي لما حدث في البيت.</p></div><div class="card"><h3>الأهل عاجزون</h3><p>لا يعرفون كيف يطمئنون على التمرين ولا كيف يخبرون الطبيب.</p></div></div>
@@ -911,7 +918,7 @@ apply(get())})();
 <div class="page" data-page="library" data-title="مكتبة التمارين — دأب">
 <section><div class="wrap"><h1>مكتبة التمارين</h1><div class="rule"></div>
 <div class="guide-bar" role="region" aria-label="دليل التمارين">
-<div class="guide-bar-hd"><span class="guide-sec-n">١</span><div><h2>الدليل المصوّر — اختر ما يناسبك</h2><p>بطاقات بنفس تنسيق دليل دأب: خطوات، مدة، وتكرار</p></div></div>
+<div class="guide-bar-hd"><span class="guide-sec-n">١</span></div>
 <p class="guide-note">اقرأ هذه الإرشادات قبل أي ممارسة. استشر أخصائي العلاج الطبيعي أو طبيبك، خاصة مع الأطفال والرضع.</p>
 </div>
 <div class="wsw" style="margin:0 0 16px"></div>
@@ -1447,7 +1454,7 @@ function exOrd(id){var n=parseInt(String(id).replace(/\D/g,''),10);return isNaN(
 function guideMeta(x){if(!x)return {dur:'—',rep:'—'};if(x.cat==='eye')return {dur:'ثبات 5–10 ثوانٍ بمتابعة هادئة',rep:'6–10 تكرارات'};if(x.cat==='kid'||x.dn)return {dur:'ثبات 15–30 ثانية',rep:'8–10 تكرارات'};if(x.cat==='bal')return {dur:'ثبات 3–5 ثوانٍ',rep:'10–12 تكراراً'};return {dur:'ثبات 2–5 ثوانٍ',rep:'10–15 تكراراً'}}
 function guideSteps(id){var st=stepsOf(id);return st.length?st.slice(0,3):[]}
 function exGuideCard(x,sgIds,lbl){var gm=guideMeta(x),st=guideSteps(x.id),n=exOrd(x.id),imp='';for(var i=1;i<=3;i++)imp+='<i class="'+(i<=x.imp?'on':'')+'"></i>';
- return '<article class="ex ex-guide"><div class="top"><span class="cat">'+CATS[x.cat]+'</span>'+(sgIds.indexOf(x.id)>-1?'<span class="cat sugb">مقترح لحالتك</span>':'')+downBadge(x)+rxBadge(x)+eyeBadge(x)+'<span class="imp"><span aria-hidden="true" style="display:inline-flex;gap:4px">'+imp+'</span>الأهمية: '+IMP[x.imp]+'</span></div><div class="ex-illus-wrap"><span class="ex-num">'+n+'</span>'+musBlock(x.id,true)+'</div><h4>'+x.n+'</h4>'+(st.length?'<ol class="ex-steps">'+st.map(function(t){return '<li>'+t+'</li>'}).join('')+'</ol>':'')+'<p class="ex-desc">'+x.s+'</p><div class="ex-pills"><span class="pill dur"><b>المدة</b>'+gm.dur+'</span><span class="pill rep"><b>التكرار</b>'+gm.rep+'</span></div>'+musBlock(x.id)+'<div class="ex-detail"><b>من يحتاجه؟</b><ul>'+x.w.map(function(w){return '<li>'+w+'</li>'}).join('')+'</ul></div><p class="small ex-track">'+x.t+'</p>'+libBtns(x.id,'grid',lbl)+'</article>'}
+ return '<article class="ex ex-guide"><div class="top"><div class="ex-tags"><span class="cat">'+CATS[x.cat]+'</span>'+(sgIds.indexOf(x.id)>-1?'<span class="cat sugb">مقترح لحالتك</span>':'')+downBadge(x)+rxBadge(x)+eyeBadge(x)+'</div><span class="imp"><span aria-hidden="true" style="display:inline-flex;gap:4px">'+imp+'</span>الأهمية: '+IMP[x.imp]+'</span></div><div class="ex-illus-wrap"><span class="ex-num">'+n+'</span>'+musBlock(x.id,true)+'</div><h4>'+x.n+'</h4>'+(st.length?'<ol class="ex-steps">'+st.map(function(t){return '<li>'+t+'</li>'}).join('')+'</ol>':'')+'<p class="ex-desc">'+x.s+'</p><div class="ex-pills"><span class="pill dur"><b>المدة</b>'+gm.dur+'</span><span class="pill rep"><b>التكرار</b>'+gm.rep+'</span></div>'+musBlock(x.id)+'<div class="ex-detail"><b>من يحتاجه؟</b><ul>'+x.w.map(function(w){return '<li>'+w+'</li>'}).join('')+'</ul></div><p class="small ex-track">'+x.t+'</p>'+libBtns(x.id,'grid',lbl)+'</article>'}
 /* ===== موعد التمرين عند إضافته من المكتبة ===== */
 var addTouched=false,addId='',addWhere='',addDays=[],addT={time:'16:00',dur:15,per:1,gap:180},addMsg='';
 function exDays(id){return SCH().map(function(d,i){return d.on&&d.ex.indexOf(id)>-1?i:-1}).filter(function(i){return i>-1})}
