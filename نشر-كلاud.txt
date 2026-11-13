@@ -1,8 +1,14 @@
-# نشر دأب على kine (مرة واحدة — بدون رفع يدوي)
+# نشر دأب على daab (مرة واحدة — بدون رفع يدوي)
 
-## 1) اربطي GitHub بمشروع kine
+## 0) إعادة تسمية المشروع من kine إلى daab (مرة واحدة)
 
-Workers & Pages → **kine** → **Settings** → **Builds**  
+Workers & Pages → **kine** → **Settings** → **Rename project** → اكتبي **daab** → Save.
+
+بعدها يصبح الرابط الافتراضي مثل **https://daab.pages.dev** (أو **daab-XXXX.pages.dev** حسب حسابك).
+
+## 1) اربطي GitHub بمشروع daab
+
+Workers & Pages → **daab** → **Settings** → **Builds**  
 → **Connect to Git** (أو Create deployment → Git)
 
 - Repository: **vr4li/kine**
@@ -17,7 +23,7 @@ Save → **Retry deployment** أو **Deploy**
 ## 2) بعدها
 
 كل ما تعدّلين الموقع على GitHub، Cloudflare ينشر تلقائياً.  
-الرابط يظل: **https://kine-enf.pages.dev**
+الرابط: **https://daab.pages.dev** (أو الرابط الافتراضي للمشروع بعد إعادة التسمية)
 
 ## 3) تحديث التصميم من الماك
 

@@ -28,7 +28,7 @@ cp -f public/daab-pose.js daab-pose.js 2>/dev/null || cp -f daab-pose.js public/
 
 echo ""
 echo "جاري الرفع (مجلد public فقط — تصميمك)..."
-npx wrangler@3 pages deploy public --project-name=kine --commit-dirty=true
+npx wrangler@3 pages deploy public --project-name=daab --commit-dirty=true
 
 echo ""
-echo "Done! نفس الرابط: https://kine-enf.pages.dev"
+echo "Done! الرابط: https://daab.pages.dev (أو الرابط الافتراضي الظاهر في Cloudflare بعد الرفع)"
