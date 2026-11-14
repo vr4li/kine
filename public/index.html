@@ -270,7 +270,9 @@ fieldset.fld legend{padding:0;margin-bottom:8px}
 .pane .pose-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;object-fit:cover;transform:scaleX(-1);z-index:2}
 .pane video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
 .pane svg.rig{width:min(230px,62%);max-height:62%;position:relative;margin-bottom:56px}
-.pane video.eye-guide-vid{position:relative;inset:auto;width:min(100%,320px);max-height:min(62%,320px);height:auto;object-fit:contain;transform:none;margin-bottom:56px;z-index:1;background:#0B4A42}
+.pane video.eye-guide-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:none;z-index:1;margin:0;background:#0B4A42}
+.sess.eye-guide .pane:first-child svg.rig{display:none!important}
+.sess.eye-guide .pane:first-child ol.stp{display:none}
 ol.stp{list-style:none;margin:0;padding:8px 14px;position:absolute;bottom:0;inset-inline:0;background:rgba(5,46,41,.9);font-size:calc(14px*var(--fz));line-height:1.6;z-index:2}
 .stp li{opacity:.6;padding:1px 0}.stp li.on{opacity:1;font-weight:600;color:#F2A273}
 .wsw{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.wsw[hidden]{display:none}.wsw b{margin-inline-end:4px}.wsw .chip{font-size:calc(15px*var(--fz))}
@@ -1673,8 +1675,9 @@ function chips(){[].forEach.call($('eyeChk').children,function(e){var k=e.datase
  [].forEach.call($('eyeDemo').querySelectorAll('[data-sc]'),function(b){b.setAttribute('aria-pressed',b.dataset.sc===eyeSc)});
  var al=$('eyeAl');al.hidden=eyeSc==='ok';if(eyeSc!=='ok')al.textContent=eyeMsg(eyeSc)}
 function setRig(id){var eye=isEyeEx(id),m=eye?'eye':'body';$('eyeChk').hidden=!eye;$('eyeDemo').hidden=!eye;$('eyeAl').hidden=true;
+ var sess=$('sRun')&&$('sRun').querySelector('.sess');if(sess)sess.classList.toggle('eye-guide',eye);
  if(m!==rigMode||eye){rigMode=m;['rig1','rig2'].forEach(function(i){var e=$(i);e._c=null;e._H=null;e._t=0});
-  if(eye){mkEye($('rig1'),true);mkEye($('rig2'),false)}else{rig1=mk($('rig1'));rig2=mk($('rig2'))}}
+  if(eye){var r1=$('rig1');r1.innerHTML='';r1.hidden=true;r1._e=null;mkEye($('rig2'),false)}else{rig1=mk($('rig1'));rig2=mk($('rig2'))}}
  var gv=$('eyeGuideVid'),showVid=eye;
  if(gv){if(showVid){$('rig1').hidden=true;gv.hidden=false;if(gv.getAttribute('data-src')!=='child'){gv.setAttribute('data-src','child');gv.src='eye-exercises-child.mp4'}try{gv.load();var gp=gv.play();if(gp&&gp.catch)gp.catch(function(){})}catch(e){}}else{gv.hidden=true;try{gv.pause()}catch(e2){}$('rig1').hidden=false}}
  if(eye){eyeC=-1;eyeSc='ok';eyeBad=false;eyeAn='ok';eyeAt=0;chips();$('camNote').textContent='محاكاة تجريبية للصقة والنظارة'}}
