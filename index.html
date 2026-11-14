@@ -1038,6 +1038,7 @@ function acctUI(){var g=function(i){return document.getElementById(i)},w=g('acct
 function xferPack(obj){return btoa(unescape(encodeURIComponent(JSON.stringify(obj))))}
 function xferUnpack(s){var t=String(s||'').replace(/\s+/g,'');return JSON.parse(decodeURIComponent(escape(atob(t))))}
 function getMode(){return S.mode}
+function childSess(){if(getMode()==='child')return true;if(S.ward&&S.ward.kind==='child')return true;return false}
 function home(m){return m==='child'?'kids':'home'}
 /* ===== جدول الطفل وحدّ الجلسات ===== */
 var DAYS=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
@@ -1674,8 +1675,8 @@ function chips(){[].forEach.call($('eyeChk').children,function(e){var k=e.datase
 function setRig(id){var eye=isEyeEx(id),m=eye?'eye':'body';$('eyeChk').hidden=!eye;$('eyeDemo').hidden=!eye;$('eyeAl').hidden=true;
  if(m!==rigMode||eye){rigMode=m;['rig1','rig2'].forEach(function(i){var e=$(i);e._c=null;e._H=null;e._t=0});
   if(eye){mkEye($('rig1'),true);mkEye($('rig2'),false)}else{rig1=mk($('rig1'));rig2=mk($('rig2'))}}
- var gv=$('eyeGuideVid'),kidEye=eye&&getMode()==='child';
- if(gv){if(kidEye){$('rig1').hidden=true;gv.hidden=false;if(gv.getAttribute('data-src')!=='child'){gv.setAttribute('data-src','child');gv.src='eye-exercises-child.mp4'}try{gv.load();var gp=gv.play();if(gp&&gp.catch)gp.catch(function(){})}catch(e){}}else{gv.hidden=true;try{gv.pause()}catch(e2){}$('rig1').hidden=false}}
+ var gv=$('eyeGuideVid'),showVid=eye;
+ if(gv){if(showVid){$('rig1').hidden=true;gv.hidden=false;if(gv.getAttribute('data-src')!=='child'){gv.setAttribute('data-src','child');gv.src='eye-exercises-child.mp4'}try{gv.load();var gp=gv.play();if(gp&&gp.catch)gp.catch(function(){})}catch(e){}}else{gv.hidden=true;try{gv.pause()}catch(e2){}$('rig1').hidden=false}}
  if(eye){eyeC=-1;eyeSc='ok';eyeBad=false;eyeAn='ok';eyeAt=0;chips();$('camNote').textContent='محاكاة تجريبية للصقة والنظارة'}}
 function eyeXY(t,mode){if(mode==='h')return{tx:50+40*Math.sin(t*0.85),ty:58};if(mode==='v')return{tx:50,ty:58+32*Math.sin(t*0.85)};if(mode==='patch'||mode==='fix')return{tx:50+10*Math.sin(t*1.2),ty:58+6*Math.cos(t*1.1)};var dir=Math.floor(t/8)%2?-1:1,ang=-Math.PI/2+dir*2*Math.PI*((t%8)/8);return{tx:50+42*Math.cos(ang),ty:58+42*Math.sin(ang)}}
 function eyeDraw(t){var a=$('rig1')._e,b=$('rig2')._e;if(!b)return;var ex=byId(Q[qi]),m=(ex&&ex.eyeM)||'circ',xy=eyeXY(t,m),tx=xy.tx,ty=xy.ty;
