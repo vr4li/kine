@@ -9,13 +9,23 @@ from pathlib import Path
 
 PORT = 8443
 DIR = Path(__file__).parent / "public"
-CERT = DIR / "cert.pem"
-KEY = DIR / "key.pem"
+
+# انسخ ملفات الجذر إلى public قبل التشغيل — حتى تشوف آخر تعديل
+import shutil
+for _f in ("index.html", "daab-pose.js"):
+    _src = Path(__file__).parent / _f
+    if _src.exists():
+        shutil.copyfile(_src, DIR / _f)
+# خارج public/ — وإلا يُرفع المفتاح الخاص مع الموقع عند النشر
+CERT_DIR = Path(__file__).parent / ".certs"
+CERT = CERT_DIR / "cert.pem"
+KEY = CERT_DIR / "key.pem"
 
 
 def ensure_cert():
     if CERT.exists() and KEY.exists():
         return
+    CERT_DIR.mkdir(exist_ok=True)
     print("Creating self-signed certificate (first time only)...")
     subprocess.run(
         [
@@ -59,6 +69,7 @@ if __name__ == "__main__":
     ensure_cert()
     ip = local_ip()
 
+    socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("0.0.0.0", PORT), Handler) as httpd:
         ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         ctx.load_cert_chain(str(CERT), str(KEY))

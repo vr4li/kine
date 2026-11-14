@@ -9,7 +9,6 @@
   var canvas = null;
   var ctx = null;
   var exId = "";
-  var langEn = false;
   var onFeedback = null;
   var onRep = null;
   var onReject = null;
@@ -25,8 +24,10 @@
   var rep = {
     phase: "down",
     sawPeak: false,
-    peakOk: false,
+    sawMid: false,
     lastRep: 0,
+    lastSide: "",
+    baseY: null,
   };
   var counting = false;
 
@@ -45,15 +46,26 @@
     ["right_knee", "right_ankle"],
   ];
 
+  /* اللغة تُقرأ في كل رسالة — لو بدّل المستخدم اللغة أثناء الجلسة تتبدّل الرسائل فوراً */
   function msg(ar, en) {
-    return langEn ? en : ar;
+    return document.documentElement.lang === "en" ? en : ar;
   }
 
   function resetRep() {
     rep.phase = "down";
     rep.sawPeak = false;
-    rep.peakOk = false;
+    rep.sawMid = false;
+    rep.lastSide = "";
+    rep.baseY = null;
   }
+
+  /* بصمة SRI: لو تغيّر ملف المكتبة على الـCDN (اختراق مثلاً) يرفض المتصفح تشغيله */
+  var SRI = {
+    "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js":
+      "sha384-vE8hbVJ4lezako5rlvE7bY0BVzWlFhZncPlckrqNwcUQpVtgbENTgZ8TBbnPjZre",
+    "https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js":
+      "sha384-pjg3ZYfXdbqsHl42YTyNHeHMzvrwQUvEuQ7tTn6+tDmoUkSD3ItK1sBa73y1l0H3",
+  };
 
   function loadScript(src) {
     return new Promise(function (resolve, reject) {
@@ -64,6 +76,10 @@
       var s = document.createElement("script");
       s.src = src;
       s.async = true;
+      if (SRI[src]) {
+        s.integrity = SRI[src];
+        s.crossOrigin = "anonymous";
+      }
       s.onload = resolve;
       s.onerror = reject;
       document.head.appendChild(s);
@@ -105,35 +121,52 @@
     return (Math.acos(Math.max(-1, Math.min(1, dot / mag))) * 180) / Math.PI;
   }
 
+  function mid(a, b) {
+    if (a && b) return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    return a || b || null;
+  }
+
+  /* طول الجذع (كتف → ورك) — كل المقاييس نسبةً له، فلا تتأثر بقرب الشخص من الكاميرا */
+  function torsoLen(map) {
+    var sh = mid(kp(map, "left_shoulder"), kp(map, "right_shoulder"));
+    var hp = mid(kp(map, "left_hip"), kp(map, "right_hip"));
+    if (sh && hp && hp.y - sh.y > 10) return hp.y - sh.y;
+    return 0.3 * (canvas.height || 240);
+  }
+
   function torsoOk(map) {
     var ls = kp(map, "left_shoulder"),
       rs = kp(map, "right_shoulder");
     var lh = kp(map, "left_hip"),
       rh = kp(map, "right_hip");
     if (!ls || !rs || !lh || !rh) return false;
-    if (Math.abs(ls.y - rs.y) > 0.08 * (canvas.height || 240)) return false;
+    if (Math.abs(ls.y - rs.y) > 0.3 * torsoLen(map)) return false;
     return true;
   }
 
-  function armLiftNorm(map) {
-    var h = canvas.height || 240;
-    var ls = kp(map, "left_shoulder"),
-      rs = kp(map, "right_shoulder");
-    var lw = kp(map, "left_wrist"),
-      rw = kp(map, "right_wrist");
-    var ref = ls && rs ? (ls.y + rs.y) / 2 : ls ? ls.y : rs ? rs.y : null;
-    if (ref == null) return null;
-    var best = 0;
-    if (lw) best = Math.max(best, (ref - lw.y) / h);
-    if (rw) best = Math.max(best, (ref - rw.y) / h);
-    return best;
+  /* ارتفاع الرسغ: 0 ≈ عند الورك، 1 ≈ عند الكتف، أكبر من 1 = فوق الكتف */
+  function wristElev(map, side) {
+    var w = kp(map, side + "_wrist");
+    var sh = kp(map, side + "_shoulder") || mid(kp(map, "left_shoulder"), kp(map, "right_shoulder"));
+    if (!w || !sh) return null;
+    var T = torsoLen(map);
+    return (sh.y + T - w.y) / T;
   }
 
-  function kneeAngleVal(map) {
-    var hip = kp(map, "left_hip") || kp(map, "right_hip");
-    var knee = kp(map, "left_knee") || kp(map, "right_knee");
-    var ankle = kp(map, "left_ankle") || kp(map, "right_ankle");
-    return angle(hip, knee, ankle);
+  function armElev(map) {
+    var l = wristElev(map, "left"),
+      r = wristElev(map, "right");
+    if (l == null && r == null) return null;
+    return Math.max(l == null ? -9 : l, r == null ? -9 : r);
+  }
+
+  /* زاوية مفصل من نفس الجهة فقط (لا نخلط ورك اليسار مع ركبة اليمين) */
+  function sideAngle(map, a, b, c, pick) {
+    var L = angle(kp(map, "left_" + a), kp(map, "left_" + b), kp(map, "left_" + c));
+    var R = angle(kp(map, "right_" + a), kp(map, "right_" + b), kp(map, "right_" + c));
+    if (L == null) return R;
+    if (R == null) return L;
+    return pick(L, R);
   }
 
   function countRepIfReady() {
@@ -142,56 +175,31 @@
     if (n - rep.lastRep < 900) return;
     rep.lastRep = n;
     if (onRep) onRep(0.22, true);
-    rep.sawPeak = false;
-    rep.peakOk = false;
-    rep.phase = "down";
   }
 
-  function repArmLift(lift) {
-    if (lift == null) return;
-    var PEAK = 0.11;
-    var DOWN = 0.045;
-
-    if (lift >= PEAK) {
+  /* دورة عامة: نزول → قمة (أخضر) → نزول = تكرار. حركة ناقصة تُبلَّغ ولا تُحسب */
+  function repCycle(v, peak, down, invert, rejectMsg) {
+    if (v == null) return;
+    var d = invert ? -1 : 1;
+    var mid2 = down + 0.6 * (peak - down);
+    if ((v - peak) * d >= 0) {
       rep.phase = "peak";
       rep.sawPeak = true;
-      rep.peakOk = true;
-    } else if (lift <= DOWN) {
-      if (rep.sawPeak && rep.peakOk) countRepIfReady();
-      else if (rep.sawPeak && !rep.peakOk && onReject) {
-        onReject(msg("لم تُحسب — ارفع أعلى حتى يصير أخضر", "Not counted — raise higher for green"));
-        rep.sawPeak = false;
-      }
+    } else if ((v - down) * d <= 0) {
+      if (rep.sawPeak) countRepIfReady();
+      else if (rep.sawMid && counting && onReject) onReject(rejectMsg);
+      rep.sawPeak = false;
+      rep.sawMid = false;
       rep.phase = "down";
     } else {
-      rep.phase = "up";
-    }
-  }
-
-  function repKnee(ka) {
-    if (ka == null) return;
-    if (ka >= 152) {
-      rep.phase = "peak";
-      rep.sawPeak = true;
-      rep.peakOk = true;
-    } else if (ka <= 125) {
-      if (rep.sawPeak && rep.peakOk) countRepIfReady();
-      else if (rep.sawPeak && !rep.peakOk && onReject) {
-        onReject(msg("لم تُحسب — مدّ الركبة أكثر في الأعلى", "Not counted — extend knee more at top"));
-        rep.sawPeak = false;
-      }
-      rep.phase = "down";
-    } else {
+      if ((v - mid2) * d >= 0) rep.sawMid = true;
       rep.phase = "up";
     }
   }
 
   function legAlignOk(map) {
     function side(a, b, c) {
-      var ka = kp(map, a),
-        kb = kp(map, b),
-        kc = kp(map, c);
-      return !!(ka && kb && kc);
+      return !!(kp(map, a) && kp(map, b) && kp(map, c));
     }
     return (
       side("left_hip", "left_knee", "left_ankle") ||
@@ -210,10 +218,10 @@
   }
 
   function alignBlock(id, map, vis) {
-    if (!torsoOk(map)) {
+    if (id !== "e6" && !torsoOk(map)) {
       return {
         level: "bad",
-        text: msg("✗ عدّلي وضع الجذع", "✗ Straighten your torso"),
+        text: msg("✗ عدّل وضع الجذع", "✗ Straighten your torso"),
         alignReady: false,
       };
     }
@@ -221,7 +229,7 @@
       if (!legAlignOk(map))
         return {
           level: "warn",
-          text: msg("أظهري الساق والقدم للكاميرا", "Show leg and foot to camera"),
+          text: msg("أظهر الساق والقدم للكاميرا", "Show leg and foot to camera"),
           alignReady: false,
         };
       return null;
@@ -230,16 +238,16 @@
       if (!armAlignOk(map))
         return {
           level: "warn",
-          text: msg("أظهري الذراع والكوع للكاميرا", "Show arm and elbow to camera"),
+          text: msg("أظهر الذراع والكوع للكاميرا", "Show arm and elbow to camera"),
           alignReady: false,
         };
       return null;
     }
     if (id === "e5" || id === "e6" || id === "e8") {
-      if (vis < MIN_VIS)
+      if (vis < MIN_VIS || !legAlignOk(map))
         return {
           level: "warn",
-          text: msg("اقتربي — أظهري الجسم بالكامل", "Show full body in frame"),
+          text: msg("ابتعد قليلاً — أظهر جسمك كاملاً", "Show full body in frame"),
           alignReady: false,
         };
       return null;
@@ -247,14 +255,17 @@
     if (vis < MIN_VIS && !armAlignOk(map))
       return {
         level: "warn",
-        text: msg("اقتربي — أظهري الجسم أو الذراعين", "Show your body or both arms"),
+        text: msg("أظهر جسمك أو ذراعيك للكاميرا", "Show your body or both arms"),
         alignReady: false,
       };
     return null;
   }
 
-  function alignReadyFor(id, map, vis) {
-    return !alignBlock(id, map, vis);
+  function good(ar, en) {
+    return { level: "good", text: msg(ar, en), alignReady: true };
+  }
+  function warn(ar, en, ready) {
+    return { level: "warn", text: msg(ar, en), alignReady: ready !== false };
   }
 
   function analyzeAndRep(id, map) {
@@ -264,88 +275,102 @@
     });
     var block = alignBlock(id, map, vis);
     if (block) return block;
-    var alignReady = alignReadyFor(id, map, vis);
+    var T = torsoLen(map);
+    var NO = msg("لم تُحسب — أكمل الحركة حتى يصير أخضر", "Not counted — complete the movement until green");
 
+    /* بسط الركبة جالساً: الزاوية تكبر عند المدّ */
     if (id === "e3") {
-      var ka = kneeAngleVal(map);
-      if (counting) repKnee(ka);
-      if (ka == null)
-        return { level: "warn", text: msg("أظهري الركبة والكعب", "Show knee and ankle"), alignReady: false };
-      if (ka >= 150)
-        return {
-          level: "good",
-          text: msg("✓ امتداد ممتاز — أنزلي ببطء", "✓ Great extension — lower slowly"),
-          alignReady: alignReady,
-        };
-      return {
-        level: "warn",
-        text: msg("↑ مدّي ثم ↓ ارجعي (جولة = مدّ + ثني)", "↑ Extend then ↓ return"),
-        alignReady: alignReady,
-      };
+      var ka = sideAngle(map, "hip", "knee", "ankle", Math.max);
+      if (counting) repCycle(ka, 152, 125, false, msg("لم تُحسب — مدّ الركبة أكثر", "Not counted — extend the knee more"));
+      if (ka == null) return warn("أظهر الركبة والكاحل", "Show knee and ankle", false);
+      if (ka >= 152) return good("✓ امتداد ممتاز — أنزل ببطء", "✓ Great extension — lower slowly");
+      return warn("↑ مدّ ركبتك ثم ↓ ارجع (جولة = مدّ + ثني)", "↑ Extend then ↓ return");
     }
 
-    if (id === "e1" || id === "e11" || id === "e7" || id === "e12") {
-      var lift = armLiftNorm(map);
-      if (counting) repArmLift(lift);
-      if (lift == null)
-        return { level: "warn", text: msg("أظهري ذراعيك للكاميرا", "Show arms to camera"), alignReady: false };
-      if (lift >= 0.11)
-        return {
-          level: "good",
-          text: msg("✓ ممتاز — أنزلي الذراع ببطء", "✓ Great — lower arm slowly"),
-          alignReady: alignReady,
-        };
-      if (lift >= 0.05)
-        return {
-          level: "warn",
-          text: msg("↑ للأخضر ارفعي، أو ↓ أكملي النزول", "↑ Raise for green, or ↓ lower"),
-          alignReady: alignReady,
-        };
-      return {
-        level: "warn",
-        text: msg("↑ ارفعي الذراع", "↑ Raise your arm"),
-        alignReady: alignReady,
-      };
-    }
-
+    /* ثني الكوع وبسطه: القمة = ثني كامل (زاوية صغيرة) */
     if (id === "e2") {
-      var lsh = kp(map, "left_shoulder"),
-        le = kp(map, "left_elbow"),
-        lw = kp(map, "left_wrist");
-      var ea =
-        angle(lsh, le, lw) ||
-        angle(kp(map, "right_shoulder"), kp(map, "right_elbow"), kp(map, "right_wrist"));
-      if (counting) repArmLift(armLiftNorm(map));
-      if (ea == null)
-        return { level: "warn", text: msg("أظهري الكوع", "Show elbow"), alignReady: false };
-      if (ea <= 55 || ea >= 155)
-        return {
-          level: "good",
-          text: msg("✓ وضع الكوع — بدّلي الاتجاه", "✓ Switch direction"),
-          alignReady: alignReady,
-        };
-      return {
-        level: "warn",
-        text: msg("اثنِ أو افردِ الكوع", "Bend or straighten elbow"),
-        alignReady: alignReady,
-      };
+      var ea = sideAngle(map, "shoulder", "elbow", "wrist", Math.min);
+      if (counting) repCycle(ea, 60, 145, true, msg("لم تُحسب — اثنِ الكوع أكثر", "Not counted — bend the elbow more"));
+      if (ea == null) return warn("أظهر الكوع", "Show elbow", false);
+      if (ea <= 60) return good("✓ ثني ممتاز — افرد ذراعك ببطء", "✓ Good bend — straighten slowly");
+      if (ea >= 145) return warn("↑ اثنِ كوعك ليقترب كفّك من كتفك", "↑ Bend your elbow toward your shoulder");
+      return warn("اثنِ أو افرد الكوع", "Bend or straighten elbow");
     }
 
-    if (id === "e4" || id === "e5" || id === "e6" || id === "e8" || id === "e9") {
-      var liftG = armLiftNorm(map);
-      if (counting) repArmLift(liftG);
+    /* رفع الكعبين: يرتفع الكتفان قليلاً عن وضع الوقوف */
+    if (id === "e4") {
+      var sh = mid(kp(map, "left_shoulder"), kp(map, "right_shoulder"));
+      if (!sh) return warn("أظهر كتفيك للكاميرا", "Show your shoulders", false);
+      if (rep.baseY == null || sh.y > rep.baseY) rep.baseY = sh.y;
+      else if (rep.phase === "down") rep.baseY += (sh.y - rep.baseY) * 0.02;
+      var rise = (rep.baseY - sh.y) / T;
+      if (counting) repCycle(rise, 0.08, 0.03, false, msg("لم تُحسب — ارفع كعبيك أعلى", "Not counted — rise higher on your toes"));
+      if (rise >= 0.08) return good("✓ ممتاز — أنزل كعبيك ببطء", "✓ Great — lower your heels slowly");
+      return warn("↑ ارفع كعبيك", "↑ Rise onto your toes");
     }
 
-    var lift2 = armLiftNorm(map);
-    if (counting && id !== "e4" && id !== "e5" && id !== "e6" && id !== "e8" && id !== "e9")
-      repArmLift(lift2);
-    if (lift2 != null && lift2 >= 0.08)
-      return { level: "good", text: msg("✓ حركة واضحة", "✓ Clear movement"), alignReady: alignReady };
-    return {
-      level: "warn",
-      text: msg("↑ نفّذي الحركة كاملة", "↑ Do the full movement"),
-      alignReady: alignReady,
-    };
+    /* الجلوس والوقوف: ارتفاع الورك عن الكاحل نسبةً للجذع */
+    if (id === "e5") {
+      var hp = mid(kp(map, "left_hip"), kp(map, "right_hip"));
+      var an = mid(kp(map, "left_ankle"), kp(map, "right_ankle"));
+      if (!hp || !an) return warn("أظهر الورك والقدمين", "Show hips and feet", false);
+      var hh = (an.y - hp.y) / T;
+      if (counting) repCycle(hh, 1.45, 1.15, false, msg("لم تُحسب — قف باستقامة كاملة", "Not counted — stand fully upright"));
+      if (hh >= 1.45) return good("✓ وقفة ممتازة — اجلس ببطء", "✓ Great stand — sit down slowly");
+      return warn("↑ قف دون الاعتماد على يديك", "↑ Stand up without using your hands");
+    }
+
+    /* المشي في المكان: فرق ارتفاع الركبتين */
+    if (id === "e8") {
+      var lk = kp(map, "left_knee"),
+        rk = kp(map, "right_knee");
+      if (!lk || !rk) return warn("أظهر ركبتيك للكاميرا", "Show both knees", false);
+      var kd = Math.abs(lk.y - rk.y) / T;
+      if (counting) repCycle(kd, 0.45, 0.15, false, msg("لم تُحسب — ارفع ركبتك أعلى", "Not counted — lift your knee higher"));
+      if (kd >= 0.45) return good("✓ ركبة عالية — بدّل الرجل", "✓ High knee — switch legs");
+      return warn("↑ ارفع ركبتك", "↑ Lift your knee");
+    }
+
+    /* الوقوف على قدم / نقل الوزن: رفع قدم أو ميل الورك فوق قدم واحدة */
+    if (id === "e6") {
+      var la = kp(map, "left_ankle"),
+        ra = kp(map, "right_ankle");
+      var hp2 = mid(kp(map, "left_hip"), kp(map, "right_hip"));
+      var ls = kp(map, "left_shoulder"),
+        rs = kp(map, "right_shoulder");
+      if (!la || !ra || !hp2) return warn("أظهر قدميك ووركك", "Show your feet and hips", false);
+      var sw = ls && rs ? Math.abs(ls.x - rs.x) : T * 0.8;
+      var lift2 = Math.abs(la.y - ra.y) / T / 0.25;
+      var shift = Math.abs(hp2.x - (la.x + ra.x) / 2) / (sw || 1) / 0.3;
+      var bv = Math.max(lift2, shift);
+      if (counting) repCycle(bv, 1, 0.4, false, msg("لم تُحسب — انقل وزنك أكثر", "Not counted — shift your weight further"));
+      if (bv >= 1) return good("✓ ثبات جيد — ارجع للوسط", "✓ Good — return to centre");
+      return warn("انقل وزنك إلى قدم واحدة", "Shift your weight onto one foot");
+    }
+
+    /* رفع الذراعين بالتناوب: تكرار عند تبدّل الذراع المرفوعة فوق الرأس */
+    if (id === "e12") {
+      var el = wristElev(map, "left"),
+        er = wristElev(map, "right");
+      if (el == null && er == null) return warn("أظهر ذراعيك للكاميرا", "Show arms to camera", false);
+      var up = (el != null && el >= 1.4) ? "l" : (er != null && er >= 1.4) ? "r" : "";
+      if (up && up !== rep.lastSide) {
+        if (rep.lastSide && counting) countRepIfReady();
+        rep.lastSide = up;
+      }
+      if (up) return good("✓ ممتاز — بدّل الذراع", "✓ Great — switch arms");
+      return warn("↑ ارفع ذراعاً فوق رأسك", "↑ Raise one arm overhead");
+    }
+
+    /* رفع الذراع للأمام / جانباً حتى الكتف، التصفيق فوق الرأس، دوائر الذراعين */
+    var peak = id === "e7" ? 1.4 : 0.85;
+    var down = id === "e7" ? 0.6 : 0.4;
+    var lift = armElev(map);
+    if (counting) repCycle(lift, peak, down, false, msg("لم تُحسب — ارفع أعلى حتى يصير أخضر", "Not counted — raise higher for green"));
+    if (lift == null) return warn("أظهر ذراعيك للكاميرا", "Show arms to camera", false);
+    if (lift >= peak) return good("✓ ممتاز — أنزل الذراع ببطء", "✓ Great — lower arm slowly");
+    if (lift >= (peak + down) / 2) return warn("↑ ارفع أعلى قليلاً للأخضر", "↑ A little higher for green");
+    return warn(id === "e7" ? "↑ ارفع ذراعيك فوق رأسك" : "↑ ارفع الذراع حتى مستوى الكتف", id === "e7" ? "↑ Raise both arms overhead" : "↑ Raise your arm to shoulder level");
   }
 
   function toMap(keypoints) {
@@ -384,13 +409,16 @@
     });
   }
 
+  /* الفيديو معروض بـ object-fit: cover — نطبّق نفس القصّ والتكبير على النقاط
+     وإلا ينزاح الهيكل عن الجسم كلما اختلفت نسبة الشاشة عن نسبة الكاميرا */
   function scaleKeypoints(kps) {
     var vw = video.videoWidth || canvas.width || 1;
     var vh = video.videoHeight || canvas.height || 1;
-    var sx = canvas.width / vw;
-    var sy = canvas.height / vh;
+    var s = Math.max(canvas.width / vw, canvas.height / vh);
+    var ox = (canvas.width - vw * s) / 2;
+    var oy = (canvas.height - vh * s) / 2;
     return kps.map(function (k) {
-      return { name: k.name, score: k.score, x: k.x * sx, y: k.y * sy };
+      return { name: k.name, score: k.score, x: k.x * s + ox, y: k.y * s + oy };
     });
   }
 
@@ -415,8 +443,10 @@
       detecting = false;
     }, 2000);
 
+    /* flipHorizontal: false — اللوحة نفسها معكوسة بالـ CSS مثل الفيديو؛
+       القلب هنا كان يعكس الهيكل مرتين فيظهر على الجهة الخطأ */
     detector
-      .estimatePoses(video, { flipHorizontal: true, maxPoses: 1 })
+      .estimatePoses(video, { flipHorizontal: false, maxPoses: 1 })
       .then(function (poses) {
         if (!active) return;
         resize();
@@ -451,7 +481,6 @@
       canvas = c;
       ctx = canvas.getContext("2d");
       exId = exerciseId || "";
-      langEn = document.documentElement.lang === "en";
       onFeedback = opts.onFeedback;
       onRep = opts.onRep;
       onReject = opts.onReject;

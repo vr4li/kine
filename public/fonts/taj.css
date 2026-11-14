@@ -1,0 +1,48 @@
+/* tajawal-arabic-400-normal */
+@font-face {
+  font-family: 'Tajawal';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(tajawal-arabic-400-normal.woff2) format('woff2');
+}
+/* tajawal-latin-400-normal */
+@font-face {
+  font-family: 'Tajawal';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(tajawal-latin-400-normal.woff2) format('woff2');
+}
+/* tajawal-arabic-500-normal */
+@font-face {
+  font-family: 'Tajawal';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(tajawal-arabic-500-normal.woff2) format('woff2');
+}
+/* tajawal-latin-500-normal */
+@font-face {
+  font-family: 'Tajawal';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url(tajawal-latin-500-normal.woff2) format('woff2');
+}
+/* tajawal-arabic-700-normal */
+@font-face {
+  font-family: 'Tajawal';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(tajawal-arabic-700-normal.woff2) format('woff2');
+}
+/* tajawal-latin-700-normal */
+@font-face {
+  font-family: 'Tajawal';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(tajawal-latin-700-normal.woff2) format('woff2');
+}

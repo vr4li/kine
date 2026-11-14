@@ -1,0 +1,45 @@
+# نشر دأب على daab (مرة واحدة — بدون رفع يدوي)
+
+## 0) الرابط الرسمي
+
+**https://daab-web.pages.dev** (مشروع Pages: **daab-web**).  
+`daab.pages.dev` محجوز عند Cloudflare. المشروع القديم `kine-enf.pages.dev` عُطّل نشره التلقائي.
+
+## 1) GitHub مربوط بمشروع daab-web
+
+Workers & Pages → **daab-web** → **Settings** → **Builds**  
+→ **Connect to Git** (أو Create deployment → Git)
+
+- Repository: **vr4li/kine**
+- Branch: **main**
+- Framework: **None**
+- Build command: `cp index.html daab-pose.js public/`  ← ينسخ آخر نسخة قبل النشر
+- **Build output directory:** `public`  ← مهم جداً
+- **Root directory (advanced):** *(فاضي)*
+
+Save → **Retry deployment** أو **Deploy**
+
+## 2) بعدها
+
+كل ما تعدّلين الموقع على GitHub، Cloudflare ينشر تلقائياً.  
+الرابط الرسمي: **https://daab-web.pages.dev**
+
+## 3) تحديث التصميم من الماك
+
+```bash
+cd ~/Desktop/aidab
+# عدّلي index.html أو daab-pose.js ثم:
+git add -A
+git commit -m "update site"
+git push
+```
+
+## رفع مباشر (لو Git ما اشتغل)
+
+```bash
+./deploy-cloudflare.sh
+```
+يرفع مجلد `public` فقط إلى مشروع **daab-web**.
+
+ملاحظة: لو عدّلتِ `daab-pose.js` غيّري رقم النسخة في `index.html`
+(`daab-pose.js?v=7` → `v=8`) حتى تحمّل الجوالات النسخة الجديدة.

@@ -4,10 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>دأب — خطوة كل يوم</title>
+<meta name="description" content="دأب: متابعة تمارين العلاج الطبيعي في البيت. يحدد مختصك الخطة، وتنفّذها بكاميرا هاتفك، ويصله تقرير من صفحة واحدة.">
+<meta name="theme-color" content="#0C3D31">
+<meta property="og:type" content="website">
+<meta property="og:title" content="دأب — خطوة كل يوم">
+<meta property="og:description" content="متابعة تمارين العلاج الطبيعي في البيت بكاميرا الهاتف، وتقرير من صفحة واحدة لمختصك.">
+<meta property="og:locale" content="ar_SA">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 150'%3E%3Crect width='150' height='150' rx='27' fill='%230B4A42'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='9.5' stroke-linecap='round'%3E%3Cpath d='M46.8 82.3L112.5 28M74.8 58V90M74.8 90L57.5 125.5M74.8 90L92.5 125.5'/%3E%3C/g%3E%3Ccircle cx='74.8' cy='31.8' r='10.5' fill='%23fff'/%3E%3Cg fill='%23E07A3F'%3E%3Ccircle cx='112.5' cy='28' r='7'/%3E%3Ccircle cx='74.8' cy='58' r='6.5'/%3E%3Ccircle cx='74.8' cy='90' r='6.5'/%3E%3Ccircle cx='46.8' cy='82.3' r='7'/%3E%3C/g%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="fonts/plex.css">
 <style>
 :root{--fz:1;--fb:"IBM Plex Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif;--fh:"IBM Plex Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif;--green:#0C3D31;--green2:#587F78;--mist:#D8E6E4;--illus:#D0E2E2;--orange:#E67E22;--ink-o:#B45309;--bg:#F7F4ED;--card:#fff;--ink:#3A4A5C;--line:#E0DACB;--cream:#F7F4ED;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
@@ -59,6 +63,7 @@ html[data-mode=child] .guide-home{display:none}
 .guide-sec-n{display:grid;place-items:center;min-width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.15);font:700 calc(18px*var(--fz)) var(--fh)}
 .guide-bar-hd h2{font-size:calc(22px*var(--fz));color:#fff;margin:0}
 .guide-bar-hd p{margin:4px 0 0;font-size:calc(15px*var(--fz));opacity:.9}
+.guide-act{display:flex;flex-wrap:wrap;gap:10px;padding:16px 22px 0}.guide-act .btn{width:auto;margin-top:0;flex:1 1 180px;text-align:center;min-height:48px}.guide-meta{margin:0;padding:10px 22px 16px;font-size:calc(14px*var(--fz));color:var(--ink)}
 .guide-note{margin:0;padding:14px 22px 16px;border-inline-start:4px solid var(--orange);background:var(--bg);font-weight:600;color:var(--green);font-size:calc(15px*var(--fz))}
 .guide-foot{margin-top:28px;padding:14px 18px;border-radius:14px;background:var(--mist);font-size:calc(14px*var(--fz));color:var(--green);text-align:center}
 .lib.guide-lib{gap:24px}
@@ -291,7 +296,7 @@ ol.stp{list-style:none;margin:0;padding:8px 14px;position:absolute;bottom:0;inse
 #sRun .cta{justify-content:center}
 html[data-mode=child] #sHelp{font:700 calc(28px*var(--fz)) var(--fh);padding:18px 40px;border-radius:28px}
 html[data-mode=child] .shead{font-size:calc(24px*var(--fz))}
-@media(max-width:760px){.sess{grid-template-columns:1fr;grid-template-rows:1fr 1fr;height:min(86svh,660px)}.pane+.pane{border-inline-start:0;border-top:3px solid var(--cream)}}
+@media(max-width:760px){.sess{grid-template-columns:1fr;grid-template-rows:1fr 1fr;height:min(86svh,660px)}.pane+.pane{border-inline-start:0;border-top:3px solid var(--cream)}.shead{gap:8px}.shead .cn{font-size:calc(28px*var(--fz))}#sRun .fb{font-size:calc(clamp(18px,4.8vw,28px)*var(--fz));margin:12px 0 4px;min-height:40px}.eye-guide-vid{object-fit:cover}.guide-act .btn{flex:1 1 100%}}
 @media(prefers-reduced-motion:reduce){.prog i{transition:none}.pop{animation:none}}
 .btn[hidden]{display:none}
 .fld select{display:block;width:100%;margin-top:6px;padding:12px 14px;font:inherit;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
@@ -466,7 +471,7 @@ table{border:1px solid #E8E2D4}th{font-size:calc(15px*var(--fz))}
 .screen .btn.help{width:100%}
 button.btn,a.btn{font-weight:600;line-height:1.3}
 button.btn:not(.acct .btn):not(.exl .btn):not(.pr .btn):not(.sct .btn):not(.tools .btn){font-size:calc(17px*var(--fz))}
-.hero .wrap{grid-template-columns:1fr 1fr}.hero .cta{display:grid;grid-template-columns:1fr 1fr;max-width:460px}.hero .cta .btn{padding:0 14px;white-space:nowrap}.hero .cta .btn:first-child{grid-column:1/-1}
+@media(min-width:861px){.hero .wrap{grid-template-columns:1fr 1fr}}.hero .cta{display:grid;grid-template-columns:1fr 1fr;max-width:460px}.hero .cta .btn{padding:0 14px;white-space:nowrap}.hero .cta .btn:first-child{grid-column:1/-1}
 .mine .lbtns{margin-inline-start:auto;justify-content:flex-end}.mine .asum{text-align:end}
 @media(max-width:560px){.hero .cta{grid-template-columns:1fr}.tools{flex-direction:row;align-items:center}footer{padding-bottom:96px}}
 .chip,.apanel .chip,.eyepick .chip,.eyedemo .chip,.wsw .chip,.rp-bar .chip,.jump .chip{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 16px;font-size:calc(15px*var(--fz));line-height:1.3}
@@ -588,10 +593,13 @@ html[lang=en] .msg{min-height:0}
 html[lang=en] .rate button{min-width:0;flex:1 1 72px}
 html[lang=en] .badge{overflow-wrap:break-word;font-size:calc(17px*var(--fz))}
 html[lang=en] .mus{flex-wrap:wrap}
+.pjump{margin:18px 0 6px}
+section[data-jn][id]{scroll-margin-top:var(--jn,96px)}
+#secCnd,#sugSec,#secMine,#secAll{scroll-margin-top:var(--jn,96px)}
 </style>
 <script>
-(function(){var Z=[.9,1,1.15,1.3,1.5,1.75],F={taj:'Tajawal:wght@400;500;700',nsk:'Noto+Naskh+Arabic:wght@400;500;700'},d=document.documentElement;
-function load(k){if(!F[k]||document.getElementById('ff-'+k))return;var l=document.createElement('link');l.id='ff-'+k;l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family='+F[k]+'&display=swap';document.head.appendChild(l)}
+(function(){var Z=[.9,1,1.15,1.3,1.5,1.75],F={taj:1,nsk:1},d=document.documentElement;
+function load(k){if(!F[k]||document.getElementById('ff-'+k))return;var l=document.createElement('link');l.id='ff-'+k;l.rel='stylesheet';l.href='fonts/'+k+'.css';document.head.appendChild(l)}
 function get(){try{return JSON.parse(localStorage.getItem('daab-a11y')||'{}')||{}}catch(e){return {}}}
 function apply(o){var z=Z[o.z]!=null?o.z:1;d.style.setProperty('--fz',Z[z]);if(Z[z]>=1.5)d.setAttribute('data-big','');else d.removeAttribute('data-big');if(o.f&&o.f!=='def'){d.setAttribute('data-ff',o.f);load(o.f)}else d.removeAttribute('data-ff')}
 window.DAAB_A11Y={Z:Z,load:load,get:get,apply:apply,set:function(o){try{localStorage.setItem('daab-a11y',JSON.stringify(o))}catch(e){}apply(o)}};
@@ -922,7 +930,9 @@ apply(get())})();
 <div class="page" data-page="library" data-title="مكتبة التمارين — دأب">
 <section><div class="wrap"><h1>مكتبة التمارين</h1><div class="rule"></div>
 <div class="guide-bar" role="region" aria-label="دليل التمارين">
-<div class="guide-bar-hd"><span class="guide-sec-n">١</span></div>
+<div class="guide-bar-hd"><span class="guide-sec-n">١</span><div><h2>الدليل المصوّر للتمارين</h2><p>كل تمارين الموقع في ملف واحد بخطوات واضحة، للبالغين والأطفال.</p></div></div>
+<div class="guide-act"><a class="btn help" href="daab-exercise-guide.pdf" target="_blank" rel="noopener">افتح الدليل</a><a class="btn ghost" href="daab-exercise-guide.pdf" download="daab-exercise-guide.pdf">حمّل الدليل (PDF)</a></div>
+<p class="guide-meta">ملف PDF من 20 صفحة، حجمه نحو 10 ميغابايت.</p>
 <p class="guide-note">اقرأ هذه الإرشادات قبل أي ممارسة. استشر أخصائي العلاج الطبيعي أو طبيبك، خاصة مع الأطفال والرضع.</p>
 </div>
 <div class="wsw" style="margin:0 0 16px"></div>
@@ -1109,6 +1119,7 @@ var editing=-1,pq='',pc='all';
 function EN(){return document.documentElement.lang==='en'}
 function tx(s){if(s==null)return'';s=String(s);if(!EN())return s;try{if(window.DAAB_TR_EXACT){var u=window.DAAB_TR_EXACT(s);if(u)return u}}catch(e){}return s}
 function i18nDynRefresh(){try{if(typeof setTab==='function'&&typeof tab!=='undefined')setTab(tab);if(typeof renderLib==='function')renderLib();if(typeof paintPlan==='function')paintPlan();if(typeof acctUI==='function')acctUI();if(typeof route==='function')route()}catch(e){}}
+window.i18nDynRefresh=i18nDynRefresh;
 function enT(t){try{return document.documentElement.lang==='en'&&window.DAAB_TR?String(window.DAAB_TR(String(t))||'').toLowerCase():''}catch(e){return ''}}
 function norm(t){return String(t||'').replace(/[\u064B-\u0652\u0640]/g,'').replace(/[إأآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').toLowerCase()}
 function perT(n){return n===1?'مرة واحدة':n===2?'مرتان':'3 مرات'}
@@ -1385,6 +1396,8 @@ EX.push({id:'e11',cat:'up',imp:2,n:'الطائر: رفع الذراعين جان
 function byId(i){return EX.filter(function(x){return x.id===i})[0]}
 function validEx(i){return !!byId(i)}
 function isEyeEx(id){var x=byId(id);return !!(x&&x.cat==='eye')}
+function noPose(id){return id==='e17'}
+function poseFor(id){return !isEyeEx(id)&&!noPose(id)}
 function eyeLegacyId(i){return i==='e21'||i==='e22'||i==='e23'||i==='e24'?'e10':i}
 function cleanMine(){var h={},o=[];(S.mine||[]).forEach(function(i){i=eyeLegacyId(i);if(validEx(i)&&!h[i]){h[i]=1;o.push(i)}});S.mine=o}
 function scrubSched(){var d=SCH();if(!d)return;d.forEach(function(day){var h={};day.ex=(day.ex||[]).map(eyeLegacyId).filter(function(i){if(!validEx(i)||h[i])return false;h[i]=1;return true});if(day.ex&&!day.ex.length)day.on=false})}
@@ -1706,31 +1719,32 @@ function queue(){if(guest&&!acct)return S.mine.filter(function(i){return isCam(i
 function plan(){var ids=queue(),saved=(guest&&!acct)?S.mine.some(isCam):(dayOn(SCH()[new Date().getDay()])||S.mine.some(isCam));$('sPlan').innerHTML=ids.length?ids.map(function(i){var x=byId(i);return x?'<li>'+x.n+(x.dn?' <span class="cat downb" style="font-size:.85em">متلازمة داون</span>':'')+(x.rx?' <span class="cat rxb" style="font-size:.85em">بعد الجراحة</span>':'')+(x.cat==='eye'?' <span class="cat eyeb" style="font-size:.85em">العين الكسولة</span>':'')+'</li>':''}).join(''):'<li class="small">لا توجد تمارين بعد.</li>';
  $('sPlanNote').innerHTML=!ids.length?(getMode()==='child'?'لم يُضف المرافق أي تمرين بعد. اطلب منه إضافة تمارين من المكتبة قبل أن تبدأ.':'لم تُضف أي تمرين بعد. <a href="#library">أضف تمارينك من المكتبة</a> أولاً، ثم تبدأ الجلسة.'):saved?((guest&&!acct)?'من تمارينك المختارة (تُحفظ على هذا المتصفح).':'من جدول اليوم، ومدة الجلسة '+durT(SCH()[new Date().getDay()].dur)+' وتنتهي تلقائياً بعدها. في التطبيق الحقيقي تبدأ بعد اعتماد المختص.'):'لا توجد تمارين محفوظة بعد، فهذه تمارين تجريبية.'+(getMode()==='child'?'':' <a href="#library">أضف تمارينك من المكتبة</a>');$('dHome').setAttribute('href','#'+home(getMode()));var g=gate(),hold=g.why==='hold',schedWarn=(getMode()==='companion'||hasComp())&&!g.ok&&!hold;$('sLimit').hidden=!schedWarn&&!hold;var ne=ids.some(isEyeEx),kid=getMode()==='child';$('eyeSetup').hidden=!ne;if(ne){$('epBtns').hidden=kid;[].forEach.call($('epBtns').children,function(b){b.setAttribute('aria-pressed',b.dataset.lazy===S.lazy)});$('epNote').textContent=S.lazy?'العين الكسولة: '+lzT()+'. اللصقة تُوضع على العين '+gdT()+'.':(kid?'اطلب من مرافقك تحديد العين الكسولة قبل أن تبدأ.':'اختر العين الكسولة لتبدأ.')}$('sStart').hidden=hold||!ids.length||(ne&&!S.lazy);if(hold){$('sLimitT').textContent='أُوقفت الجلسات مؤقتاً';$('sLimitMsg').textContent=pmsg(g)}else if(schedWarn){$('sLimitT').textContent='تنبيه الجدول';$('sLimitMsg').textContent=pmsg(g)+' يمكنك البدء الآن من تمارينك المحفوظة.'}$('sExtra').hidden=hasComp()||hold||!schedWarn;$('sClr').hidden=!hold||!canClr()}
 
-function needsManualAlign(id){return isEyeEx(id)||!poseOn||sim}
+function needsManualAlign(id){return !poseFor(id)||!poseOn||sim}
 function eyeUiCount(on){var bar=$('sPhaseBar'),btn=$('sPhaseNext'),hint=$('sPhaseHint');if(!bar||!btn)return;if(on){bar.hidden=false;btn.hidden=false;btn.textContent='أنهيت هذه الجولة';if(hint)hint.textContent='اتبع الفيديو (أفقي، عمودي، دائري) ثم اضغط الزر بعد كل جولة كاملة'}else if(!isEyeEx(Q[qi])||sessPhase!=='instr'){if(sessPhase!=='instr'&&sessPhase!=='align')return}}
 function alignPrompt(id){if(isEyeEx(id))return{fb:"تأكّد من النظارة واللصقة — ثم «جاهز للجولة»",hint:"جهّز النظارة واللصقة",sp:"تأكّد من النظارة واللصقة ثم ابدأ"};id=poseRefId(id);if(id==="e3"||id==="e4")return{fb:"أظهر الساق والقدم في الكاميرا — انتظر ✓",hint:"عدّل وضع الساق",sp:"أظهر ساقك للكاميرا"};if(id==="e2")return{fb:"أظهر الذراع والكوع — انتظر ✓",hint:"عدّل وضع الذراع",sp:"أظهر ذراعك للكاميرا"};if(id==="e5"||id==="e6"||id==="e8")return{fb:"أظهر جسمك كاملًا — انتظر ✓",hint:"اقترب حتى يظهر الجسم كاملًا",sp:"أظهر جسمك كاملًا أمام الكاميرا"};return{fb:"أظهر جسمك أو ذراعيك — انتظر ✓",hint:"عدّل وضعك أمام الكاميرا",sp:"عدّل وضعك أمام الكاميرا"}}
 function poseFeedback(r){var f=$("fb");if(!f||gap||needsManualAlign(Q[qi]))return;if(sessPhase==="instr"||sessPhase==="ready")return;if(sessPhase==="count"){f.textContent=r.text;f.className="fb "+(r.level==="good"?"ok":"warn");if(childSafeOn()&&(r.level==="good"||r.alignReady))safeTouch();sayMsg(r.text,false,5000);return}if(sessPhase==="align"){if(r.alignReady){safeTouch();alignOk++;f.textContent="✓ الوضع جيد — جاري التحضير...";f.className="fb ok";if(alignOk>=10)beginCountdown();else if(alignOk===1)sayMsg(f.textContent,true)}else{alignOk=0;f.textContent=r.text;f.className="fb "+(r.level==="bad"?"warn":"warn");sayMsg(r.text,false,4000)}}}
 function paintInstStep(){var id=Q[qi],steps=stepsOf(id),li=$("sSteps").children;[].forEach.call(li,function(e,i){e.className=i===instStep?"on":""});var tx=steps[instStep]||"";$("fb").textContent=(instStep+1)+" / "+steps.length+" — "+tx;$("fb").className="fb";$("sPhaseHint").textContent="اقرأ الخطوة ثم «التالي»";$("sPhaseNext").textContent=instStep>=steps.length-1?"ضبط الوضعية":"الخطوة التالية";$("sPhaseBar").hidden=false;$("sPhaseNext").hidden=false;speakAloud('الخطوة '+(instStep+1)+' من '+steps.length+'. '+tx)}
 function beginAlign(){sessPhase="align";alignOk=0;if(window.DaabPose&&DaabPose.setCounting)DaabPose.setCounting(false);var p=alignPrompt(Q[qi]);if(needsManualAlign(Q[qi])){$("sPhaseHint").textContent=p.hint;$("fb").textContent=p.fb;$("fb").className="fb";$("sPhaseNext").hidden=false;$("sPhaseNext").textContent="جاهز للجولة";speakAloud(p.fb);return}$("sPhaseNext").hidden=true;$("sPhaseHint").textContent="عدّل وضعك حتى تظهر ✓";$("fb").textContent=p.fb;$("fb").className="fb";speakAloud(p.sp||p.fb)}
-function beginCountdown(){if(sessPhase!=="align")return;sessPhase="ready";alignOk=0;var n=3;function tick(){var msg=n>0?"الجولة تبدأ بعد "+n+"...":"ابدئي!";$("fb").textContent=msg;$("fb").className="fb ok";speakAloud(msg);if(n>0){n--;setTimeout(tick,900)}else{sessPhase="count";if(!isEyeEx(Q[qi])&&window.DaabPose&&DaabPose.setCounting)DaabPose.setCounting(true);if(!isEyeEx(Q[qi])){$("sPhaseBar").hidden=true;$("sPhaseNext").hidden=false}else{eyeUiCount(true)}t0=performance.now();safeReset();if(isEyeEx(Q[qi])){$("fb").textContent="تابع النقطة بعينك الكسولة";eyeC=-1;eyeAn="ok";eyeLastRep=0;speakAloud($("fb").textContent)}}}tick()}
+function beginCountdown(){if(sessPhase!=="align")return;sessPhase="ready";alignOk=0;var n=3;function tick(){var msg=n>0?"الجولة تبدأ بعد "+n+"...":"ابدأ!";$("fb").textContent=msg;$("fb").className="fb ok";speakAloud(msg);if(n>0){n--;setTimeout(tick,900)}else{sessPhase="count";if(poseFor(Q[qi])&&window.DaabPose&&DaabPose.setCounting)DaabPose.setCounting(true);if(!isEyeEx(Q[qi])){$("sPhaseBar").hidden=true;$("sPhaseNext").hidden=true}else{eyeUiCount(true)}t0=performance.now();safeReset();if(isEyeEx(Q[qi])){$("fb").textContent="تابع النقطة بعينك الكسولة";eyeC=-1;eyeAn="ok";eyeLastRep=0;speakAloud($("fb").textContent)}}}tick()}
 function startExercisePhases(id){sessPhase="instr";instStep=0;alignOk=0;eyeC=-1;if(window.DaabPose&&DaabPose.setCounting)DaabPose.setCounting(false);paintInstStep()}
 
+function camNoteFor(id){return poseFor(id)?'محلل الحركة — الخط الأخضر يحسب التكرار':isEyeEx(id)?'الكاميرا تعمل':'تقدير حركة بالكاميرا'}
 function loadEx(){var id=Q[qi];setRig(id);tgt=isEyeEx(id)?4:TGT;reps=0;
  var poseOpts={onFeedback:function(r){poseFeedback(r)},onRep:function(pk,ok){if(sessPhase==='count'&&ok!==false)rep(pk)},onReject:function(txt){if(sessPhase!=='count')return;var f=$('fb');if(!f||gap)return;badN++;var bn=$('sBadN');bn.hidden=false;bn.textContent='حركات لم تُحسب: '+badN;f.textContent=txt;f.className='fb warn';if(!window._rejT||Date.now()-window._rejT>4000){window._rejT=Date.now();speak(txt)}}};
- if(poseOn&&window.DaabPose&&stream&&!isEyeEx(id)){DaabPose.stop();if(DaabPose.resetRep)DaabPose.resetRep();DaabPose.start($('cam'),$('camPose'),poseRefId(id),poseOpts)}
+ if(window.DaabPose&&stream&&poseOn){DaabPose.stop();if(poseFor(id)){if(DaabPose.resetRep)DaabPose.resetRep();DaabPose.start($('cam'),$('camPose'),poseRefId(id),poseOpts)}$('camNote').textContent=camNoteFor(id)}
  act=false;quiet=0;peak=0;prev=null;lastRep=0;simCyc=-1;badN=0;badK='';$('sBadN').hidden=true;var _ex=byId(id);$('sName').textContent=_ex.n+(_ex.dn?' · متلازمة داون':'')+(_ex.rx?' · بعد الجراحة':'')+(_ex.cat==='eye'?' · العين الكسولة':'');$('sOf').textContent='تمرين '+(qi+1)+' من '+Q.length;$('sReps').textContent=0;$('sBar').style.width='0';$('sT').textContent=tgt;
  $('sSteps').innerHTML=stepsOf(id).map(function(t){return '<li>'+t+'</li>'}).join('');speakAloud('التمرين '+(qi+1)+': '+byId(id).n);startExercisePhases(id)}
 function loop(ts){raf=requestAnimationFrame(loop);if(!run)return;var t=(ts-t0)/1000,id=Q[qi],pid=poseRefId(id);if(t<0)return;if(isEyeEx(id)){if(sessPhase==='count')eyeDraw(t);return}draw(rig1,pose(pid,t,1));
  var li=$('sSteps').children;if(sessPhase==='count'&&!isEyeEx(id)){var ph=(t%3)/3,k=ph<.15?0:ph<.55?1:2;[].forEach.call(li,function(e,i){e.className=i===k?'on':''})}else if(sessPhase==='instr'){[].forEach.call(li,function(e,i){e.className=i===instStep?'on':''})};
  if(sim){var c=Math.floor(t/3);if(c!==simCyc){simCyc=c;simAmp=AMPS[Math.floor(Math.random()*AMPS.length)]}draw(rig2,pose(pid,Math.max(0,t-.4),simAmp))}}
-function tick(){if(run&&childSafeOn()&&onSessPg())safeTick();if(!run||paused||gap)return;if(poseOn&&!isEyeEx(Q[qi]))return;if(sessEnd&&Date.now()>sessEnd){sessEnd=0;finish(false,childSafeOn()?'time':'');return}var en=0,t=(performance.now()-t0)/1000;if(isEyeEx(Q[qi])){if(sessPhase==='count')eyeTick(t);return}
+function tick(){if(run&&childSafeOn()&&onSessPg())safeTick();if(!run||paused||gap)return;if(poseOn&&poseFor(Q[qi]))return;if(sessEnd&&Date.now()>sessEnd){sessEnd=0;finish(false,childSafeOn()?'time':'');return}var en=0,t=(performance.now()-t0)/1000;if(isEyeEx(Q[qi])){if(sessPhase==='count')eyeTick(t);return}
  if(sim){var ph=(Math.max(0,t-.4)%3)/3;en=ph<.6?simAmp*.2*Math.sin(Math.PI*ph/.6)+.01:.01}
  else{try{cx.drawImage($('cam'),0,0,32,24);var d=cx.getImageData(0,0,32,24).data;if(prev){var c=0;for(var i=0;i<d.length;i+=4)if(Math.abs(d[i]-prev[i])+Math.abs(d[i+1]-prev[i+1])+Math.abs(d[i+2]-prev[i+2])>60)c++;en=c/768}prev=d}catch(e){}}
  $('meter').style.width=Math.min(100,en*300)+'%';
  if(en>.06){if(childSafeOn()&&sessPhase==='count')safeTouch();if(!act){act=true;peak=0}peak=Math.max(peak,en);quiet=0}
  else if(act&&++quiet>=4){act=false;if(sessPhase!=='count')return;var n=performance.now();if(n-lastRep>1000){lastRep=n;rep(peak)}}}
 var badN=0,badK='',badAt=0;
-function rep(pk){safeTouch();var f=$('fb');
+function rep(pk){if(gap||reps>=tgt)return;safeTouch();var f=$('fb');
  if(pk<.12||pk>.30){badN++;var bn=$('sBadN');bn.hidden=false;bn.textContent='حركات لم تُحسب: '+badN;var k=pk<.12?'s':'f';
   f.textContent=pk<.12?'لم تُحسب هذه الحركة. وسّع الحركة قليلاً ثم أعدها':'لم تُحسب هذه الحركة. أبطئ، حركة هادئة وثابتة';f.className='fb warn';
   if(k!==badK||performance.now()-badAt>6000){badK=k;badAt=performance.now();speak(f.textContent)}return}
@@ -1750,10 +1764,11 @@ function celebrate(big){try{if(window.matchMedia&&matchMedia('(prefers-reduced-m
   if(el<dur)requestAnimationFrame(f);else c.remove()})(t0)}catch(e){}}
 function stopCam(){if(window.DaabPose)DaabPose.stop();poseOn=false;if(stream){stream.getTracks().forEach(function(t){t.stop()});stream=null}var v=document.getElementById('cam');if(v){v.srcObject=null;v.style.display='none'}}
 function stopSess(){if(run){recSess(false,childSafeOn()?'leave':'');run=false;stopCam();hush();safeStage=0;hideSafeAl()}}
-function finish(ok,why){var w=why||safeReason||'';recSess(ok,w);run=false;sessEnd=0;stopCam();safeStage=0;hideSafeAl();
+function finish(ok,why){var w=why||safeReason||'',demo=!!sim;recSess(ok&&!demo,demo?'sim':w);run=false;sessEnd=0;stopCam();safeStage=0;hideSafeAl();
  $('dTitle').textContent=ok?'أحسنت! أكملت الجلسة':(childSafeOn()?(w==='absent'?'نرتاح قليلاً':'لا بأس، توقفنا بهدوء'):'انتهت الجلسة قبل اكتمالها');
- $('dMsg').textContent=ok?'أكملت '+Q.length+' من التمارين. سيصل ملخص الجلسة لمختصك عند توفر الإنترنت.':(childSafeOn()?(w==='absent'?'خرجت من الكاميرا أو توقفت الحركة. سجّلنا الجلسة غير مكتملة ليراها المرافق والمختص. نكمل لاحقاً معاً.':w==='help'?'طلبت مساعدة والمرافق على علم. لا بأس أبداً.':'سُجّلت الجلسة غير مكتملة وسيظهر ذلك في التقرير.'):'سُجّلت الجلسة «غير مكتملة» وسيظهر ذلك في التقرير.');
- if(ok){S.stars++;save();paint();chime();celebrate(true)}fbOpen(ok);showP('sDone');speak($('dTitle').textContent+'. '+$('dMsg').textContent+' '+fbQ());safeReason=''}
+ $('dMsg').textContent=ok?'أكملت '+(Q.length===1?'تمرين الجلسة':'كل تمارين الجلسة ('+cntT(Q.length)+')')+'. سيصل ملخص الجلسة لمختصك عند توفر الإنترنت.':(childSafeOn()?(w==='absent'?'خرجت من الكاميرا أو توقفت الحركة. سجّلنا الجلسة غير مكتملة ليراها المرافق والمختص. نكمل لاحقاً معاً.':w==='help'?'طلبت مساعدة والمرافق على علم. لا بأس أبداً.':'سُجّلت الجلسة غير مكتملة وسيظهر ذلك في التقرير.'):'سُجّلت الجلسة «غير مكتملة» وسيظهر ذلك في التقرير.');
+ if(ok&&demo)$('dMsg').textContent='انتهت جلسة التجربة. كانت محاكاة بلا كاميرا، فلا تُحسب في تقريرك. اسمح بالكاميرا لتُسجَّل جلساتك.';
+ if(ok){if(!demo)S.stars++;save();paint();chime();celebrate(true)}fbOpen(ok);showP('sDone');speak($('dTitle').textContent+'. '+$('dMsg').textContent+' '+fbQ());safeReason=''}
 var sesT=0,sesRec=true,curSid='';
 function recSess(ok,why){if(sesRec||!sesT)return;sesRec=true;curSid='';if(guest&&!acct)return;var h=S.hist||(S.hist=[]);curSid='s'+Date.now().toString(36);h.push({id:curSid,t:sesT,e:Date.now(),ok:!!ok,why:why||'',ex:Q.slice(0,ok?Q.length:Math.min(Q.length,qi+1)),all:Q.length});if(h.length>300)h.splice(0,h.length-300);save()}
 
@@ -1765,7 +1780,7 @@ $('sStart').onclick=async function(){primeSpeech();var qq=queue();if(!qq.length)
  if(stream){v.srcObject=stream;try{await v.play()}catch(e){}}
  else{try{stream=await Promise.race([navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false}),new Promise(function(_,rj){setTimeout(function(){rj(new Error('timeout'))},12000)})]);v.srcObject=stream;await v.play()}catch(e){$('camNote').textContent=e&&e.message==='timeout'?'انتظار الكاميرا طال. اسمح بالكاميرا أو نكمل بالمحاكاة.':$('camNote').textContent}}
  var pid=poseRefId(Q[qi]);
- if(stream){sim=false;v.style.display='block';$('rig2').style.display='none';$('camNote').textContent='جاري تحميل المحلل…';if(!isEyeEx(Q[qi])&&window.DaabPose){setTimeout(function(){DaabPose.start(v,$('camPose'),pid,{onFeedback:function(r){poseFeedback(r)},onRep:function(pk,ok){if(sessPhase==='count'&&ok!==false)rep(pk)},onReject:function(txt){if(sessPhase!=='count')return;var f=$('fb');if(!f||gap)return;badN++;var bn=$('sBadN');bn.hidden=false;bn.textContent='حركات لم تُحسب: '+badN;f.textContent=txt;f.className='fb warn';if(!window._rejT||Date.now()-window._rejT>4000){window._rejT=Date.now();speak(txt)}}}).then(function(ok){poseOn=!!ok;$('camNote').textContent=ok?'محلل الحركة — الخط الأخضر يحسب التكرار':'تقدير حركة (بدون نموذج)';if(!ok)sim=true;else if(run&&!isEyeEx(Q[qi])&&window.DaabPose&&DaabPose.setCounting)DaabPose.setCounting(sessPhase==='count')})},0)}}
+ if(stream){sim=false;v.style.display='block';$('rig2').style.display='none';$('camNote').textContent='جاري تحميل المحلل…';if(Q.some(poseFor)&&window.DaabPose){setTimeout(function(){DaabPose.start(v,$('camPose'),pid,{onFeedback:function(r){poseFeedback(r)},onRep:function(pk,ok){if(sessPhase==='count'&&ok!==false)rep(pk)},onReject:function(txt){if(sessPhase!=='count')return;var f=$('fb');if(!f||gap)return;badN++;var bn=$('sBadN');bn.hidden=false;bn.textContent='حركات لم تُحسب: '+badN;f.textContent=txt;f.className='fb warn';if(!window._rejT||Date.now()-window._rejT>4000){window._rejT=Date.now();speak(txt)}}}).then(function(ok){if(!run||!stream)return;poseOn=!!ok;if(ok&&!poseFor(Q[qi]))DaabPose.stop();$('camNote').textContent=ok?camNoteFor(Q[qi]):(isEyeEx(Q[qi])?'الكاميرا تعمل':'تقدير حركة (بدون نموذج)');if(!ok)sim=true;if(ok&&poseFor(Q[qi])&&DaabPose.setCounting)DaabPose.setCounting(sessPhase==='count')})},0)}else{$('camNote').textContent=isEyeEx(Q[qi])?'الكاميرا تعمل':camNoteFor(Q[qi])}}
  else{$('camNote').textContent='تعذّرت الكاميرا، نعرض محاكاة'}
  loadEx();run=true;safeReason='';safeReset();if(!raf)raf=requestAnimationFrame(loop);window.scrollTo(0,0)};
 $('sStop').onclick=function(){if(childSafeOn()&&run){pendingStop=true;$('code').value='';$('codeMsg').textContent=hasCompanionPin()?'أدخل رمز المرافق لإنهاء الجلسة.':pinPrompt();$('lockOv').hidden=false;$('code').focus();return}finish(false,childSafeOn()?'stop':'')};$('sAgain').onclick=function(){if(getMode()==='child'&&!gate().ok){location.hash='#rest';return}showP('sSetup');plan()};
@@ -1976,6 +1991,41 @@ try{en=localStorage.getItem(K)==='en'}catch(e){}
 apply();
 })();
 </script>
-<script src="daab-pose.js?v=6"></script>
+<script>
+/* شريط «انتقل إلى» لصفحات فيها عدة أقسام (لوحتي، لوحة المرافق، وصفحات الشرح) */
+(function(){
+var PAGES=['adult','companion','how','safe','clinics'],timer=0;
+function T(s){try{if(document.documentElement.lang==='en'&&window.DAAB_TR_EXACT){var t=window.DAAB_TR_EXACT(s);if(t)return t}}catch(e){}return s}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function offset(){var hd=document.querySelector('header'),n=(hd?hd.offsetHeight:0)+12;document.documentElement.style.setProperty('--jn',n+'px')}
+function build(){
+ offset();
+ var pg=document.querySelector('.page.on'),old=document.querySelector('.pjump');
+ if(!pg||PAGES.indexOf(pg.getAttribute('data-page'))<0){if(old)old.remove();return}
+ var seen={},items=[];
+ [].forEach.call(pg.children,function(s,i){
+  if(s.tagName!=='SECTION'||s.offsetParent===null)return;
+  var h2=s.querySelector('h2');if(!h2)return;
+  var t=h2.textContent.replace(/\s+/g,' ').trim();if(!t||seen[t])return;seen[t]=1;
+  if(!s.id)s.id='jn-'+pg.getAttribute('data-page')+'-'+i;
+  s.setAttribute('data-jn','');items.push([s.id,t])});
+ if(items.length<3){if(old)old.remove();return}
+ var sig=pg.getAttribute('data-page')+'|'+document.documentElement.lang+'|'+items.map(function(x){return x[0]+':'+x[1]}).join('|');
+ if(old&&old.getAttribute('data-sig')===sig&&pg.contains(old))return;
+ if(old)old.remove();
+ var wrap=pg.querySelector('section .wrap');if(!wrap)return;
+ var nav=document.createElement('nav');nav.className='jump pjump';nav.setAttribute('data-sig',sig);
+ nav.setAttribute('aria-label',T('انتقل إلى قسم في الصفحة'));
+ nav.innerHTML='<b>'+esc(T('انتقل إلى:'))+'</b>'+items.map(function(x){return '<button class="chip" type="button" data-jump="'+esc(x[0])+'">'+esc(x[1])+'</button>'}).join('');
+ var ref=wrap.querySelector(':scope > .lead')||wrap.querySelector(':scope > .rule2')||wrap.querySelector(':scope > .rule')||wrap.querySelector(':scope > h1');
+ if(ref)ref.parentNode.insertBefore(nav,ref.nextSibling);else wrap.appendChild(nav)}
+function soon(){clearTimeout(timer);timer=setTimeout(build,200)}
+window.addEventListener('hashchange',soon);window.addEventListener('resize',soon);
+new MutationObserver(soon).observe(document.documentElement,{attributes:true,attributeFilter:['data-page','data-mode','lang']});
+new MutationObserver(soon).observe(document.body,{subtree:true,attributes:true,attributeFilter:['hidden','style','class']});
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',soon);else soon();
+})();
+</script>
+<script src="daab-pose.js?v=8"></script>
 </body>
 </html>
