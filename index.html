@@ -270,6 +270,7 @@ fieldset.fld legend{padding:0;margin-bottom:8px}
 .pane .pose-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;object-fit:cover;transform:scaleX(-1);z-index:2}
 .pane video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
 .pane svg.rig{width:min(230px,62%);max-height:62%;position:relative;margin-bottom:56px}
+.pane video.eye-guide-vid{position:relative;inset:auto;width:min(100%,320px);max-height:min(62%,320px);height:auto;object-fit:contain;transform:none;margin-bottom:56px;z-index:1;background:#0B4A42}
 ol.stp{list-style:none;margin:0;padding:8px 14px;position:absolute;bottom:0;inset-inline:0;background:rgba(5,46,41,.9);font-size:calc(14px*var(--fz));line-height:1.6;z-index:2}
 .stp li{opacity:.6;padding:1px 0}.stp li.on{opacity:1;font-weight:600;color:#F2A273}
 .wsw{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.wsw[hidden]{display:none}.wsw b{margin-inline-end:4px}.wsw .chip{font-size:calc(15px*var(--fz))}
@@ -951,7 +952,7 @@ apply(get())})();
 <div class="shead"><div><b id="sName"></b> <span class="small" id="sOf"></span></div><div class="cn"><span id="sReps">0</span> من <span id="sT">10</span></div></div>
 <div class="prog" style="margin-bottom:14px"><i id="sBar"></i></div>
 <div class="sess">
-<div class="pane"><span class="lbl">شرح التمرين</span><svg id="rig1" class="rig" viewBox="0 0 100 120" aria-hidden="true"></svg><ol class="stp" id="sSteps"></ol></div>
+<div class="pane"><span class="lbl">شرح التمرين</span><svg id="rig1" class="rig" viewBox="0 0 100 120" aria-hidden="true"></svg><video id="eyeGuideVid" class="eye-guide-vid" playsinline loop muted controls hidden aria-label="شرح تمرين العين"></video><ol class="stp" id="sSteps"></ol></div>
 <div class="pane"><span class="lbl">كاميرتك: <span id="camNote"></span></span><video id="cam" autoplay playsinline muted style="display:none"></video><canvas id="camPose" class="pose-canvas" hidden aria-hidden="true"></canvas><svg id="rig2" class="rig" viewBox="0 0 100 120" aria-hidden="true"></svg><div class="eyeal" id="eyeAl" role="alert" hidden></div><div class="eyechk" id="eyeChk" hidden><span data-k="gl">النظارة</span><span data-k="pt">اللصقة على العين السليمة</span><span data-k="mv">متابعة الدائرة</span></div><div class="meter"><i id="meter"></i></div></div>
 </div>
 <p class="pst" id="safeBan" hidden role="status" style="margin:12px 0">تنبيه للمرافق: تحقّق من الطفل — غاب عن الكاميرا أو توقّف.</p>
@@ -1676,12 +1677,14 @@ function chips(){[].forEach.call($('eyeChk').children,function(e){var k=e.datase
 function setRig(id){var eye=isEyeEx(id),m=eye?'eye':'body';$('eyeChk').hidden=!eye;$('eyeDemo').hidden=!eye;$('eyeAl').hidden=true;
  if(m!==rigMode||eye){rigMode=m;['rig1','rig2'].forEach(function(i){var e=$(i);e._c=null;e._H=null;e._t=0});
   if(eye){mkEye($('rig1'),true);mkEye($('rig2'),false)}else{rig1=mk($('rig1'));rig2=mk($('rig2'))}}
+ var gv=$('eyeGuideVid'),kidEye=eye&&getMode()==='child';
+ if(gv){if(kidEye){$('rig1').hidden=true;gv.hidden=false;if(gv.getAttribute('data-src')!=='child'){gv.setAttribute('data-src','child');gv.src='eye-exercises-child.mp4'}try{gv.load();var gp=gv.play();if(gp&&gp.catch)gp.catch(function(){})}catch(e){}}else{gv.hidden=true;try{gv.pause()}catch(e2){}$('rig1').hidden=false}}
  if(eye){eyeC=-1;eyeSc='ok';eyeBad=false;eyeAn='ok';eyeAt=0;chips();$('camNote').textContent='محاكاة تجريبية للصقة والنظارة'}}
 function eyeXY(t,mode){if(mode==='h')return{tx:50+40*Math.sin(t*0.85),ty:58};if(mode==='v')return{tx:50,ty:58+32*Math.sin(t*0.85)};if(mode==='patch'||mode==='fix')return{tx:50+10*Math.sin(t*1.2),ty:58+6*Math.cos(t*1.1)};var dir=Math.floor(t/8)%2?-1:1,ang=-Math.PI/2+dir*2*Math.PI*((t%8)/8);return{tx:50+42*Math.cos(ang),ty:58+42*Math.sin(ang)}}
-function eyeDraw(t){var a=$('rig1')._e,b=$('rig2')._e;if(!a||!b||!a.tg)return;var ex=byId(Q[qi]),m=(ex&&ex.eyeM)||'circ',xy=eyeXY(t,m),tx=xy.tx,ty=xy.ty;
- a.tg.setAttribute('cx',tx);a.tg.setAttribute('cy',ty);
+function eyeDraw(t){var a=$('rig1')._e,b=$('rig2')._e;if(!b)return;var ex=byId(Q[qi]),m=(ex&&ex.eyeM)||'circ',xy=eyeXY(t,m),tx=xy.tx,ty=xy.ty;
+ if(a&&a.tg&&!$('rig1').hidden){a.tg.setAttribute('cx',tx);a.tg.setAttribute('cy',ty)}
  function look(e,fx,mv){var dx=tx-fx,dy=ty-55,d=Math.hypot(dx,dy)||1,k=mv?0:3.2;e.pl.setAttribute('cx',fx+dx/d*k);e.pl.setAttribute('cy',55+dy/d*k)}
- look(a,a.lx,false);look(b,b.lx,eyeSc==='mv');
+ if(a&&a.lx!=null&&!$('rig1').hidden)look(a,a.lx,false);if(b&&b.lx!=null)look(b,b.lx,eyeSc==='mv');
  b.gl.style.opacity=eyeSc==='gl'?0:1;b.pt.style.opacity=(eyeSc==='pt'||eyeSc==='wrong')?0:1;b.wp.style.opacity=eyeSc==='wrong'?1:0;
  [].forEach.call($('sSteps').children,function(e,i){var on=eyeSc==='gl'?i===0:(eyeSc==='pt'||eyeSc==='wrong')?i===1:i===2;e.className=on?'on':''})}
 function eyeRep(){if(!run||gap||sessPhase!=='count'||!isEyeEx(Q[qi]))return;safeTouch();var now=performance.now();if(now-eyeLastRep<2500)return;if(eyeSc!=='ok'){var f=$('fb');f.textContent=eyeMsg(eyeSc)||'عدّلي النظارة أو اللصقة أولاً';f.className='fb warn';speakAloud(f.textContent);return}eyeLastRep=now;reps++;$('sReps').textContent=reps;$('sBar').style.width=(reps/tgt*100)+'%';var f=$('fb');f.textContent=['ممتاز، تابع الدائرة','أحسنت، اللصقة في مكانها الصحيح','رائع، عينك الكسولة تتابع الدائرة'][fbI++%3];f.className='fb ok';if(reps>=tgt)nextEx();else{ding();speakAloud(reps+'، '+f.textContent)}}
