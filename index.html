@@ -275,8 +275,6 @@ fieldset.fld legend{padding:0;margin-bottom:8px}
 .pane .pose-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;object-fit:cover;transform:scaleX(-1);z-index:2}
 .pane video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
 .pane svg.rig{width:min(230px,62%);max-height:62%;position:relative;margin-bottom:56px}
-.pane svg.rig.coach-3d-hide{opacity:0;visibility:hidden;position:absolute;inset:0;margin:0;width:100%;height:100%;pointer-events:none}
-.pane canvas.coach3d{position:absolute;inset:0;width:100%;height:100%;z-index:1;touch-action:manipulation;display:block}
 .pane video.eye-guide-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:none;z-index:1;margin:0;background:#0B4A42}
 .sess.eye-guide .pane:first-child svg.rig{display:none!important}
 .sess.eye-guide .pane:first-child ol.stp{display:none}
@@ -966,7 +964,7 @@ apply(get())})();
 <div class="shead"><div><b id="sName"></b> <span class="small" id="sOf"></span></div><div class="cn"><span id="sReps">0</span> من <span id="sT">10</span></div></div>
 <div class="prog" style="margin-bottom:14px"><i id="sBar"></i></div>
 <div class="sess">
-<div class="pane"><span class="lbl">شرح التمرين</span><canvas id="coach3d" class="coach3d" hidden aria-hidden="true"></canvas><svg id="rig1" class="rig" viewBox="0 0 100 120" aria-hidden="true"></svg><video id="eyeGuideVid" class="eye-guide-vid" playsinline loop muted controls hidden aria-label="شرح تمرين العين"></video><ol class="stp" id="sSteps"></ol></div>
+<div class="pane"><span class="lbl">شرح التمرين</span><svg id="rig1" class="rig" viewBox="0 0 100 120" aria-hidden="true"></svg><video id="eyeGuideVid" class="eye-guide-vid" playsinline loop muted controls hidden aria-label="شرح تمرين العين"></video><ol class="stp" id="sSteps"></ol></div>
 <div class="pane"><span class="lbl">كاميرتك: <span id="camNote"></span></span><video id="cam" autoplay playsinline muted style="display:none"></video><canvas id="camPose" class="pose-canvas" hidden aria-hidden="true"></canvas><svg id="rig2" class="rig" viewBox="0 0 100 120" aria-hidden="true"></svg><div class="eyeal" id="eyeAl" role="alert" hidden></div><div class="eyechk" id="eyeChk" hidden><span data-k="gl">النظارة</span><span data-k="pt">اللصقة على العين السليمة</span><span data-k="mv">متابعة الدائرة</span></div><div class="meter"><i id="meter"></i></div></div>
 </div>
 <p class="pst" id="safeBan" hidden role="status" style="margin:12px 0">تنبيه للمرافق: تحقّق من الطفل — غاب عن الكاميرا أو توقّف.</p>
@@ -1651,8 +1649,7 @@ function draw(s,p){var X=50,SY=42+p.dy,HY=72+p.dy,C=s._c||(s._c={});function Lq(
  var tl=Lq('trl').children,i,pt,cur=best>=0?en[best]:null;
  for(i=0;i<tl.length;i++){pt=best>=0&&bl>12?H[H.length-2-i]:null;
   if(pt&&Math.hypot(pt[best][0]-cur[0],pt[best][1]-cur[1])>7){tl[i].setAttribute('cx',pt[best][0]);tl[i].setAttribute('cy',pt[best][1]);tl[i].setAttribute('opacity',(.95-i*.14).toFixed(2));tl[i].style.display=''}
-  else tl[i].style.display='none'}
- if(window.DaabCoach3d&&DaabCoach3d.active)DaabCoach3d.fromPose(p)}
+  else tl[i].style.display='none'}}
 function pose(id,t,amp){var T=3,ph=(t%T)/T,s=Math.min(1,(1-Math.cos(ph*2*Math.PI))/2*amp),q=1-s,p={a:0,b:0,ea:0,eb:0,l:0,m:0,k:0,k2:0,dy:0,sp:18},u,v,w,l,k,h;
  switch(id){
  case'e1':p.a=s*165;break;
@@ -1699,8 +1696,6 @@ function setRig(id){var eye=isEyeEx(id),m=eye?'eye':'body';$('eyeChk').hidden=!e
  if(m!==rigMode||eye){rigMode=m;['rig1','rig2'].forEach(function(i){var e=$(i);e._c=null;e._H=null;e._t=0});
   if(eye){var r1=$('rig1');r1.innerHTML='';r1.hidden=true;r1._e=null;mkEye($('rig2'),false)}else{rig1=mk($('rig1'));rig2=mk($('rig2'))}}
  var gv=$('eyeGuideVid'),showVid=eye;
- var c3=$('coach3d'),r1=$('rig1');
- if(c3){if(eye){c3.hidden=true;r1.classList.remove('coach-3d-hide');if(window.DaabCoach3d)DaabCoach3d.show(false)}else{c3.hidden=false;r1.classList.remove('hidden');r1.classList.add('coach-3d-hide');if(window.DaabCoach3d){if(!c3._ok){DaabCoach3d.init(c3).then(function(ok){c3._ok=ok;if(ok)DaabCoach3d.show(true)})}else DaabCoach3d.show(true)}}}
  if(gv){if(showVid){$('rig1').hidden=true;gv.hidden=false;var ek=eyeGuideKey(),es=eyeGuideSrc();if(gv.getAttribute('data-src')!==ek){gv.setAttribute('data-src',ek);gv.src=es}try{gv.load();var gp=gv.play();if(gp&&gp.catch)gp.catch(function(){})}catch(e){}}else{gv.hidden=true;try{gv.pause()}catch(e2){}$('rig1').hidden=false}}
  if(eye){eyeC=-1;eyeSc='ok';eyeBad=false;eyeAn='ok';eyeAt=0;chips();$('camNote').textContent='محاكاة تجريبية للصقة والنظارة'}}
 function eyeXY(t,mode){if(mode==='h')return{tx:50+40*Math.sin(t*0.85),ty:58};if(mode==='v')return{tx:50,ty:58+32*Math.sin(t*0.85)};if(mode==='patch'||mode==='fix')return{tx:50+10*Math.sin(t*1.2),ty:58+6*Math.cos(t*1.1)};var dir=Math.floor(t/8)%2?-1:1,ang=-Math.PI/2+dir*2*Math.PI*((t%8)/8);return{tx:50+42*Math.cos(ang),ty:58+42*Math.sin(ang)}}
@@ -2031,7 +2026,6 @@ new MutationObserver(soon).observe(document.body,{subtree:true,attributes:true,a
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',soon);else soon();
 })();
 </script>
-<script src="daab-coach3d.js?v=1"></script>
 <script src="daab-pose.js?v=8"></script>
 </body>
 </html>
