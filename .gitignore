@@ -20,6 +20,8 @@ content-image*.png
 map-reference-blue.png
 NotoNaskhArabic*.ttf
 
-# MediaPipe قديم — المحلل يستخدم TensorFlow من CDN
-models/
+# MediaPipe قديم — المحلل يستخدم TensorFlow من CDN (جذر المشروع فقط)
+/models/
 libs/
+
+# شخصيات FBX — مُرفقة مع موقع دأب (X Bot / Y Bot)
