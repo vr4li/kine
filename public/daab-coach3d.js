@@ -203,28 +203,13 @@ function rotBone(short, dx, dy, dz, bones, bindEuler) {
   b.rotation.set(e.x + dx, e.y + dy, e.z + dz);
 }
 
-/** تدوير على X فقط — يمنع انقلاب اليد من Y/Z */
-function rotBoneX(short, dx, bones, bindEuler) {
-  const key = boneKey(short, bones);
-  const b = key && bones[key];
-  const e = key && bindEuler[key];
-  if (!b || !e) return;
-  b.rotation.set(e.x + dx, e.y, e.z);
-}
-
-/** زاوية SVG من الرأسي: 0=للأسفل، 90=أفقي (T-pose)، فوق 90=للأعلى */
-function armDeltaX(deg) {
-  const D = Math.PI / 180;
-  if (deg <= 90) return (90 - deg) * D;
-  return (deg - 90) * D;
-}
-
 function applyDaabPose(p, exId, model, bones, bindEuler, bindPos) {
   resetBones(bones, bindEuler, bindPos);
   const D = Math.PI / 180;
   const off = (a, b) => b * Math.max(0, 1 - Math.abs(a) / 25);
   const aa = p.a + off(p.a, -26);
   const bb = p.b + off(p.b, 26);
+  const bb3d = -bb;
 
   if (exId === "e9") {
     const w = p.a * D;
@@ -235,10 +220,13 @@ function applyDaabPose(p, exId, model, bones, bindEuler, bindPos) {
     rotBone("LeftArm", 0, 0, s, bones, bindEuler);
     rotBone("RightArm", 0, 0, -s, bones, bindEuler);
   } else {
-    rotBoneX("LeftArm", armDeltaX(aa), bones, bindEuler);
-    rotBoneX("RightArm", -armDeltaX(-bb), bones, bindEuler);
-    rotBoneX("LeftForeArm", -(p.ea * D), bones, bindEuler);
-    rotBoneX("RightForeArm", -(p.eb * D), bones, bindEuler);
+    // نفس زوايا SVG: 0=ذراع لأسفل، 90=T-pose؛ الموديل يواجه الكاميرا (rotation.y = PI)
+    const leftX = (aa - 90) * D;
+    const rightX = -(bb3d - 90) * D;
+    rotBone("LeftArm", leftX, 0, 0, bones, bindEuler);
+    rotBone("RightArm", rightX, 0, 0, bones, bindEuler);
+    rotBone("LeftForeArm", -p.ea * D, 0, 0, bones, bindEuler);
+    rotBone("RightForeArm", -p.eb * D, 0, 0, bones, bindEuler);
   }
 
   rotBone("LeftUpLeg", -(p.l - p.sp) * D, 0, 0, bones, bindEuler);
