@@ -1,6 +1,5 @@
 /**
- * دأب — شخصيات Mixamo ثلاثية الأبعاد (X Bot أنثى · Y Bot ذكر)
- * تحل محل الرسم الـ SVG في الجلسة والصفحة الرئيسية.
+ * دأب — شخصيات Mixamo (تحميل كسول، جلسة فقط)
  */
 import * as THREE from "three";
 import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
@@ -12,9 +11,9 @@ const MODELS = {
 };
 
 const loader = new FBXLoader();
-const masters = { female: null, male: null };
+const masters = { female: null, male: null, femaleLoading: null, maleLoading: null };
 
-export function pose3d(id, t, amp) {
+function pose3d(id, t, amp) {
   var T = 3,
     ph = (t % T) / T,
     s = Math.min(1, ((1 - Math.cos(ph * 2 * Math.PI)) / 2) * amp),
@@ -99,8 +98,9 @@ export function pose3d(id, t, amp) {
 function prepMeshes(obj) {
   obj.traverse((ch) => {
     if (ch.isSkinnedMesh || ch.isMesh) {
-      ch.castShadow = ch.receiveShadow = true;
-      ch.frustumCulled = false;
+      ch.castShadow = false;
+      ch.receiveShadow = false;
+      ch.frustumCulled = true;
       const mats = ch.material
         ? Array.isArray(ch.material)
           ? ch.material
@@ -110,7 +110,6 @@ function prepMeshes(obj) {
         if (!m) return;
         m.side = THREE.DoubleSide;
         if (m.metalness > 0.4) m.metalness = 0.15;
-        m.roughness = Math.min(m.roughness || 0.6, 0.85);
       });
     }
   });
@@ -132,16 +131,27 @@ function scaleToMeters(obj) {
   return box.max.y - box.min.y;
 }
 
-async function loadMaster(gender) {
-  if (masters[gender]) return masters[gender];
-  const root = await loader.loadAsync(MODELS[gender]);
-  prepMeshes(root);
-  scaleToMeters(root);
-  root.traverse((c) => {
-    if (c.animations) c.animations = [];
-  });
-  masters[gender] = root;
-  return root;
+function loadMaster(gender) {
+  if (masters[gender]) return Promise.resolve(masters[gender]);
+  const lk = gender + "Loading";
+  if (masters[lk]) return masters[lk];
+  masters[lk] = loader
+    .loadAsync(MODELS[gender])
+    .then((root) => {
+      prepMeshes(root);
+      scaleToMeters(root);
+      root.traverse((c) => {
+        if (c.animations) c.animations = [];
+      });
+      masters[gender] = root;
+      masters[lk] = null;
+      return root;
+    })
+    .catch((err) => {
+      masters[lk] = null;
+      throw err;
+    });
+  return masters[lk];
 }
 
 function regBone(b, bones, bindEuler, bindPos) {
@@ -243,35 +253,39 @@ class CoachView {
     this.bindEuler = {};
     this.bindPos = {};
     this.bodyH = 1.6;
+    this.visible = false;
 
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(bgHex);
 
     this.camera = new THREE.PerspectiveCamera(38, 1, 0.1, 200);
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    this.renderer.shadowMap.enabled = true;
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: false,
+      alpha: false,
+      powerPreference: "low-power",
+    });
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    this.renderer.shadowMap.enabled = false;
     mount.appendChild(this.renderer.domElement);
 
-    this.scene.add(new THREE.AmbientLight(0xffffff, 0.85));
-    const key = new THREE.DirectionalLight(0xfff5e8, 1.15);
+    this.scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+    const key = new THREE.DirectionalLight(0xfff5e8, 0.95);
     key.position.set(2, 5, 3);
-    key.castShadow = true;
     this.scene.add(key);
-    const fill = new THREE.DirectionalLight(0x8ab4ae, 0.32);
-    fill.position.set(-2, 2, -2);
-    this.scene.add(fill);
 
     const ground = new THREE.Mesh(
-      new THREE.CircleGeometry(2.2, 40),
+      new THREE.CircleGeometry(2.2, 32),
       new THREE.MeshStandardMaterial({ color: 0x2a3744, roughness: 0.92 }),
     );
     ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
     this.scene.add(ground);
 
-    this._ro = new ResizeObserver(() => this.resize());
-    this._ro.observe(mount);
+    this._resizeTimer = null;
+    this._onResize = () => {
+      if (this._resizeTimer) clearTimeout(this._resizeTimer);
+      this._resizeTimer = setTimeout(() => this.resize(), 120);
+    };
+    window.addEventListener("resize", this._onResize);
     this.resize();
   }
 
@@ -313,7 +327,7 @@ class CoachView {
   }
 
   render() {
-    if (!this.model) return;
+    if (!this.model || !this.visible) return;
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -326,8 +340,13 @@ class CoachView {
     this.renderer.setSize(w, h);
   }
 
+  setVisible(on) {
+    this.visible = !!on;
+    if (!on) this.renderer.clear();
+  }
+
   dispose() {
-    this._ro.disconnect();
+    window.removeEventListener("resize", this._onResize);
     if (this.model) {
       this.scene.remove(this.model);
       this.model.traverse((c) => {
@@ -340,79 +359,44 @@ class CoachView {
   }
 }
 
-const views = {
-  coach: null,
-  user: null,
-  heroCoach: null,
-  heroUser: null,
-};
-
-let heroRaf = 0;
-let heroT0 = 0;
-let ready = false;
-let booting = null;
+const views = { coach: null, user: null };
+let userMount = null;
+let userBg = 0x2a3744;
+let readyCoach = false;
 let active = false;
+let renderRaf = 0;
+const pending = { coach: null, user: null, needUser: false };
 
-async function boot() {
-  if (ready) return true;
-  if (booting) return booting;
-  booting = Promise.all([loadMaster("female"), loadMaster("male")])
-    .then(() => {
-      ready = true;
-      return true;
-    })
-    .catch((err) => {
-      console.warn("DaabCoach3D: تعذّر تحميل الشخصيات", err);
-      booting = null;
-      return false;
-    });
-  return booting;
+function scheduleRender() {
+  if (renderRaf) return;
+  renderRaf = requestAnimationFrame(() => {
+    renderRaf = 0;
+    if (pending.coach && views.coach) {
+      const c = pending.coach;
+      views.coach.setExercise(c.id);
+      views.coach.applyTime(c.t, c.amp);
+      views.coach.render();
+    }
+    if (pending.needUser && pending.user && views.user) {
+      const u = pending.user;
+      views.user.setExercise(u.id);
+      views.user.applyTime(u.t, u.amp);
+      views.user.render();
+    }
+  });
 }
 
-async function ensureView(key, el, gender, bg) {
-  if (!el) return null;
-  if (!views[key]) {
-    views[key] = new CoachView(el, gender, bg);
-    await views[key].attach(gender);
-  }
-  return views[key];
-}
-
-function startHeroLoop() {
-  if (heroRaf || !views.heroCoach || !views.heroUser) return;
-  heroT0 = performance.now();
-  const reduce =
-    window.matchMedia &&
-    matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let last = 0;
-  function frame(ts) {
-    if (!views.heroCoach || !views.heroUser || document.hidden) {
-      heroRaf = requestAnimationFrame(frame);
-      return;
-    }
-    if (ts - last < 32) {
-      heroRaf = requestAnimationFrame(frame);
-      return;
-    }
-    last = ts;
-    const w = views.heroCoach.mount.getBoundingClientRect().width;
-    if (w > 0) {
-      const t = reduce ? 1.5 : (ts - heroT0) / 1000;
-      views.heroCoach.setExercise("e1");
-      views.heroCoach.applyTime(t, 1);
-      views.heroUser.setExercise("e1");
-      views.heroUser.applyTime(Math.max(0, t - 0.4), 1);
-      views.heroCoach.render();
-      views.heroUser.render();
-    }
-    heroRaf = requestAnimationFrame(frame);
-  }
-  heroRaf = requestAnimationFrame(frame);
+async function ensureUserView() {
+  if (views.user || !userMount) return !!views.user;
+  views.user = new CoachView(userMount, "male", userBg);
+  views.user.setVisible(true);
+  await views.user.attach("male");
+  return true;
 }
 
 const api = {
   get ready() {
-    return ready;
+    return readyCoach;
   },
   get active() {
     return active;
@@ -420,43 +404,57 @@ const api = {
   set active(v) {
     active = !!v;
   },
-  boot,
-  async mountHero(coachEl, userEl) {
-    const ok = await boot();
-    if (!ok) return false;
-    await ensureView("heroCoach", coachEl, "female", 0x0c3d31);
-    await ensureView("heroUser", userEl, "male", 0x2a3744);
-    startHeroLoop();
+  async mountSession(coachEl, userEl) {
+    userMount = userEl;
+    await loadMaster("female");
+    if (!views.coach) {
+      views.coach = new CoachView(coachEl, "female", 0x0c3d31);
+      views.coach.setVisible(true);
+      await views.coach.attach("female");
+    }
+    readyCoach = true;
     return true;
   },
-  async mountSession(coachEl, userEl) {
-    const ok = await boot();
-    if (!ok) return false;
-    await ensureView("coach", coachEl, "female", 0x0c3d31);
-    await ensureView("user", userEl, "male", 0x2a3744);
-    return true;
+  async ensureSimUser() {
+    try {
+      return await ensureUserView();
+    } catch (e) {
+      console.warn("DaabCoach3D: user view", e);
+      return false;
+    }
   },
   showBody(use3d) {
-    active = !!use3d && ready;
+    active = !!use3d && readyCoach;
   },
   setCoach(exId, t, amp) {
-    if (!ready || !views.coach) return;
-    views.coach.setExercise(exId);
-    views.coach.applyTime(t, amp == null ? 1 : amp);
-    views.coach.render();
+    if (!readyCoach || !views.coach) return;
+    pending.coach = { id: exId, t, amp: amp == null ? 1 : amp };
+    scheduleRender();
   },
   setUser(exId, t, amp) {
-    if (!ready || !views.user) return;
-    views.user.setExercise(exId);
-    views.user.applyTime(t, amp == null ? 1 : amp);
-    views.user.render();
+    if (!readyCoach) return;
+    pending.user = { id: exId, t, amp: amp == null ? 1 : amp };
+    pending.needUser = true;
+    if (!views.user) api.ensureSimUser();
+    scheduleRender();
+  },
+  clearUserPending() {
+    pending.needUser = false;
+    pending.user = null;
   },
   resizeAll() {
-    Object.values(views).forEach((v) => v && v.resize());
+    if (views.coach) views.coach.resize();
+    if (views.user) views.user.resize();
+  },
+  dispose() {
+    if (renderRaf) cancelAnimationFrame(renderRaf);
+    renderRaf = 0;
+    views.coach && views.coach.dispose();
+    views.user && views.user.dispose();
+    views.coach = views.user = null;
+    readyCoach = false;
+    active = false;
   },
 };
 
 window.DaabCoach3D = api;
-try {
-  window.dispatchEvent(new Event("daab-coach3d-ready"));
-} catch (_) {}
