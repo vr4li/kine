@@ -4,7 +4,7 @@
  */
 import * as THREE from "three";
 import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
-import { SkeletonUtils } from "three/addons/utils/SkeletonUtils.js";
+import { clone as cloneSkinned } from "three/addons/utils/SkeletonUtils.js";
 
 const MODELS = {
   female: "models/x-bot.fbx",
@@ -284,7 +284,7 @@ class CoachView {
         if (c.geometry) c.geometry.dispose();
       });
     }
-    this.model = SkeletonUtils.clone(master);
+    this.model = cloneSkinned(master);
     this.scene.add(this.model);
     this.bodyH = scaleToMeters(this.model);
     const dist = Math.max(2.4, this.bodyH * 2.15);
@@ -384,11 +384,17 @@ function startHeroLoop() {
   const reduce =
     window.matchMedia &&
     matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let last = 0;
   function frame(ts) {
-    if (!views.heroCoach || !views.heroUser) {
-      heroRaf = 0;
+    if (!views.heroCoach || !views.heroUser || document.hidden) {
+      heroRaf = requestAnimationFrame(frame);
       return;
     }
+    if (ts - last < 32) {
+      heroRaf = requestAnimationFrame(frame);
+      return;
+    }
+    last = ts;
     const w = views.heroCoach.mount.getBoundingClientRect().width;
     if (w > 0) {
       const t = reduce ? 1.5 : (ts - heroT0) / 1000;
@@ -451,3 +457,6 @@ const api = {
 };
 
 window.DaabCoach3D = api;
+try {
+  window.dispatchEvent(new Event("daab-coach3d-ready"));
+} catch (_) {}

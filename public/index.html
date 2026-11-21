@@ -1785,9 +1785,10 @@ function onSessionPage(){plan()}
 
 if(!$('sPhaseNext')._b){$('sPhaseNext')._b=1;$('sPhaseNext').onclick=function(){if(!run||gap)return;var steps=stepsOf(Q[qi]),id=Q[qi];if(sessPhase==='count'&&isEyeEx(id)){eyeRep();return}if(sessPhase==='instr'){if(instStep<steps.length-1){instStep++;paintInstStep()}else beginAlign()}else if(sessPhase==='align'&&needsManualAlign(id))beginCountdown()}}
 $('sStart').onclick=async function(){primeSpeech();var qq=queue();if(!qq.length){plan();speakAloud('أضف تماريناً من المكتبة أولاً ثم ابدأ الجلسة');return}if(qq.some(isEyeEx)&&!S.lazy){plan();speakAloud('اختر العين الكسولة قبل بدء تمرين العين');return}var g=gate();if(!g.ok&&getMode()==='child'){location.hash='#rest';return}if(!g.ok&&g.why==='hold'){plan();return}logSession();Q=qq.slice();sesT=Date.now();sesRec=false;sessEnd=(guest&&!acct)?0:Date.now()+SCH()[new Date().getDay()].dur*60000;qi=0;paused=false;gap=false;poseOn=false;showP('sRun');rigMode='';
- if(window.DaabCoach3D)await DaabCoach3D.mountSession($('coach3d1'),$('coach3d2'));
- if(!coach3dOk()){rig1=mk($('rig1'));rig2=mk($('rig2'))}else coach3dPane(!isEyeEx(Q[qi]));
- sim=true;var v=$('cam');v.style.display='none';$('rig2').style.display=coach3dOk()?'none':'block';coach3dUserSim(true);$('camNote').textContent='محاكاة تجريبية';
+ if(!coach3dOk()){rig1=mk($('rig1'));rig2=mk($('rig2'))}
+ sim=true;var v=$('cam');v.style.display='none';$('rig2').style.display='block';$('camNote').textContent='محاكاة تجريبية';
+ function coach3dSessionReady(){if(!run)return;if(coach3dOk()&&!isEyeEx(Q[qi])){coach3dPane(true);coach3dUserSim(sim);$('rig2').style.display=sim?'none':'block'}else if(!coach3dOk()){$('rig2').style.display='block';coach3dUserSim(false)}}
+ if(window.DaabCoach3D){$('camNote').textContent='جاري تحميل الشخصية…';DaabCoach3D.mountSession($('coach3d1'),$('coach3d2')).then(coach3dSessionReady).catch(coach3dSessionReady)}else coach3dUserSim(false);
  if(stream){v.srcObject=stream;try{await v.play()}catch(e){}}
  else{try{stream=await Promise.race([navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false}),new Promise(function(_,rj){setTimeout(function(){rj(new Error('timeout'))},12000)})]);v.srcObject=stream;await v.play()}catch(e){$('camNote').textContent=e&&e.message==='timeout'?'انتظار الكاميرا طال. اسمح بالكاميرا أو نكمل بالمحاكاة.':$('camNote').textContent}}
  var pid=poseRefId(Q[qi]);
@@ -1937,8 +1938,8 @@ function heroFig(a,ts){var E=function(v){return (1-Math.cos(2*Math.PI*((v/1000)%
  hr.innerHTML='<g transform="translate(-27.4 -12) scale(.95)"><g fill="none" stroke="#fff" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"><path d="M'+hx+' '+hy+'L74.8 58L46.8 82.3M74.8 58V90M74.8 90L57.5 125.5M74.8 90L92.5 125.5"/></g><circle cx="74.8" cy="31.8" r="10.5" fill="#fff"/><g fill="#E07A3F"><circle cx="'+hx+'" cy="'+hy+'" r="6.4"/><circle cx="74.8" cy="58" r="5.8"/><circle cx="74.8" cy="90" r="5.8"/><circle cx="46.8" cy="82.3" r="6.2"/>'+d+'</g></g>'}
 var hv=document.getElementById('heroVid'),hu=document.getElementById('heroYou'),hrm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches,hs=performance.now();
 function heroSvgLoop(){if(!hv||!hu)return;mk(hv);mk(hu);(function hl2(ts){if(hv.getBoundingClientRect().width>0){var t=hrm?1.5:Math.max(0,(ts||performance.now())-hs)/1000;draw(hv,pose('e1',t,1));draw(hu,pose('e1',Math.max(0,t-.4),1))}if(!hrm)requestAnimationFrame(hl2)})(0)}
-function heroCoachBoot(){if(!window.DaabCoach3D)return heroSvgLoop();DaabCoach3D.boot().then(function(ok){if(ok&&$('heroCoach3d')&&$('heroUser3d')){DaabCoach3D.mountHero($('heroCoach3d'),$('heroUser3d')).then(function(h){if(!h)heroSvgLoop()})}else heroSvgLoop()})}
-heroCoachBoot();
+function heroCoachBoot(){if(!window.DaabCoach3D||window.matchMedia&&matchMedia('(max-width:860px)').matches)return heroSvgLoop();var run=function(){DaabCoach3D.boot().then(function(ok){if(ok&&$('heroCoach3d')&&$('heroUser3d')){DaabCoach3D.mountHero($('heroCoach3d'),$('heroUser3d')).then(function(h){if(!h)heroSvgLoop()})}else heroSvgLoop()})};if('requestIdleCallback' in window)requestIdleCallback(run,{timeout:2500});else setTimeout(run,400)}
+window.addEventListener('daab-coach3d-ready',heroCoachBoot);
 if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches){c=7;show();if(hr)heroFig(150);return}
 if(hr)(function hl(ts){if(hr.getBoundingClientRect().width>0)heroFig(150*(1-Math.cos(2*Math.PI*((ts/1000)%1.8)/1.8))/2,ts);requestAnimationFrame(hl)})(0);
 show();setInterval(function(){c=c>=10?0:c+1;show()},3000);
@@ -2042,7 +2043,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
 </script>
-<script type="module" src="daab-coach3d.js?v=1"></script>
+<script type="module" src="daab-coach3d.js?v=2"></script>
 <script src="daab-pose.js?v=8"></script>
 </body>
 </html>
