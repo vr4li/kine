@@ -103,7 +103,7 @@
     <p>X Bot (أنثى) · Y Bot (ذكر) — لا تُنشر على الإنترنت</p>
   </header>
   <div class="wrap">
-    <p class="banner">⚠️ للمعاينة على جهازك فقط — لا ترفعي Cloudflare ولا GitHub لهذه الصفحة والملفات حتى ندمجها رسمياً.</p>
+    <p class="banner">صفحة ضبط الوقوف — نفس منطق الجلسة. بعد التعديل انسخي قيم STAND_CALIB إلى <code>daab-coach3d.js</code>.</p>
     <div id="view">
       <div class="load" id="load">جاري تحميل الشخصية…</div>
     </div>
@@ -112,8 +112,13 @@
       <button type="button" id="btnM" class="alt">شخصية الرجال (Y Bot)</button>
     </div>
     <div class="card">
+      <h2>ضبط وقوف تام</h2>
+      <p>الوجه باتجاهك (ليس الظهر). الذراعان لأسفل. الأرقام بالدرجات تُحوَّل تلقائياً — نفس <code>STAND_CALIB</code> في الجلسة.</p>
+      <div id="calib" class="row" style="flex-direction:column;align-items:stretch;gap:8px;max-width:420px;margin:12px auto 0"></div>
+    </div>
+    <div class="card">
       <h2>تمارين دأب (معاينة حركة)</h2>
-      <p id="exHint">الشخصية تواجهك مباشرة. اختر تمريناً لمطابقة رسم دأب (تقريبي على Mixamo). لفّي المشهد بالماوس من الجانب للمقارنة.</p>
+      <p id="exHint">ابدئي بـ «وقوف تام». اختاري تمريناً بعد ما يصير الوقوف صحيحاً. لفّي المشهد بالماوس.</p>
       <p id="exTitle" style="font-weight:600;color:#0c3d31;margin-top:8px"></p>
       <div id="exList"></div>
     </div>
@@ -146,9 +151,19 @@
     import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
     const MODELS = {
-      female: { path: "models/x-bot.fbx", title: "شخصية النساء (X Bot)" },
-      male: { path: "models/y-bot.fbx", title: "شخصية الرجال (Y Bot)" },
+      female: { path: "/models/x-bot.fbx", title: "شخصية النساء (X Bot)" },
+      male: { path: "/models/y-bot.fbx", title: "شخصية الرجال (Y Bot)" },
     };
+
+    /** نفس daab-coach3d.js — عدّلي هنا ثم انسخي للملف الرئيسي */
+    const STAND_CALIB = {
+      always: true,
+      rightArm: { x: 0, y: 0, z: 0 },
+      leftArm: { x: 0, y: 0, z: 0 },
+      rightForeArm: { x: 0, y: 0, z: 0 },
+      leftForeArm: { x: 0, y: 0, z: 0 },
+    };
+    const FACE_Y = Math.PI;
 
     const mount = document.getElementById("view");
     const loadEl = document.getElementById("load");
@@ -295,6 +310,8 @@
           p.a = Math.max(u, 0) * amp * 170;
           p.b = -Math.max(-u, 0) * amp * 170;
           break;
+        case "rest":
+          break;
       }
       return p;
     }
@@ -353,7 +370,34 @@
       b.rotation.set(e.x + dx, e.y + dy, e.z + dz);
     }
 
-    /** نفس منطق draw() في index: زاوية الذراع من الوضع الرأسي (0=للأسفل، 90=أفقي). */
+    function nudgeBone(short, dx, dy, dz) {
+      const key = boneKey(short);
+      const b = key && bones[key];
+      if (!b) return;
+      b.rotation.x += dx;
+      b.rotation.y += dy;
+      b.rotation.z += dz;
+    }
+
+    function applyStandNudge() {
+      const c = STAND_CALIB;
+      nudgeBone("RightArm", c.rightArm.x, c.rightArm.y, c.rightArm.z);
+      nudgeBone("LeftArm", c.leftArm.x, c.leftArm.y, c.leftArm.z);
+      nudgeBone(
+        "RightForeArm",
+        c.rightForeArm.x,
+        c.rightForeArm.y,
+        c.rightForeArm.z,
+      );
+      nudgeBone(
+        "LeftForeArm",
+        c.leftForeArm.x,
+        c.leftForeArm.y,
+        c.leftForeArm.z,
+      );
+    }
+
+    /** مطابق لـ daab-coach3d.js (وجه للكاميرا + rotation.y = π) */
     function applyDaabPose(p) {
       resetBones();
       const D = Math.PI / 180;
@@ -371,13 +415,15 @@
         rotBone("LeftArm", 0, 0, s);
         rotBone("RightArm", 0, 0, -s);
       } else {
-        const leftX = (aa - 90) * D;
-        const rightX = (bb3d - 90) * D;
-        rotBone("LeftArm", leftX, 0, 0);
-        rotBone("RightArm", rightX, 0, 0);
-        rotBone("LeftForeArm", -p.ea * D, 0, 0);
-        rotBone("RightForeArm", -p.eb * D, 0, 0);
+        const sideDemo = (90 - aa) * D;
+        const sideIdle = (90 - bb3d) * D;
+        rotBone("RightArm", 0, 0, -sideDemo);
+        rotBone("RightForeArm", -p.ea * D, 0, 0);
+        rotBone("LeftArm", 0, 0, sideIdle);
+        rotBone("LeftForeArm", -p.eb * D, 0, 0);
       }
+
+      if (exId === "rest" || STAND_CALIB.always) applyStandNudge();
 
       const lThigh = (p.l - p.sp) * D;
       const rThigh = (p.m + p.sp) * D;
@@ -469,7 +515,7 @@
       obj.position.x -= center.x;
       obj.position.z -= center.z;
       obj.position.y -= box.min.y;
-      obj.rotation.y = 0;
+      obj.rotation.y = FACE_Y;
       obj.updateMatrixWorld(true);
       const h = box.max.y - box.min.y;
       const dist = Math.max(2.6, h * 2.2);
@@ -562,7 +608,7 @@
           }
           cacheBones(model);
           resumePendingExercise();
-          if (!exId) startExercise("e2", "ثني الكوع");
+          if (!exId) startExercise("rest", "وقوف تام (بدون تمرين)");
 
           if (fbx.animations && fbx.animations.length) {
             mixer = new THREE.AnimationMixer(model);
@@ -622,18 +668,61 @@
     document.getElementById("btnF").onclick = () => loadGender("female");
     document.getElementById("btnM").onclick = () => loadGender("male");
 
+    function applyCurrentPose() {
+      if (!model || !exId) return;
+      const t = exId === "rest" ? 0 : exT;
+      applyDaabPose(pose(exId, t, 1));
+    }
+
+    function buildCalibUI() {
+      const el = document.getElementById("calib");
+      const bones = [
+        ["rightArm", "كتف يمين (مشهد)"],
+        ["leftArm", "كتف يسار (مشهد)"],
+        ["rightForeArm", "ساعد يمين"],
+        ["leftForeArm", "ساعد يسار"],
+      ];
+      const axes = ["x", "y", "z"];
+      bones.forEach(([key, label]) => {
+        const row = document.createElement("div");
+        row.style.fontSize = "0.85rem";
+        row.innerHTML =
+          "<strong style=color:#0c3d31>" +
+          label +
+          "</strong>";
+        axes.forEach((ax) => {
+          const inp = document.createElement("input");
+          inp.type = "number";
+          inp.step = "1";
+          inp.value = "0";
+          inp.style.width = "4.2rem";
+          inp.title = ax + " (درجة)";
+          inp.oninput = () => {
+            STAND_CALIB[key][ax] = (Number(inp.value) || 0) * (Math.PI / 180);
+            applyCurrentPose();
+          };
+          const sp = document.createElement("span");
+          sp.textContent = " " + ax.toUpperCase() + "° ";
+          row.appendChild(sp);
+          row.appendChild(inp);
+        });
+        el.appendChild(row);
+      });
+    }
+
     function tick() {
       requestAnimationFrame(tick);
       const d = clock.getDelta();
       if (exId && model) {
-        exT += d;
-        applyDaabPose(pose(exId, exT, 1));
+        if (exId !== "rest") exT += d;
+        applyCurrentPose();
       } else if (mixer) mixer.update(d);
       controls.update();
       renderer.render(scene, camera);
     }
 
     buildExList();
+    buildCalibUI();
     resize();
     window.addEventListener("resize", resize);
     loadGender("female");
