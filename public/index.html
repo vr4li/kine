@@ -12,7 +12,7 @@
 <meta property="og:locale" content="ar_SA">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 150'%3E%3Crect width='150' height='150' rx='27' fill='%230B4A42'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='9.5' stroke-linecap='round'%3E%3Cpath d='M46.8 82.3L112.5 28M74.8 58V90M74.8 90L57.5 125.5M74.8 90L92.5 125.5'/%3E%3C/g%3E%3Ccircle cx='74.8' cy='31.8' r='10.5' fill='%23fff'/%3E%3Cg fill='%23E07A3F'%3E%3Ccircle cx='112.5' cy='28' r='7'/%3E%3Ccircle cx='74.8' cy='58' r='6.5'/%3E%3Ccircle cx='74.8' cy='90' r='6.5'/%3E%3Ccircle cx='46.8' cy='82.3' r='7'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="stylesheet" href="fonts/plex.css">
-<link rel="modulepreload" href="/daab-coach3d.js?v=14">
+<link rel="modulepreload" href="/daab-coach3d.js?v=15">
 <link rel="preload" href="/models/x-bot.fbx" as="fetch" crossorigin>
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
@@ -1722,7 +1722,7 @@ function chips(){[].forEach.call($('eyeChk').children,function(e){var k=e.datase
  [].forEach.call($('eyeDemo').querySelectorAll('[data-sc]'),function(b){b.setAttribute('aria-pressed',b.dataset.sc===eyeSc)});
  var al=$('eyeAl');al.hidden=eyeSc==='ok';if(eyeSc!=='ok')al.textContent=eyeMsg(eyeSc)}
 var coach3dLoad=null;
-function loadCoach3dMod(){if(window.DaabCoach3D)return Promise.resolve(window.DaabCoach3D);if(coach3dLoad)return coach3dLoad;coach3dLoad=waitCoach3dMod().catch(function(){return import('/daab-coach3d.js?v=14').then(function(){return window.DaabCoach3D||null})}).catch(function(e){console.warn('DaabCoach3D',e);coach3dLoad=null;return null});return coach3dLoad}
+function loadCoach3dMod(){if(window.DaabCoach3D)return Promise.resolve(window.DaabCoach3D);if(coach3dLoad)return coach3dLoad;coach3dLoad=waitCoach3dMod().catch(function(){return import('/daab-coach3d.js?v=15').then(function(){return window.DaabCoach3D||null})}).catch(function(e){console.warn('DaabCoach3D',e);coach3dLoad=null;return null});return coach3dLoad}
 function coach3dOk(){return window.DaabCoach3D&&DaabCoach3D.ready}
 function coach3dArmLoading(msg){var c1=$('coach3d1'),c2=$('coach3d2');if(!c1)return;c1.hidden=false;c2.hidden=false;c1.classList.remove('coach3d-fail');c2.classList.remove('coach3d-fail');c1.classList.add('coach3d-loading');c2.classList.add('coach3d-loading');if(msg)c1.setAttribute('data-loading',msg);$('rig1').classList.add('coach-off');$('rig2').classList.add('coach-off')}
 function coach3dFail(msg){var c1=$('coach3d1'),c2=$('coach3d2');if(!c1)return;c1.classList.remove('coach3d-loading');c2.classList.remove('coach3d-loading');c1.classList.add('coach3d-fail');c2.classList.add('coach3d-fail');var t=msg||'تعذّر تحميل الشخصية. حدّث الصفحة (Cmd+Shift+R) أو جرّب Chrome/Safari.';c1.setAttribute('data-err',t);c2.setAttribute('data-err',t)}
@@ -2069,7 +2069,7 @@ new MutationObserver(soon).observe(document.body,{subtree:true,attributes:true,a
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',soon);else soon();
 })();
 </script>
-<script type="module" src="/daab-coach3d.js?v=14"></script>
+<script type="module" src="/daab-coach3d.js?v=15"></script>
 <script src="daab-pose.js?v=9"></script>
 </body>
 </html>

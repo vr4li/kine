@@ -220,13 +220,14 @@ function applyDaabPose(p, exId, model, bones, bindEuler, bindPos) {
     rotBone("LeftArm", 0, 0, s, bones, bindEuler);
     rotBone("RightArm", 0, 0, -s, bones, bindEuler);
   } else {
-    // نفس زوايا SVG: 0=ذراع لأسفل، 90=T-pose؛ الموديل يواجه الكاميرا (rotation.y = PI)
-    const leftX = (aa - 90) * D;
-    const rightX = -(bb3d - 90) * D;
-    rotBone("LeftArm", leftX, 0, 0, bones, bindEuler);
-    rotBone("RightArm", rightX, 0, 0, bones, bindEuler);
-    rotBone("LeftForeArm", -p.ea * D, 0, 0, bones, bindEuler);
-    rotBone("RightForeArm", -p.eb * D, 0, 0, bones, bindEuler);
+    // زوايا SVG: 0=لأسفل، 90=T-pose — aA=aa/ea و aB=bb/eb
+    // النموذج rotation.y=π أمام الكاميرا: يسار الشاشة = RightArm، يمين الشاشة = LeftArm
+    const sideDemo = (90 - aa) * D;
+    const sideIdle = (90 - bb3d) * D;
+    rotBone("RightArm", 0, 0, -sideDemo, bones, bindEuler);
+    rotBone("RightForeArm", -p.ea * D, 0, 0, bones, bindEuler);
+    rotBone("LeftArm", 0, 0, sideIdle, bones, bindEuler);
+    rotBone("LeftForeArm", -p.eb * D, 0, 0, bones, bindEuler);
   }
 
   rotBone("LeftUpLeg", -(p.l - p.sp) * D, 0, 0, bones, bindEuler);
