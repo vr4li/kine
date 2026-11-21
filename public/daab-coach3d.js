@@ -10,6 +10,30 @@ const MODELS = {
   male: "/models/y-bot.fbx",
 };
 
+/** وقوف تام — اضبطي هنا (راديان) بدون تمرين ثم انقلي القيم للتمارين */
+export const STAND_CALIB = {
+  always: true,
+  rightArm: { x: 0, y: 0, z: 0 },
+  leftArm: { x: 0, y: 0, z: 0 },
+  rightForeArm: { x: 0, y: 0, z: 0 },
+  leftForeArm: { x: 0, y: 0, z: 0 },
+};
+
+function poseNeutral() {
+  return {
+    a: 0,
+    b: 0,
+    ea: 0,
+    eb: 0,
+    l: 0,
+    m: 0,
+    k: 0,
+    k2: 0,
+    dy: 0,
+    sp: 18,
+  };
+}
+
 const loader = new FBXLoader();
 const masters = { female: null, male: null, femaleLoading: null, maleLoading: null };
 
@@ -88,6 +112,8 @@ function pose3d(id, t, amp) {
       u = Math.sin(ph * 2 * Math.PI);
       p.a = Math.max(u, 0) * amp * 170;
       p.b = -Math.max(-u, 0) * amp * 170;
+      break;
+    case "rest":
       break;
     default:
       break;
@@ -203,6 +229,40 @@ function rotBone(short, dx, dy, dz, bones, bindEuler) {
   b.rotation.set(e.x + dx, e.y + dy, e.z + dz);
 }
 
+function nudgeBone(short, dx, dy, dz, bones) {
+  const key = boneKey(short, bones);
+  const b = key && bones[key];
+  if (!b) return;
+  b.rotation.x += dx;
+  b.rotation.y += dy;
+  b.rotation.z += dz;
+}
+
+function applyStandNudge(bones) {
+  const c = STAND_CALIB;
+  nudgeBone("RightArm", c.rightArm.x, c.rightArm.y, c.rightArm.z, bones);
+  nudgeBone("LeftArm", c.leftArm.x, c.leftArm.y, c.leftArm.z, bones);
+  nudgeBone(
+    "RightForeArm",
+    c.rightForeArm.x,
+    c.rightForeArm.y,
+    c.rightForeArm.z,
+    bones,
+  );
+  nudgeBone(
+    "LeftForeArm",
+    c.leftForeArm.x,
+    c.leftForeArm.y,
+    c.leftForeArm.z,
+    bones,
+  );
+}
+
+/** وضعية وقوف كاملة (ذراعان لأسفل، ساقان محايدتان) — aa=bb=0 */
+export function applyStandingPose(model, bones, bindEuler, bindPos) {
+  applyDaabPose(poseNeutral(), "rest", model, bones, bindEuler, bindPos);
+}
+
 function applyDaabPose(p, exId, model, bones, bindEuler, bindPos) {
   resetBones(bones, bindEuler, bindPos);
   const D = Math.PI / 180;
@@ -229,6 +289,8 @@ function applyDaabPose(p, exId, model, bones, bindEuler, bindPos) {
     rotBone("LeftArm", 0, 0, sideIdle, bones, bindEuler);
     rotBone("LeftForeArm", -p.eb * D, 0, 0, bones, bindEuler);
   }
+
+  if (exId === "rest" || STAND_CALIB.always) applyStandNudge(bones);
 
   rotBone("LeftUpLeg", -(p.l - p.sp) * D, 0, 0, bones, bindEuler);
   rotBone("RightUpLeg", -(p.m + p.sp) * D, 0, 0, bones, bindEuler);
@@ -315,10 +377,18 @@ class CoachView {
     this.bones = cached.bones;
     this.bindEuler = cached.bindEuler;
     this.bindPos = cached.bindPos;
+    this.exId = "rest";
+    applyStandingPose(
+      this.model,
+      this.bones,
+      this.bindEuler,
+      this.bindPos,
+    );
+    this.render();
   }
 
   setExercise(id) {
-    this.exId = id || "e1";
+    this.exId = id || "rest";
   }
 
   applyTime(t, amp) {
@@ -571,6 +641,15 @@ const api = {
     if (!root) return;
     await this.paintLibraryThumbs(root);
   },
+  showStanding() {
+    if (views.coach) {
+      views.coach.setExercise("rest");
+      views.coach.applyTime(0, 1);
+      views.coach.render();
+    }
+  },
+  STAND_CALIB,
+  applyStandingPose,
 };
 
 let thumbView = null;

@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>معاينة شخصيات دأب 3D — محلي فقط</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+      background: #f7f4ed;
+      color: #3a4a5c;
+      min-height: 100vh;
+    }
+    header {
+      background: linear-gradient(135deg, #0c3d31, #0b4a42);
+      color: #f7f4ed;
+      padding: 18px 20px;
+      text-align: center;
+    }
+    header h1 { font-size: 1.35rem; margin-bottom: 4px; }
+    header p { font-size: 0.88rem; opacity: 0.92; }
+    .wrap { max-width: 960px; margin: 16px auto; padding: 0 14px; }
+  .banner {
+      background: #fbe9dd;
+      color: #b45309;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+    #view {
+      width: 100%;
+      height: min(62vh, 520px);
+      min-height: 320px;
+      background: #0c3d31;
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+      isolation: isolate;
+      box-shadow: 0 12px 40px rgba(12, 61, 49, 0.2);
+    }
+    #view canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+      touch-action: none;
+    }
+    .wrap > .row,
+    .wrap > .card { position: relative; z-index: 2; }
+    .load {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: rgba(12, 61, 49, 0.92);
+      color: #f7f4ed;
+      font-weight: 600;
+      z-index: 2;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin: 14px 0;
+    }
+    button {
+      border: none;
+      cursor: pointer;
+      font: inherit;
+      padding: 12px 20px;
+      border-radius: 999px;
+      background: #fff;
+      color: #0c3d31;
+      border: 2px solid #e0dacb;
+      min-height: 48px;
+    }
+    button.on { background: #0c3d31; color: #fff; border-color: #0c3d31; }
+    button.alt.on { background: #e67e22; border-color: #e67e22; color: #fff; }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 16px 18px;
+      margin-top: 12px;
+      box-shadow: 0 1px 0 #e0dacb;
+    }
+    .card h2 { color: #0c3d31; font-size: 1.1rem; margin-bottom: 8px; }
+    .card p, .card ul { font-size: 0.92rem; line-height: 1.65; }
+    .card ul { margin: 8px 0 0; padding-inline-start: 1.2rem; }
+    #animList, #exList { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    #animList button, #exList button { font-size: 0.85rem; padding: 8px 14px; min-height: 40px; }
+    #exList button.on { background: #e67e22; border-color: #e67e22; color: #fff; }
+    .err { color: #b45309; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>معاينة شخصيات التمارين — دأب</h1>
+    <p>X Bot (أنثى) · Y Bot (ذكر) — لا تُنشر على الإنترنت</p>
+  </header>
+  <div class="wrap">
+    <p class="banner">⚠️ للمعاينة على جهازك فقط — لا ترفعي Cloudflare ولا GitHub لهذه الصفحة والملفات حتى ندمجها رسمياً.</p>
+    <div id="view">
+      <div class="load" id="load">جاري تحميل الشخصية…</div>
+    </div>
+    <div class="row" role="group" aria-label="اختر الشخصية">
+      <button type="button" id="btnF" class="on">شخصية النساء (X Bot)</button>
+      <button type="button" id="btnM" class="alt">شخصية الرجال (Y Bot)</button>
+    </div>
+    <div class="card">
+      <h2>تمارين دأب (معاينة حركة)</h2>
+      <p id="exHint">الشخصية تواجهك مباشرة. اختر تمريناً لمطابقة رسم دأب (تقريبي على Mixamo). لفّي المشهد بالماوس من الجانب للمقارنة.</p>
+      <p id="exTitle" style="font-weight:600;color:#0c3d31;margin-top:8px"></p>
+      <div id="exList"></div>
+    </div>
+    <div class="card">
+      <h2 id="who">شخصية النساء</h2>
+      <p id="meta">بعد التحميل نعرض الحركات الموجودة داخل ملف FBX إن وُجدت.</p>
+      <div id="animList" hidden></div>
+    </div>
+    <div class="card">
+      <h2>التشغيل محلياً</h2>
+      <ul>
+        <li>من الطرفية: <code>cd ~/Desktop/aidab/public && python3 -m http.server 8080</code></li>
+        <li>افتحي: <code>http://localhost:8080/coach-3d-local.html</code> (ليس file://)</li>
+        <li>شخصية الأطفال: أضيفي لاحقاً ملف FBX في <code>public/models/</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module">
+    import * as THREE from "three";
+    import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
+    import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+    const MODELS = {
+      female: { path: "models/x-bot.fbx", title: "شخصية النساء (X Bot)" },
+      male: { path: "models/y-bot.fbx", title: "شخصية الرجال (Y Bot)" },
+    };
+
+    const mount = document.getElementById("view");
+    const loadEl = document.getElementById("load");
+    const meta = document.getElementById("meta");
+    const who = document.getElementById("who");
+    const animList = document.getElementById("animList");
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0c3d31);
+
+    const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 200);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    mount.appendChild(renderer.domElement);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+    const key = new THREE.DirectionalLight(0xfff5e8, 1.25);
+    key.position.set(3, 6, 4);
+    key.castShadow = true;
+    scene.add(key);
+    const fill = new THREE.DirectionalLight(0x8ab4ae, 0.35);
+    fill.position.set(-3, 2, -2);
+    scene.add(fill);
+
+    const ground = new THREE.Mesh(
+      new THREE.CircleGeometry(4, 48),
+      new THREE.MeshStandardMaterial({ color: 0x2a3744, roughness: 0.9 }),
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.target.set(0, 1, 0);
+    controls.maxPolarAngle = Math.PI / 2 - 0.08;
+    controls.minDistance = 1.2;
+    controls.maxDistance = 8;
+
+    let model = null;
+    let mixer = null;
+    let actions = {};
+    let current = null;
+    let gender = "female";
+    let bones = {};
+    let bindQuat = {};
+    let bindEuler = {};
+    let bindPos = {};
+    let exId = null;
+    let exT = 0;
+    let pendingEx = null;
+    const EX = [
+      ["rest", "وقوف تام (بدون تمرين)"],
+      ["e1", "رفع الذراع — كتف"],
+      ["e2", "ثني الكوع"],
+      ["e3", "ثني الركبة"],
+      ["e4", "كاحل"],
+      ["e5", "جلوس ووقوف"],
+      ["e6", "وقوف قدم واحدة"],
+      ["e7", "تصفيق فوق الرأس"],
+      ["e8", "مشي في المكان"],
+      ["e9", "دوائر الذراع"],
+      ["e11", "رفع الذراعين جانباً"],
+      ["e12", "رفع بالتناوب"],
+    ];
+
+    const clock = new THREE.Clock();
+    const loader = new FBXLoader();
+
+    function pose(id, t, amp) {
+      var T = 3,
+        ph = (t % T) / T,
+        s = Math.min(1, ((1 - Math.cos(ph * 2 * Math.PI)) / 2) * amp),
+        q = 1 - s,
+        p = { a: 0, b: 0, ea: 0, eb: 0, l: 0, m: 0, k: 0, k2: 0, dy: 0, sp: 18 },
+        u,
+        v,
+        w,
+        l,
+        k,
+        h;
+      switch (id) {
+        case "rest":
+          break;
+        case "e1":
+          p.a = s * 165;
+          break;
+        case "e2":
+          p.a = 20;
+          p.ea = s * 125;
+          break;
+        case "e3":
+          p.sp = 0;
+          p.l = 90;
+          p.m = 90;
+          p.k = 90 * q;
+          p.k2 = 90;
+          break;
+        case "e4":
+          p.dy = -s * 7;
+          break;
+        case "e5":
+          p.sp = 0;
+          l = 80 * q;
+          k = 95 * q;
+          h = 20 * Math.cos((l * Math.PI) / 180) + 20 * Math.cos(((l - k) * Math.PI) / 180);
+          p.l = p.m = l;
+          p.k = p.k2 = k;
+          p.dy = 40 - h;
+          p.a = p.b = s * 60;
+          break;
+        case "e6":
+          p.m = s * 70;
+          p.k2 = s * 80;
+          p.a = 25;
+          p.b = -25;
+          break;
+        case "e7":
+          p.a = s * 170;
+          p.b = -s * 170;
+          break;
+        case "e8":
+          u = Math.sin(ph * 2 * Math.PI);
+          v = Math.max(u, 0) * amp;
+          w = Math.max(-u, 0) * amp;
+          p.l = v * 60;
+          p.k = v * 70;
+          p.m = w * 60;
+          p.k2 = w * 70;
+          p.a = -w * 30;
+          p.b = -v * 30;
+          break;
+        case "e9":
+          p.a = ((t / 2) * 360) % 360;
+          p.b = -p.a;
+          break;
+        case "e11":
+          p.a = s * 90;
+          p.b = -s * 90;
+          break;
+        case "e12":
+          u = Math.sin(ph * 2 * Math.PI);
+          p.a = Math.max(u, 0) * amp * 170;
+          p.b = -Math.max(-u, 0) * amp * 170;
+          break;
+      }
+      return p;
+    }
+
+    function regBone(b) {
+      if (!b || !b.name || bones[b.name]) return;
+      bones[b.name] = b;
+      bindQuat[b.name] = b.quaternion.clone();
+      bindEuler[b.name] = {
+        x: b.rotation.x,
+        y: b.rotation.y,
+        z: b.rotation.z,
+      };
+      bindPos[b.name] = b.position.clone();
+    }
+
+    function boneKey(short) {
+      const candidates = [short, "mixamorig:" + short];
+      for (const c of candidates) if (bones[c]) return c;
+      const keys = Object.keys(bones);
+      return (
+        keys.find((k) => k === short || k.endsWith(":" + short) || k.endsWith(short)) ||
+        null
+      );
+    }
+
+    function cacheBones(obj) {
+      bones = {};
+      bindQuat = {};
+      bindEuler = {};
+      bindPos = {};
+      obj.traverse((o) => {
+        if (o.isBone) regBone(o);
+        if (o.isSkinnedMesh && o.skeleton && o.skeleton.bones) {
+          o.skeleton.bones.forEach(regBone);
+        }
+      });
+    }
+
+    function resetBones() {
+      for (const n in bindEuler) {
+        const b = bones[n];
+        const e = bindEuler[n];
+        if (b && e) {
+          b.rotation.set(e.x, e.y, e.z);
+          if (bindPos[n]) b.position.copy(bindPos[n]);
+        }
+      }
+    }
+
+    function rotBone(short, dx, dy, dz) {
+      const key = boneKey(short);
+      const b = key && bones[key];
+      const e = key && bindEuler[key];
+      if (!b || !e) return;
+      b.rotation.set(e.x + dx, e.y + dy, e.z + dz);
+    }
+
+    /** نفس منطق draw() في index: زاوية الذراع من الوضع الرأسي (0=للأسفل، 90=أفقي). */
+    function applyDaabPose(p) {
+      resetBones();
+      const D = Math.PI / 180;
+      const off = (a, b) => b * Math.max(0, 1 - Math.abs(a) / 25);
+      const aa = p.a + off(p.a, -26);
+      const bb = p.b + off(p.b, 26);
+      const bb3d = -bb;
+
+      if (exId === "e9") {
+        const w = p.a * D;
+        rotBone("LeftArm", 0, w, w * 0.45);
+        rotBone("RightArm", 0, -w, -w * 0.45);
+      } else if (exId === "e11") {
+        const s = (90 - aa) * D;
+        rotBone("LeftArm", 0, 0, s);
+        rotBone("RightArm", 0, 0, -s);
+      } else {
+        const leftX = (aa - 90) * D;
+        const rightX = (bb3d - 90) * D;
+        rotBone("LeftArm", leftX, 0, 0);
+        rotBone("RightArm", rightX, 0, 0);
+        rotBone("LeftForeArm", -p.ea * D, 0, 0);
+        rotBone("RightForeArm", -p.eb * D, 0, 0);
+      }
+
+      const lThigh = (p.l - p.sp) * D;
+      const rThigh = (p.m + p.sp) * D;
+      rotBone("LeftUpLeg", -lThigh, 0, 0);
+      rotBone("RightUpLeg", -rThigh, 0, 0);
+      rotBone("LeftLeg", -p.k * D, 0, 0);
+      rotBone("RightLeg", -p.k2 * D, 0, 0);
+
+      const hKey = boneKey("Hips");
+      const hips = hKey && bones[hKey];
+      if (hips && bindPos[hKey]) {
+        hips.position.y = bindPos[hKey].y - p.dy * 0.014;
+      }
+      model.traverse((o) => {
+        if (o.isSkinnedMesh && o.skeleton) o.skeleton.update();
+      });
+    }
+
+    function stopMixer() {
+      if (current) {
+        current.stop();
+        current = null;
+      }
+    }
+
+    function startExercise(id, label) {
+      document.querySelectorAll("#exList button").forEach((b) => {
+        b.classList.toggle("on", b.dataset.ex === id);
+      });
+      if (!model) {
+        pendingEx = { id, label };
+        document.getElementById("exTitle").textContent =
+          "التمرين: " + label + " (ينتظر تحميل الشخصية…)";
+
+        return;
+      }
+      stopMixer();
+      exId = id;
+      exT = 0;
+      pendingEx = null;
+      const ok = !!boneKey("Hips");
+      document.getElementById("exTitle").textContent =
+        "التمرين: " +
+        label +
+        (ok ? "" : " — تعذّر ربط العظام، حدّثي الصفحة");
+      animList.querySelectorAll("button").forEach((b) => b.classList.remove("on"));
+    }
+
+    function resumePendingExercise() {
+      if (!pendingEx || !model) return;
+      const { id, label } = pendingEx;
+      startExercise(id, label);
+    }
+
+    function buildExList() {
+      const el = document.getElementById("exList");
+      if (el.dataset.built) return;
+      el.dataset.built = "1";
+      EX.forEach(([id, label]) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = label;
+        b.dataset.ex = id;
+        b.onclick = () => startExercise(id, label);
+        el.appendChild(b);
+      });
+    }
+
+    function resize() {
+      const w = mount.clientWidth;
+      const h = mount.clientHeight;
+      camera.aspect = w / Math.max(h, 1);
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }
+
+    function fitModel(obj) {
+      obj.rotation.set(0, 0, 0);
+      obj.updateMatrixWorld(true);
+      let box = new THREE.Box3().setFromObject(obj);
+      if (box.isEmpty()) return false;
+      const size = box.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z, 0.001);
+      if (maxDim > 10) obj.scale.multiplyScalar(0.01);
+      else if (maxDim < 0.05) obj.scale.multiplyScalar(50);
+      obj.updateMatrixWorld(true);
+      box = new THREE.Box3().setFromObject(obj);
+      const center = box.getCenter(new THREE.Vector3());
+      obj.position.x -= center.x;
+      obj.position.z -= center.z;
+      obj.position.y -= box.min.y;
+      obj.rotation.y = 0;
+      obj.updateMatrixWorld(true);
+      const h = box.max.y - box.min.y;
+      const dist = Math.max(2.6, h * 2.2);
+      camera.position.set(0, Math.max(0.85, h * 0.55), -dist);
+      controls.target.set(0, h * 0.45, 0);
+      controls.update();
+      return true;
+    }
+
+    function prepMeshes(obj) {
+      obj.traverse((ch) => {
+        if (ch.isSkinnedMesh || ch.isMesh) {
+          ch.castShadow = ch.receiveShadow = true;
+          ch.frustumCulled = false;
+          const mats = ch.material
+            ? Array.isArray(ch.material)
+              ? ch.material
+              : [ch.material]
+            : [];
+          mats.forEach((m) => {
+            if (!m) return;
+            m.side = THREE.DoubleSide;
+            if (m.metalness > 0.4) m.metalness = 0.15;
+            m.roughness = Math.min(m.roughness || 0.6, 0.85);
+          });
+        }
+      });
+    }
+
+    function clearModel() {
+      exId = null;
+      exT = 0;
+      bones = {};
+      animList.innerHTML = "";
+      animList.hidden = true;
+      actions = {};
+      current = null;
+      mixer = null;
+      if (model) {
+        scene.remove(model);
+        model.traverse((c) => {
+          if (c.geometry) c.geometry.dispose();
+          if (c.material) {
+            if (Array.isArray(c.material)) c.material.forEach((m) => m.dispose());
+            else c.material.dispose();
+          }
+        });
+        model = null;
+      }
+    }
+
+    function updateSkinned() {
+      if (!model) return;
+      model.traverse((o) => {
+        if (o.isSkinnedMesh && o.skeleton) o.skeleton.update();
+      });
+    }
+
+    function playAnim(name) {
+      if (!actions[name]) return;
+      exId = null;
+      if (current) current.fadeOut(0.25);
+      current = actions[name];
+      current.reset().fadeIn(0.25).play();
+      animList.querySelectorAll("button").forEach((b) => {
+        b.classList.toggle("on", b.dataset.anim === name);
+      });
+    }
+
+    function loadGender(g) {
+      gender = g;
+      who.textContent = MODELS[g].title;
+      document.getElementById("btnF").classList.toggle("on", g === "female");
+      document.getElementById("btnM").classList.toggle("on", g === "male");
+      loadEl.style.display = "grid";
+      loadEl.textContent = "جاري تحميل الشخصية…";
+      loadEl.classList.remove("err");
+      clearModel();
+
+      loader.load(
+        MODELS[g].path,
+        (fbx) => {
+          model = fbx;
+          prepMeshes(model);
+          scene.add(model);
+          const ok = fitModel(model);
+          if (!ok) {
+            meta.textContent =
+              "الملف تحمّل لكن لا شبكة (mesh) ظاهرة. تأكدي أن التصدير من Mixamo يشمل الشخصية.";
+          }
+          cacheBones(model);
+          resumePendingExercise();
+          if (!exId) startExercise("e2", "ثني الكوع");
+
+          if (fbx.animations && fbx.animations.length) {
+            mixer = new THREE.AnimationMixer(model);
+            fbx.animations.forEach((clip) => {
+              actions[clip.name] = mixer.clipAction(clip);
+            });
+            const names = Object.keys(actions);
+            meta.textContent =
+              "وُجد " +
+              names.length +
+              " حركة. اختاري واحدة — إن اختفت الشخصية أوقفي الحركة:";
+            animList.hidden = false;
+            const stop = document.createElement("button");
+            stop.type = "button";
+            stop.textContent = "وقوف ثابت (بدون حركة)";
+            stop.className = "on";
+            stop.onclick = () => {
+              stopMixer();
+              exId = null;
+              resetBones();
+              updateSkinned();
+              fitModel(model);
+              animList
+                .querySelectorAll("button")
+                .forEach((b) => b.classList.remove("on"));
+              stop.classList.add("on");
+            };
+            animList.appendChild(stop);
+            names.forEach((n) => {
+              const b = document.createElement("button");
+              b.type = "button";
+              b.textContent = n;
+              b.dataset.anim = n;
+              b.onclick = () => {
+                stop.classList.remove("on");
+                exId = null;
+                playAnim(n);
+              };
+              animList.appendChild(b);
+            });
+          } else {
+            meta.textContent =
+              "النموذج بدون حركات. الشخصية يفترض تظهر واقفة — لفّي المشهد بالماوس.";
+          }
+          loadEl.style.display = "none";
+        },
+        undefined,
+        (err) => {
+          console.error(err);
+          loadEl.classList.add("err");
+          loadEl.textContent =
+            "تعذّر التحميل. افتحي الصفحة عبر localhost وليس file://";
+        },
+      );
+    }
+
+    document.getElementById("btnF").onclick = () => loadGender("female");
+    document.getElementById("btnM").onclick = () => loadGender("male");
+
+    function tick() {
+      requestAnimationFrame(tick);
+      const d = clock.getDelta();
+      if (exId && model) {
+        exT += d;
+        applyDaabPose(pose(exId, exT, 1));
+      } else if (mixer) mixer.update(d);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    buildExList();
+    resize();
+    window.addEventListener("resize", resize);
+    loadGender("female");
+    tick();
+  </script>
+</body>
+</html>
