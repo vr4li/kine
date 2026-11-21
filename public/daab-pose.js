@@ -225,7 +225,7 @@
         alignReady: false,
       };
     }
-    if (id === "e3" || id === "e4") {
+    if (id === "e3" || id === "e4" || id === "e17") {
       if (!legAlignOk(map))
         return {
           level: "warn",
@@ -297,7 +297,30 @@
       return warn("اثنِ أو افرد الكوع", "Bend or straighten elbow");
     }
 
-    /* رفع الكعبين: يرتفع الكتفان قليلاً عن وضع الوقوف */
+    /* ضخ وضخ الكاحل (جالس): فرق ارتفاع الكاحل عن الركبة */
+    if (id === "e17") {
+      var lka = kp(map, "left_knee"),
+        laa = kp(map, "left_ankle"),
+        rka = kp(map, "right_knee"),
+        raa = kp(map, "right_ankle");
+      var useLeft = laa && lka && laa.score >= KP_MIN && lka.score >= KP_MIN;
+      var uK = useLeft ? lka : rka,
+        uA = useLeft ? laa : raa;
+      if (!uK || !uA) return warn("أظهر الكاحل والساق في الإطار", "Show ankle and lower leg", false);
+      var flex = (uK.y - uA.y) / T;
+      if (counting)
+        repCycle(
+          flex,
+          0.32,
+          0.14,
+          false,
+          msg("لم تُحسب — حرّك كاحلك للأعلى", "Not counted — flex ankle more")
+        );
+      if (flex >= 0.32) return good("✓ ممتاز — ارجع ببطء", "✓ Great — return slowly");
+      return warn("↑ حرّك كاحلك للأعلى والأسفل", "↑ Pump ankle up and down");
+    }
+
+    /* رفع الكعبين (واقف): يرتفع الكتفان قليلاً عن وضع الوقوف */
     if (id === "e4") {
       var sh = mid(kp(map, "left_shoulder"), kp(map, "right_shoulder"));
       if (!sh) return warn("أظهر كتفيك للكاميرا", "Show your shoulders", false);

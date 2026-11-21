@@ -6,8 +6,8 @@ import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
 import { clone as cloneSkinned } from "three/addons/utils/SkeletonUtils.js";
 
 const MODELS = {
-  female: "models/x-bot.fbx",
-  male: "models/y-bot.fbx",
+  female: "/models/x-bot.fbx",
+  male: "/models/y-bot.fbx",
 };
 
 const loader = new FBXLoader();
@@ -203,13 +203,28 @@ function rotBone(short, dx, dy, dz, bones, bindEuler) {
   b.rotation.set(e.x + dx, e.y + dy, e.z + dz);
 }
 
+/** تدوير على X فقط — يمنع انقلاب اليد من Y/Z */
+function rotBoneX(short, dx, bones, bindEuler) {
+  const key = boneKey(short, bones);
+  const b = key && bones[key];
+  const e = key && bindEuler[key];
+  if (!b || !e) return;
+  b.rotation.set(e.x + dx, e.y, e.z);
+}
+
+/** زاوية SVG من الرأسي: 0=للأسفل، 90=أفقي (T-pose)، فوق 90=للأعلى */
+function armDeltaX(deg) {
+  const D = Math.PI / 180;
+  if (deg <= 90) return (90 - deg) * D;
+  return (deg - 90) * D;
+}
+
 function applyDaabPose(p, exId, model, bones, bindEuler, bindPos) {
   resetBones(bones, bindEuler, bindPos);
   const D = Math.PI / 180;
   const off = (a, b) => b * Math.max(0, 1 - Math.abs(a) / 25);
   const aa = p.a + off(p.a, -26);
   const bb = p.b + off(p.b, 26);
-  const bb3d = -bb;
 
   if (exId === "e9") {
     const w = p.a * D;
@@ -220,12 +235,10 @@ function applyDaabPose(p, exId, model, bones, bindEuler, bindPos) {
     rotBone("LeftArm", 0, 0, s, bones, bindEuler);
     rotBone("RightArm", 0, 0, -s, bones, bindEuler);
   } else {
-    const leftX = (aa - 90) * D;
-    const rightX = (bb3d - 90) * D;
-    rotBone("LeftArm", leftX, 0, 0, bones, bindEuler);
-    rotBone("RightArm", rightX, 0, 0, bones, bindEuler);
-    rotBone("LeftForeArm", -p.ea * D, 0, 0, bones, bindEuler);
-    rotBone("RightForeArm", -p.eb * D, 0, 0, bones, bindEuler);
+    rotBoneX("LeftArm", armDeltaX(aa), bones, bindEuler);
+    rotBoneX("RightArm", -armDeltaX(-bb), bones, bindEuler);
+    rotBoneX("LeftForeArm", -(p.ea * D), bones, bindEuler);
+    rotBoneX("RightForeArm", -(p.eb * D), bones, bindEuler);
   }
 
   rotBone("LeftUpLeg", -(p.l - p.sp) * D, 0, 0, bones, bindEuler);
@@ -286,6 +299,10 @@ class CoachView {
       this._resizeTimer = setTimeout(() => this.resize(), 120);
     };
     window.addEventListener("resize", this._onResize);
+    if (typeof ResizeObserver !== "undefined") {
+      this._ro = new ResizeObserver(() => this.resize());
+      this._ro.observe(this.mount);
+    }
     this.resize();
   }
 
@@ -299,6 +316,7 @@ class CoachView {
       });
     }
     this.model = cloneSkinned(master);
+    this.model.rotation.y = Math.PI;
     this.scene.add(this.model);
     this.bodyH = scaleToMeters(this.model);
     const dist = Math.max(2.4, this.bodyH * 2.15);
@@ -346,6 +364,10 @@ class CoachView {
   }
 
   dispose() {
+    if (this._ro) {
+      this._ro.disconnect();
+      this._ro = null;
+    }
     window.removeEventListener("resize", this._onResize);
     if (this.model) {
       this.scene.remove(this.model);
@@ -404,18 +426,83 @@ const api = {
   set active(v) {
     active = !!v;
   },
+  releaseExtras() {
+    if (heroViews) {
+      if (heroViews.raf) cancelAnimationFrame(heroViews.raf);
+      heroViews.c.dispose();
+      heroViews.u.dispose();
+      heroViews = null;
+    }
+    abortThumbs();
+  },
+  sessionOff() {
+    sessionLocked = false;
+    if (renderRaf) cancelAnimationFrame(renderRaf);
+    renderRaf = 0;
+    if (views.coach) {
+      views.coach.dispose();
+      views.coach = null;
+    }
+    if (views.user) {
+      views.user.dispose();
+      views.user = null;
+    }
+    readyCoach = false;
+    active = false;
+    pending.coach = pending.user = null;
+    pending.needUser = false;
+  },
   async mountSession(coachEl, userEl) {
+    if (!coachEl) return false;
+  if (readyCoach && views.coach && views.coach.mount === coachEl) {
+    coachEl.hidden = false;
+    coachEl.removeAttribute("aria-hidden");
+    if (userEl) {
+      userEl.hidden = false;
+      userEl.removeAttribute("aria-hidden");
+    }
+    active = true;
+    sessionLocked = true;
+    views.coach.setVisible(true);
+    views.coach.resize();
+    return true;
+  }
+    sessionLocked = true;
+    abortThumbs();
+    this.releaseExtras();
     userMount = userEl;
-    await loadMaster("female");
-    if (!views.coach) {
+    coachEl.hidden = false;
+    coachEl.removeAttribute("aria-hidden");
+    if (userEl) {
+      userEl.hidden = false;
+      userEl.removeAttribute("aria-hidden");
+    }
+    try {
+      await loadMaster("female");
+      if (views.coach) {
+        views.coach.dispose();
+        views.coach = null;
+      }
+      if (views.user) {
+        views.user.dispose();
+        views.user = null;
+      }
       views.coach = new CoachView(coachEl, "female", 0x0c3d31);
       views.coach.setVisible(true);
       await views.coach.attach("female");
+      readyCoach = true;
+      active = true;
+      views.coach.resize();
+      setTimeout(() => views.coach && views.coach.resize(), 150);
+      setTimeout(() => views.coach && views.coach.resize(), 500);
+      return true;
+    } catch (err) {
+      sessionLocked = false;
+      throw err;
     }
-    readyCoach = true;
-    return true;
   },
   async ensureSimUser() {
+    if (!readyCoach || !views.coach || !active) return false;
     try {
       return await ensureUserView();
     } catch (e) {
@@ -455,6 +542,70 @@ const api = {
     readyCoach = false;
     active = false;
   },
+  async paintLibraryThumbs(root) {
+    if (!root || views.coach || sessionLocked || active) return;
+    await loadMaster("female");
+    if (views.coach || sessionLocked || active) return;
+    const slots = root.querySelectorAll(".ex-coach3d[data-rig]");
+    if (!slots.length) return;
+    if (views.coach || sessionLocked || active) return;
+    const thumb = await ensureThumbView();
+    if (views.coach || sessionLocked || active) {
+      abortThumbs();
+      return;
+    }
+    const rigs = {};
+    slots.forEach((el) => {
+      const r = el.dataset.rig || "e1";
+      rigs[r] = true;
+    });
+    for (const rig in rigs) {
+      thumb.setExercise(rig);
+      thumb.applyTime(0.75, 0.9);
+      thumb.resize();
+      thumb.render();
+      thumbCache[rig] = thumb.renderer.domElement.toDataURL("image/png");
+    }
+    slots.forEach((el) => {
+      const u = thumbCache[el.dataset.rig || "e1"];
+      if (u) {
+        el.style.backgroundImage = "url(" + u + ")";
+        el.classList.add("has-thumb");
+      }
+    });
+    if (thumbView) {
+      thumbView.dispose();
+      thumbView = null;
+    }
+  },
+  async paintHeroPeek(root) {
+    if (!root) return;
+    await this.paintLibraryThumbs(root);
+  },
 };
+
+let thumbView = null;
+let thumbCache = {};
+let heroViews = null;
+let sessionLocked = false;
+
+function abortThumbs() {
+  if (thumbView) {
+    thumbView.dispose();
+    thumbView = null;
+  }
+}
+
+async function ensureThumbView() {
+  if (thumbView) return thumbView;
+  const mount = document.createElement("div");
+  mount.style.cssText =
+    "position:fixed;left:-9999px;top:0;width:220px;height:260px;pointer-events:none;opacity:0";
+  document.body.appendChild(mount);
+  thumbView = new CoachView(mount, "female", 0x0c3d31);
+  thumbView.setVisible(true);
+  await thumbView.attach("female");
+  return thumbView;
+}
 
 window.DaabCoach3D = api;
