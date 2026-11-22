@@ -15,7 +15,7 @@ export const STAND_CALIB = {
   always: true,
   rightArm: {
     x: 198 * (Math.PI / 180),
-    y: 310 * (Math.PI / 180),
+    y: 89 * (Math.PI / 180),
     z: -71 * (Math.PI / 180),
   },
   leftArm: {
