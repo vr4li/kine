@@ -23,8 +23,8 @@ export const STAND_CALIB = {
     y: 269 * (Math.PI / 180),
     z: -244 * (Math.PI / 180),
   },
-  rightForeArm: { x: 0, y: 22 * (Math.PI / 180), z: 0 },
-  leftForeArm: { x: 7 * (Math.PI / 180), y: 2 * (Math.PI / 180), z: 0 },
+  rightForeArm: { x: 0, y: 0, z: 0 },
+  leftForeArm: { x: 0, y: 0, z: 0 },
 };
 
 function poseNeutral() {
