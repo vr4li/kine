@@ -157,7 +157,7 @@
 
     /** مصدر واحد للدرجات — يُنسَخ إلى daab-coach3d.js */
     const STAND_CALIB_DEG = {
-      rightArm: { x: 0, y: 310, z: -71 },
+      rightArm: { x: 0, y: 310, z: 71 },
       leftArm: { x: 17, y: 283, z: -244 },
       rightForeArm: { x: 0, y: 22, z: 0 },
       leftForeArm: { x: 7, y: 2, z: 0 },
@@ -175,7 +175,7 @@
       always: true,
       ...calibFromDeg(STAND_CALIB_DEG),
     };
-    const STAND_VER = "2025-11-22a";
+    const STAND_VER = "2025-11-22b";
     const FACE_Y = Math.PI;
 
     const mount = document.getElementById("view");
@@ -698,6 +698,7 @@
         ["leftForeArm", "ساعد يسار"],
       ];
       const axes = ["x", "y", "z"];
+      const axisLabel = { x: "X", y: "Y", z: "Z" };
       bones.forEach(([key, label]) => {
         const row = document.createElement("div");
         row.style.fontSize = "0.85rem";
@@ -719,7 +720,7 @@
             applyCurrentPose();
           };
           const sp = document.createElement("span");
-          sp.textContent = " " + ax.toUpperCase() + "° ";
+          sp.textContent = " " + axisLabel[ax] + "° ";
           row.appendChild(sp);
           row.appendChild(inp);
         });

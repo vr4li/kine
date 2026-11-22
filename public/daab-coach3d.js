@@ -10,10 +10,10 @@ const MODELS = {
   male: "/models/y-bot.fbx",
 };
 
-/** وقوف تام — معايرة 2025-11-22a — مصدر الدرجات: coach-3d-local.html → STAND_CALIB_DEG */
+/** وقوف تام — معايرة 2025-11-22b — مصدر الدرجات: coach-3d-local.html → STAND_CALIB_DEG */
 export const STAND_CALIB = {
   always: true,
-  rightArm: { x: 0, y: 310 * (Math.PI / 180), z: -71 * (Math.PI / 180) },
+  rightArm: { x: 0, y: 310 * (Math.PI / 180), z: 71 * (Math.PI / 180) },
   leftArm: {
     x: 17 * (Math.PI / 180),
     y: 283 * (Math.PI / 180),
