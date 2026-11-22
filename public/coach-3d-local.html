@@ -113,7 +113,7 @@
     </div>
     <div class="card">
       <h2>ضبط وقوف تام</h2>
-      <p>الوجه باتجاهك (ليس الظهر). الذراعان لأسفل. الأرقام بالدرجات تُحوَّل تلقائياً — نفس <code>STAND_CALIB</code> في الجلسة.</p>
+      <p>الوجه باتجاهك (ليس الظهر). الجدول: <strong>X ثم Y ثم Z</strong> (يسار→يمين) — نفس ترتيب الأرقام التي ترسلينها.</p>
       <div id="calib" class="row" style="flex-direction:column;align-items:stretch;gap:8px;max-width:420px;margin:12px auto 0"></div>
     </div>
     <div class="card">
@@ -175,7 +175,7 @@
       always: true,
       ...calibFromDeg(STAND_CALIB_DEG),
     };
-    const STAND_VER = "2025-11-22c";
+    const STAND_VER = "2025-11-22d";
     const FACE_Y = Math.PI;
 
     const mount = document.getElementById("view");
@@ -698,34 +698,46 @@
         ["leftForeArm", "ساعد يسار"],
       ];
       const axes = ["x", "y", "z"];
-      const axisLabel = { x: "X", y: "Y", z: "Z" };
+      const tbl = document.createElement("table");
+      tbl.style.cssText =
+        "width:100%;max-width:520px;margin:8px auto 0;border-collapse:collapse;direction:ltr;font-size:0.88rem";
+      const thead = document.createElement("thead");
+      const theadRow = document.createElement("tr");
+      theadRow.innerHTML =
+        "<th style=text-align:right;color:#0c3d31;direction:rtl;padding:6px 8px>العظم</th><th>X°</th><th>Y°</th><th>Z°</th>";
+      thead.appendChild(theadRow);
+      tbl.appendChild(thead);
+      const tbody = document.createElement("tbody");
       bones.forEach(([key, label]) => {
-        const row = document.createElement("div");
-        row.style.fontSize = "0.85rem";
-        row.innerHTML =
-          "<strong style=color:#0c3d31>" +
-          label +
-          "</strong>";
+        const tr = document.createElement("tr");
+        const td0 = document.createElement("td");
+        td0.textContent = label;
+        td0.style.cssText = "text-align:right;direction:rtl;font-weight:600;color:#0c3d31;padding:6px 8px";
+        tr.appendChild(td0);
         axes.forEach((ax) => {
+          const td = document.createElement("td");
+          td.style.textAlign = "center";
           const inp = document.createElement("input");
           inp.type = "number";
           inp.step = "1";
           inp.value = String(STAND_CALIB_DEG[key][ax]);
-          inp.style.width = "4.2rem";
-          inp.title = ax + " (درجة)";
+          inp.style.cssText = "width:4.5rem;text-align:center";
+          inp.dataset.bone = key;
+          inp.dataset.axis = ax;
+          inp.title = label + " — محور " + ax.toUpperCase();
           inp.oninput = () => {
             const v = Number(inp.value) || 0;
             STAND_CALIB_DEG[key][ax] = v;
             STAND_CALIB[key][ax] = v * DEG;
             applyCurrentPose();
           };
-          const sp = document.createElement("span");
-          sp.textContent = " " + axisLabel[ax] + "° ";
-          row.appendChild(sp);
-          row.appendChild(inp);
+          td.appendChild(inp);
+          tr.appendChild(td);
         });
-        el.appendChild(row);
+        tbody.appendChild(tr);
       });
+      tbl.appendChild(tbody);
+      el.appendChild(tbl);
     }
 
     function tick() {
