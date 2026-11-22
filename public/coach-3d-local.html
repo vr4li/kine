@@ -103,7 +103,7 @@
     <p>X Bot (أنثى) · Y Bot (ذكر) — لا تُنشر على الإنترنت</p>
   </header>
   <div class="wrap">
-    <p class="banner">صفحة ضبط الوقوف — نفس منطق الجلسة. بعد التعديل انسخي قيم STAND_CALIB إلى <code>daab-coach3d.js</code>.</p>
+    <p class="banner" id="standVer">صفحة ضبط الوقوف — نفس منطق الجلسة. بعد التعديل انسخي قيم STAND_CALIB إلى <code>daab-coach3d.js</code>.</p>
     <div id="view">
       <div class="load" id="load">جاري تحميل الشخصية…</div>
     </div>
@@ -155,14 +155,27 @@
       male: { path: "/models/y-bot.fbx", title: "شخصية الرجال (Y Bot)" },
     };
 
-    /** نفس daab-coach3d.js — عدّلي هنا ثم انسخي للملف الرئيسي */
+    /** مصدر واحد للدرجات — يُنسَخ إلى daab-coach3d.js */
+    const STAND_CALIB_DEG = {
+      rightArm: { x: 0, y: 310, z: -71 },
+      leftArm: { x: 17, y: 283, z: -244 },
+      rightForeArm: { x: 0, y: 22, z: 0 },
+      leftForeArm: { x: 7, y: 2, z: 0 },
+    };
+    const DEG = Math.PI / 180;
+    function calibFromDeg(deg) {
+      const out = {};
+      for (const bone in deg) {
+        out[bone] = {};
+        for (const ax in deg[bone]) out[bone][ax] = deg[bone][ax] * DEG;
+      }
+      return out;
+    }
     const STAND_CALIB = {
       always: true,
-      rightArm: { x: 0, y: 0, z: 0 },
-      leftArm: { x: 0, y: 0, z: 0 },
-      rightForeArm: { x: 0, y: 0, z: 0 },
-      leftForeArm: { x: 0, y: 0, z: 0 },
+      ...calibFromDeg(STAND_CALIB_DEG),
     };
+    const STAND_VER = "2025-11-22a";
     const FACE_Y = Math.PI;
 
     const mount = document.getElementById("view");
@@ -405,9 +418,13 @@
       const bb3d = -bb;
 
       if (exId === "e9") {
-        const w = p.a * D;
-        rotBone("LeftArm", 0, w, w * 0.45);
-        rotBone("RightArm", 0, -w, -w * 0.45);
+        const hangZ = 90 * D;
+        const a = p.a * D;
+        const b = p.b * D;
+        rotBone("RightArm", a - hangZ, 0, -hangZ);
+        rotBone("LeftArm", b - hangZ, 0, hangZ);
+        rotBone("RightForeArm", 0, 0, 0);
+        rotBone("LeftForeArm", 0, 0, 0);
       } else if (exId === "e11") {
         const s = (90 - aa) * D;
         rotBone("LeftArm", 0, 0, s);
@@ -692,11 +709,13 @@
           const inp = document.createElement("input");
           inp.type = "number";
           inp.step = "1";
-          inp.value = "0";
+          inp.value = String(STAND_CALIB_DEG[key][ax]);
           inp.style.width = "4.2rem";
           inp.title = ax + " (درجة)";
           inp.oninput = () => {
-            STAND_CALIB[key][ax] = (Number(inp.value) || 0) * (Math.PI / 180);
+            const v = Number(inp.value) || 0;
+            STAND_CALIB_DEG[key][ax] = v;
+            STAND_CALIB[key][ax] = v * DEG;
             applyCurrentPose();
           };
           const sp = document.createElement("span");
@@ -721,6 +740,8 @@
 
     buildExList();
     buildCalibUI();
+    const sv = document.getElementById("standVer");
+    if (sv) sv.textContent = "معايرة وقوف «" + STAND_VER + "» — محفوظة في الملف.";
     resize();
     window.addEventListener("resize", resize);
     loadGender("female");

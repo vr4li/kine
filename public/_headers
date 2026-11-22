@@ -16,6 +16,9 @@
 /daab-coach3d.js
   Cache-Control: public, max-age=3600
 
+/coach-3d-local.html
+  Cache-Control: no-cache, must-revalidate
+
 /models/*
   Cache-Control: public, max-age=604800
 

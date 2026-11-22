@@ -10,13 +10,17 @@ const MODELS = {
   male: "/models/y-bot.fbx",
 };
 
-/** وقوف تام — اضبطي هنا (راديان) بدون تمرين ثم انقلي القيم للتمارين */
+/** وقوف تام — معايرة 2025-11-22a — مصدر الدرجات: coach-3d-local.html → STAND_CALIB_DEG */
 export const STAND_CALIB = {
   always: true,
-  rightArm: { x: 0, y: 0, z: 0 },
-  leftArm: { x: 0, y: 0, z: 0 },
-  rightForeArm: { x: 0, y: 0, z: 0 },
-  leftForeArm: { x: 0, y: 0, z: 0 },
+  rightArm: { x: 0, y: 310 * (Math.PI / 180), z: -71 * (Math.PI / 180) },
+  leftArm: {
+    x: 17 * (Math.PI / 180),
+    y: 283 * (Math.PI / 180),
+    z: -244 * (Math.PI / 180),
+  },
+  rightForeArm: { x: 0, y: 22 * (Math.PI / 180), z: 0 },
+  leftForeArm: { x: 7 * (Math.PI / 180), y: 2 * (Math.PI / 180), z: 0 },
 };
 
 function poseNeutral() {
@@ -272,9 +276,14 @@ function applyDaabPose(p, exId, model, bones, bindEuler, bindPos) {
   const bb3d = -bb;
 
   if (exId === "e9") {
-    const w = p.a * D;
-    rotBone("LeftArm", 0, w, w * 0.45, bones, bindEuler);
-    rotBone("RightArm", 0, -w, -w * 0.45, bones, bindEuler);
+    // دائرة في المستوى الأمامي (مثل رسم SVG)، بعد وقوف الذراعين لأسفل
+    const hangZ = 90 * D;
+    const a = p.a * D;
+    const b = p.b * D;
+    rotBone("RightArm", a - hangZ, 0, -hangZ, bones, bindEuler);
+    rotBone("LeftArm", b - hangZ, 0, hangZ, bones, bindEuler);
+    rotBone("RightForeArm", 0, 0, 0, bones, bindEuler);
+    rotBone("LeftForeArm", 0, 0, 0, bones, bindEuler);
   } else if (exId === "e11") {
     const s = (90 - aa) * D;
     rotBone("LeftArm", 0, 0, s, bones, bindEuler);
