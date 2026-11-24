@@ -27,6 +27,16 @@ export const STAND_CALIB = {
   leftForeArm: { x: 0, y: 0, z: 0 },
 };
 
+/** مصغّر بطاقة المكتبة — معتمد 2025-11-25 */
+export const LIB_THUMB = {
+  renderW: 300,
+  renderH: 340,
+  cameraDistBody: 3.35,
+  cameraFov: 42,
+  cssBgSize: "77% auto",
+  cssBgPosY: "calc(50% - 4%)",
+};
+
 function poseNeutral() {
   return {
     a: 0,
@@ -386,8 +396,8 @@ class CoachView {
     this.scene.add(this.model);
     this.bodyH = scaleToMeters(this.model);
     if (this.thumbMode) {
-      const dist = Math.max(3.2, this.bodyH * 3.35);
-      this.camera.fov = 42;
+      const dist = Math.max(3.2, this.bodyH * LIB_THUMB.cameraDistBody);
+      this.camera.fov = LIB_THUMB.cameraFov;
       this.camera.position.set(0, this.bodyH * 0.5, -dist);
       this.camera.lookAt(0, this.bodyH * 0.46, 0);
     } else {
@@ -688,6 +698,7 @@ const api = {
     }
   },
   STAND_CALIB,
+  LIB_THUMB,
   applyStandingPose,
 };
 
@@ -707,7 +718,7 @@ async function ensureThumbView() {
   if (thumbView) return thumbView;
   const mount = document.createElement("div");
   mount.style.cssText =
-    "position:fixed;left:-9999px;top:0;width:300px;height:340px;pointer-events:none;opacity:0";
+    `position:fixed;left:-9999px;top:0;width:${LIB_THUMB.renderW}px;height:${LIB_THUMB.renderH}px;pointer-events:none;opacity:0`;
   document.body.appendChild(mount);
   thumbView = new CoachView(mount, "female", 0x0c3d31, { thumbMode: true });
   thumbView.setVisible(true);
