@@ -12,7 +12,7 @@
 <meta property="og:locale" content="ar_SA">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 150'%3E%3Crect width='150' height='150' rx='27' fill='%230B4A42'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='9.5' stroke-linecap='round'%3E%3Cpath d='M46.8 82.3L112.5 28M74.8 58V90M74.8 90L57.5 125.5M74.8 90L92.5 125.5'/%3E%3C/g%3E%3Ccircle cx='74.8' cy='31.8' r='10.5' fill='%23fff'/%3E%3Cg fill='%23E07A3F'%3E%3Ccircle cx='112.5' cy='28' r='7'/%3E%3Ccircle cx='74.8' cy='58' r='6.5'/%3E%3Ccircle cx='74.8' cy='90' r='6.5'/%3E%3Ccircle cx='46.8' cy='82.3' r='7'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="stylesheet" href="fonts/plex.css">
-<link rel="modulepreload" href="/daab-coach3d.js?v=20251125saved">
+<link rel="modulepreload" href="/daab-coach3d.js?v=20251125hero">
 <link rel="preload" href="/models/x-bot.fbx" as="fetch" crossorigin>
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
@@ -78,6 +78,7 @@ html[data-mode=child] .guide-home{display:none}
 .ex-guide .ex-tags{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .ex-guide .top .imp{margin:12px 0 0;padding-top:12px;border-top:1px solid var(--line);width:100%;font-size:calc(13px*var(--fz));flex-wrap:wrap;gap:8px}
 .ex-guide .ex-illus-wrap{position:relative;margin:14px var(--ex-pad) 0;background:var(--illus);border-radius:16px;min-height:168px;display:grid;place-items:center;padding:14px}
+.ex-guide .ex-illus-wrap .mus-eye-thumb svg{width:min(132px,74%);height:auto;display:block}
 .ex-guide .ex-num{position:absolute;top:12px;inset-inline-end:12px;width:34px;height:34px;border-radius:50%;background:var(--orange);color:#fff;font:700 calc(16px*var(--fz)) var(--fh);display:grid;place-items:center;z-index:2}
 .ex-coach3d{width:100%;min-height:156px;border-radius:14px;background:#0c3d31 center no-repeat}
 .ex-coach3d.has-thumb{background-size:var(--lib-thumb-size);background-position:var(--lib-thumb-pos);min-height:156px}
@@ -653,7 +654,7 @@ apply(get())})();
 <div class="cta"><a class="btn" href="#contact">اطلب عرضاً لعيادتك</a><a class="btn ghost" href="#how">شاهد كيف يعمل</a><a class="btn ghost" href="daab-exercise-guide.pdf" target="_blank" rel="noopener">الدليل المصوّر</a><a class="btn ghost" href="#session">جرّب جلسة تمرين</a></div>
 <p class="latin">DA'AB</p></div>
 <div class="phone" aria-label="مثال على جلسة تمرين"><div class="screen">
-<div class="hsplit" id="hero3dBox"><div class="pane"><span class="lbl">شرح التمرين</span><div class="ex-coach3d hero-peek" data-rig="e1" role="img" aria-label="معاينة 3D"></div></div><div class="pane"><span class="lbl">أنت تتمرن</span><div class="ex-coach3d hero-peek" data-rig="e1" role="img" aria-label="معاينة 3D"></div></div></div>
+<div class="hsplit" id="hero3dBox"><div class="pane"><span class="lbl">شرح التمرين</span><div class="coach3d-host hero-peek" data-hero="coach" role="img" aria-label="معاينة 3D"></div></div><div class="pane"><span class="lbl">أنت تتمرن</span><div class="coach3d-host hero-peek" data-hero="user" role="img" aria-label="معاينة 3D"></div></div></div>
 <div class="count"><span id="n">0</span> <small>من 10 تكرارات</small></div>
 <p class="msg" id="msg" aria-live="polite">جاهز؟ نبدأ بهدوء</p>
 <div class="prog"><i id="bar"></i></div>
@@ -1199,13 +1200,23 @@ function route(){
  paintWsw();if(cur.dataset.page==='cond')paintCg();
  if(['home','library','session'].indexOf(cur.dataset.page)>-1)coach3dBoot(cur.dataset.page);
 }
+var thumbPaintDeb=0;
 function libraryThumbsPaint(){
  if(typeof run!=='undefined'&&run)return;
- loadCoach3dMod().then(function(D){if(!D||!D.paintLibraryThumbs||run)return;var g=$('grid');if(!g||!g.querySelector('.ex-coach3d'))return;
-  var paint=function(){D.paintLibraryThumbs(g).catch(function(e){console.warn('libraryThumbs',e)})};
-  if(typeof requestIdleCallback==='function')requestIdleCallback(paint,{timeout:4000});else setTimeout(paint,300)})}
+ clearTimeout(thumbPaintDeb);
+ thumbPaintDeb=setTimeout(function(){
+  loadCoach3dMod().then(function(D){if(!D||!D.paintLibraryThumbs||run)return;var g=$('grid');if(!g||!g.querySelector('.ex-coach3d'))return;
+   var paint=function(){D.paintLibraryThumbs(g).catch(function(e){console.warn('libraryThumbs',e);if(run)return;setTimeout(function(){D.paintLibraryThumbs(g).catch(function(e2){console.warn('libraryThumbs retry',e2)})},900)})};
+   if(typeof requestIdleCallback==='function')requestIdleCallback(paint,{timeout:2500});else setTimeout(paint,120)})},80)}
+function heroHome3d(){
+ if(typeof run!=='undefined'&&run)return;
+ loadCoach3dMod().then(function(D){if(!D||!D.mountHeroDemo||run)return;var box=$('hero3dBox');if(!box||!document.querySelector('.page[data-page=home].on'))return;
+  var go=function(){D.mountHeroDemo(box).catch(function(e){console.warn('hero3d',e)})};
+  if(typeof requestIdleCallback==='function')requestIdleCallback(go,{timeout:3000});else setTimeout(go,200)})}
 function coach3dBoot(page){
- if(page==='library')libraryThumbsPaint();}
+ if(page==='library'){libraryThumbsPaint();if(window.DaabCoach3D&&DaabCoach3D.stopHeroDemo)DaabCoach3D.stopHeroDemo();return}
+ if(page==='home')heroHome3d();
+ else if(window.DaabCoach3D&&DaabCoach3D.stopHeroDemo)DaabCoach3D.stopHeroDemo();}
 function waitCoach3dMod(){
  if(window.DaabCoach3D)return Promise.resolve(window.DaabCoach3D);
  return new Promise(function(resolve,reject){
@@ -1507,7 +1518,7 @@ function musSvg(id){var m=MUS[musRefId(id)];if(!m)return '';var svg;if(m.eye)svg
  else svg=BODY+(m.v===B?SPINE:'')+'<g fill="#F2B08A" stroke="#F2B08A">'+m.s.map(function(k){return MZ[k]}).join('')+'</g><g fill="#E67E22" stroke="#E67E22">'+m.m.map(function(k){return MZ[k]}).join('')+'</g>';
  return '<svg viewBox="0 0 120 200" role="img" aria-hidden="true">'+svg+'</svg>'}
 function coach3dThumbBlock(id){return '<div class="ex-coach3d" data-rig="'+poseRefId(id)+'" role="img" aria-label="'+tx('معاينة الشخصية ثلاثية الأبعاد')+'"></div>'}
-function musBlock(id,compact){var m=MUS[musRefId(id)];if(!m)return '';if(compact)return coach3dThumbBlock(id);
+function musBlock(id,compact){var m=MUS[musRefId(id)];if(!m)return '';if(compact)return m.eye?'<div class="mus-eye-thumb">'+musSvg(id)+'</div>':coach3dThumbBlock(id);
  return '<div class="mus mus-text-only"><div><b>'+(m.eye?tx('لا عضلات هنا'):tx('العضلات المستهدفة'))+'</b><ul>'+m.l.map(function(r){return '<li><i class="'+(r[1]?'':'s')+'"></i>'+tx(r[0])+'</li>'}).join('')+'</ul><span class="mcap">'+tx(m.v)+(m.l.some(function(r){return !r[1]})&&!m.eye?tx(' · الغامق رئيسية والفاتح داعمة'):'')+'</span></div></div>'}
 function exOrd(id){var n=parseInt(String(id).replace(/\D/g,''),10);return isNaN(n)?0:n}
 function guideMeta(x){if(!x)return {dur:'—',rep:'—'};if(x.cat==='eye')return {dur:tx('ثبات 5–10 ثوانٍ بمتابعة هادئة'),rep:tx('6–10 تكرارات')};if(x.cat==='kid'||x.dn)return {dur:tx('ثبات 15–30 ثانية'),rep:tx('8–10 تكرارات')};if(x.cat==='bal')return {dur:tx('ثبات 3–5 ثوانٍ'),rep:tx('10–12 تكراراً')};return {dur:tx('ثبات 2–5 ثوانٍ'),rep:tx('10–15 تكراراً')}}
@@ -1727,7 +1738,7 @@ function chips(){[].forEach.call($('eyeChk').children,function(e){var k=e.datase
  [].forEach.call($('eyeDemo').querySelectorAll('[data-sc]'),function(b){b.setAttribute('aria-pressed',b.dataset.sc===eyeSc)});
  var al=$('eyeAl');al.hidden=eyeSc==='ok';if(eyeSc!=='ok')al.textContent=eyeMsg(eyeSc)}
 var coach3dLoad=null;
-function loadCoach3dMod(){if(window.DaabCoach3D)return Promise.resolve(window.DaabCoach3D);if(coach3dLoad)return coach3dLoad;coach3dLoad=waitCoach3dMod().catch(function(){return import('/daab-coach3d.js?v=20251125saved').then(function(){return window.DaabCoach3D||null})}).catch(function(e){console.warn('DaabCoach3D',e);coach3dLoad=null;return null});return coach3dLoad}
+function loadCoach3dMod(){if(window.DaabCoach3D)return Promise.resolve(window.DaabCoach3D);if(coach3dLoad)return coach3dLoad;coach3dLoad=waitCoach3dMod().catch(function(){return import('/daab-coach3d.js?v=20251125hero').then(function(){return window.DaabCoach3D||null})}).catch(function(e){console.warn('DaabCoach3D',e);coach3dLoad=null;return null});return coach3dLoad}
 function coach3dOk(){return window.DaabCoach3D&&DaabCoach3D.ready}
 function coach3dArmLoading(msg){var c1=$('coach3d1'),c2=$('coach3d2');if(!c1)return;c1.hidden=false;c2.hidden=false;c1.classList.remove('coach3d-fail');c2.classList.remove('coach3d-fail');c1.classList.add('coach3d-loading');c2.classList.add('coach3d-loading');if(msg)c1.setAttribute('data-loading',msg);$('rig1').classList.add('coach-off');$('rig2').classList.add('coach-off')}
 function coach3dFail(msg){var c1=$('coach3d1'),c2=$('coach3d2');if(!c1)return;c1.classList.remove('coach3d-loading');c2.classList.remove('coach3d-loading');c1.classList.add('coach3d-fail');c2.classList.add('coach3d-fail');var t=msg||'تعذّر تحميل الشخصية. حدّث الصفحة (Cmd+Shift+R) أو جرّب Chrome/Safari.';c1.setAttribute('data-err',t);c2.setAttribute('data-err',t)}
@@ -2074,7 +2085,7 @@ new MutationObserver(soon).observe(document.body,{subtree:true,attributes:true,a
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',soon);else soon();
 })();
 </script>
-<script type="module" src="/daab-coach3d.js?v=20251125saved"></script>
+<script type="module" src="/daab-coach3d.js?v=20251125hero"></script>
 <script src="daab-pose.js?v=9"></script>
 </body>
 </html>

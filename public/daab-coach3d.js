@@ -352,6 +352,7 @@ class CoachView {
       antialias: false,
       alpha: false,
       powerPreference: "low-power",
+      preserveDrawingBuffer: !!opts.thumbMode,
     });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     this.renderer.shadowMap.enabled = false;
@@ -519,15 +520,11 @@ const api = {
     active = !!v;
   },
   releaseExtras() {
-    if (heroViews) {
-      if (heroViews.raf) cancelAnimationFrame(heroViews.raf);
-      heroViews.c.dispose();
-      heroViews.u.dispose();
-      heroViews = null;
-    }
+    api.stopHeroDemo();
     abortThumbs();
   },
   sessionOff() {
+    api.stopHeroDemo();
     sessionLocked = false;
     if (renderRaf) cancelAnimationFrame(renderRaf);
     renderRaf = 0;
@@ -626,6 +623,7 @@ const api = {
     if (views.user) views.user.resize();
   },
   dispose() {
+    api.stopHeroDemo();
     if (renderRaf) cancelAnimationFrame(renderRaf);
     renderRaf = 0;
     views.coach && views.coach.dispose();
@@ -635,14 +633,17 @@ const api = {
     active = false;
   },
   async paintLibraryThumbs(root) {
-    if (!root || views.coach || sessionLocked || active) return;
+    if (!root || views.coach || sessionLocked) return;
+    const gen = ++thumbPaintGen;
+  const stillOk = () =>
+    gen === thumbPaintGen && !views.coach && !sessionLocked;
     await loadMaster("female");
-    if (views.coach || sessionLocked || active) return;
+    if (!stillOk()) return;
     const slots = root.querySelectorAll(".ex-coach3d[data-rig]");
     if (!slots.length) return;
-    if (views.coach || sessionLocked || active) return;
+    if (!stillOk()) return;
     const thumb = await ensureThumbView();
-    if (views.coach || sessionLocked || active) {
+    if (!stillOk()) {
       abortThumbs();
       return;
     }
@@ -672,7 +673,14 @@ const api = {
       thumb.applyTime(t, 1);
       thumb.resize();
       thumb.render();
-      thumbCache[rig] = thumb.renderer.domElement.toDataURL("image/png");
+      const gl = thumb.renderer.getContext();
+      if (gl && gl.finish) gl.finish();
+      const url = thumb.renderer.domElement.toDataURL("image/png");
+      if (url && url.length > 500) thumbCache[rig] = url;
+    }
+    if (!stillOk()) {
+      abortThumbs();
+      return;
     }
     slots.forEach((el) => {
       const u = thumbCache[el.dataset.rig || "e1"];
@@ -690,6 +698,83 @@ const api = {
     if (!root) return;
     await this.paintLibraryThumbs(root);
   },
+  stopHeroDemo() {
+    if (!heroViews) return;
+    if (heroViews.raf) cancelAnimationFrame(heroViews.raf);
+    heroViews.c.dispose();
+    heroViews.u.dispose();
+    heroViews = null;
+  },
+  async mountHeroDemo(root) {
+    if (!root || views.coach || sessionLocked) return;
+    if (heroViews && heroViews.root === root) return;
+    this.stopHeroDemo();
+    abortThumbs();
+    const hosts = root.querySelectorAll(".coach3d-host[data-hero]");
+    if (hosts.length < 2) return;
+    try {
+      await loadMaster("female");
+      await loadMaster("male");
+    } catch (err) {
+      console.warn("DaabCoach3D: hero load", err);
+      return;
+    }
+    if (views.coach || sessionLocked) return;
+    const coachHost = hosts[0];
+    const userHost = hosts[1];
+    const c = new CoachView(coachHost, "female", 0x0c3d31, { thumbMode: true });
+    const u = new CoachView(userHost, "male", 0x2a3744, { thumbMode: true });
+    c.setVisible(true);
+    u.setVisible(true);
+    await c.attach("female");
+    if (views.coach || sessionLocked) {
+      c.dispose();
+      return;
+    }
+    await u.attach("male");
+    if (views.coach || sessionLocked) {
+      c.dispose();
+      u.dispose();
+      return;
+    }
+    c.setExercise("e1");
+    u.setExercise("e1");
+    c.resize();
+    u.resize();
+    setTimeout(() => {
+      if (heroViews) {
+        c.resize();
+        u.resize();
+      }
+    }, 120);
+    const reduce =
+      typeof matchMedia === "function" &&
+      matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      c.applyTime(0.45, 1);
+      u.applyTime(0.05, 0.88);
+      c.render();
+      u.render();
+      heroViews = { c, u, raf: 0, root };
+      return;
+    }
+    const t0 = performance.now();
+    const loop = (now) => {
+      if (!heroViews) return;
+      if (!document.querySelector(".page[data-page=home].on")) {
+        api.stopHeroDemo();
+        return;
+      }
+      const t = (now - t0) / 1000;
+      c.applyTime(t, 1);
+      u.applyTime(Math.max(0, t - 0.4), 0.9);
+      c.render();
+      u.render();
+      heroViews.raf = requestAnimationFrame(loop);
+    };
+    heroViews = { c, u, raf: 0, root };
+    heroViews.raf = requestAnimationFrame(loop);
+  },
   showStanding() {
     if (views.coach) {
       views.coach.setExercise("rest");
@@ -704,10 +789,12 @@ const api = {
 
 let thumbView = null;
 let thumbCache = {};
+let thumbPaintGen = 0;
 let heroViews = null;
 let sessionLocked = false;
 
 function abortThumbs() {
+  thumbPaintGen++;
   if (thumbView) {
     thumbView.dispose();
     thumbView = null;
@@ -718,7 +805,7 @@ async function ensureThumbView() {
   if (thumbView) return thumbView;
   const mount = document.createElement("div");
   mount.style.cssText =
-    `position:fixed;left:-9999px;top:0;width:${LIB_THUMB.renderW}px;height:${LIB_THUMB.renderH}px;pointer-events:none;opacity:0`;
+    `position:fixed;left:-9999px;top:0;width:${LIB_THUMB.renderW}px;height:${LIB_THUMB.renderH}px;pointer-events:none;visibility:hidden`;
   document.body.appendChild(mount);
   thumbView = new CoachView(mount, "female", 0x0c3d31, { thumbMode: true });
   thumbView.setVisible(true);
