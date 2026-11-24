@@ -10,7 +10,7 @@ const MODELS = {
   male: "/models/y-bot.fbx",
 };
 
-/** وقوف تام — معايرة 2025-11-22b — مصدر الدرجات: coach-3d-local.html → STAND_CALIB_DEG */
+/** وقوف تام — معايرة 2025-11-23i (مدموج في جلسة دأب) */
 export const STAND_CALIB = {
   always: true,
   rightArm: {
