@@ -321,7 +321,9 @@ function applyDaabPose(p, exId, model, bones, bindEuler, bindPos) {
 }
 
 class CoachView {
-  constructor(mount, gender, bgHex) {
+  constructor(mount, gender, bgHex, opts) {
+    opts = opts || {};
+    this.thumbMode = !!opts.thumbMode;
     this.mount = mount;
     this.gender = gender;
     this.exId = "e1";
@@ -383,9 +385,17 @@ class CoachView {
     this.model.rotation.y = Math.PI;
     this.scene.add(this.model);
     this.bodyH = scaleToMeters(this.model);
-    const dist = Math.max(2.4, this.bodyH * 2.15);
-    this.camera.position.set(0, Math.max(0.8, this.bodyH * 0.52), -dist);
-    this.camera.lookAt(0, this.bodyH * 0.42, 0);
+    if (this.thumbMode) {
+      const dist = Math.max(3.4, this.bodyH * 3.65);
+      this.camera.fov = 44;
+      this.camera.position.set(0, this.bodyH * 0.5, -dist);
+      this.camera.lookAt(0, this.bodyH * 0.46, 0);
+    } else {
+      const dist = Math.max(2.4, this.bodyH * 2.15);
+      this.camera.position.set(0, Math.max(0.8, this.bodyH * 0.52), -dist);
+      this.camera.lookAt(0, this.bodyH * 0.42, 0);
+    }
+    this.camera.updateProjectionMatrix();
     const cached = cacheBones(this.model);
     this.bones = cached.bones;
     this.bindEuler = cached.bindEuler;
@@ -698,7 +708,7 @@ async function ensureThumbView() {
   mount.style.cssText =
     "position:fixed;left:-9999px;top:0;width:280px;height:300px;pointer-events:none;opacity:0";
   document.body.appendChild(mount);
-  thumbView = new CoachView(mount, "female", 0x0c3d31);
+  thumbView = new CoachView(mount, "female", 0x0c3d31, { thumbMode: true });
   thumbView.setVisible(true);
   await thumbView.attach("female");
   return thumbView;
