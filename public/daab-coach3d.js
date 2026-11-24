@@ -386,8 +386,8 @@ class CoachView {
     this.scene.add(this.model);
     this.bodyH = scaleToMeters(this.model);
     if (this.thumbMode) {
-      const dist = Math.max(2.85, this.bodyH * 2.95);
-      this.camera.fov = 40;
+      const dist = Math.max(3.05, this.bodyH * 3.15);
+      this.camera.fov = 41;
       this.camera.position.set(0, this.bodyH * 0.5, -dist);
       this.camera.lookAt(0, this.bodyH * 0.46, 0);
     } else {
