@@ -386,8 +386,8 @@ class CoachView {
     this.scene.add(this.model);
     this.bodyH = scaleToMeters(this.model);
     if (this.thumbMode) {
-      const dist = Math.max(3.4, this.bodyH * 3.65);
-      this.camera.fov = 44;
+      const dist = Math.max(2.85, this.bodyH * 2.95);
+      this.camera.fov = 40;
       this.camera.position.set(0, this.bodyH * 0.5, -dist);
       this.camera.lookAt(0, this.bodyH * 0.46, 0);
     } else {
@@ -636,6 +636,7 @@ const api = {
       abortThumbs();
       return;
     }
+    thumbCache = {};
     const rigT = {
       e1: 0.45,
       e2: 0.32,
@@ -706,7 +707,7 @@ async function ensureThumbView() {
   if (thumbView) return thumbView;
   const mount = document.createElement("div");
   mount.style.cssText =
-    "position:fixed;left:-9999px;top:0;width:280px;height:300px;pointer-events:none;opacity:0";
+    "position:fixed;left:-9999px;top:0;width:300px;height:340px;pointer-events:none;opacity:0";
   document.body.appendChild(mount);
   thumbView = new CoachView(mount, "female", 0x0c3d31, { thumbMode: true });
   thumbView.setVisible(true);
