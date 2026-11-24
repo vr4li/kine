@@ -626,14 +626,29 @@ const api = {
       abortThumbs();
       return;
     }
+    const rigT = {
+      e1: 0.45,
+      e2: 0.32,
+      e3: 0.5,
+      e4: 0.4,
+      e5: 0.55,
+      e6: 0.5,
+      e7: 0.4,
+      e8: 0.35,
+      e9: 0.12,
+      e11: 0.45,
+      e12: 0.35,
+      rest: 0,
+    };
     const rigs = {};
     slots.forEach((el) => {
       const r = el.dataset.rig || "e1";
       rigs[r] = true;
     });
     for (const rig in rigs) {
-      thumb.setExercise(rig);
-      thumb.applyTime(0.75, 0.9);
+      const t = rigT[rig] != null ? rigT[rig] : 0.75;
+      thumb.setExercise(rig === "rest" ? "rest" : rig);
+      thumb.applyTime(t, 1);
       thumb.resize();
       thumb.render();
       thumbCache[rig] = thumb.renderer.domElement.toDataURL("image/png");
@@ -681,7 +696,7 @@ async function ensureThumbView() {
   if (thumbView) return thumbView;
   const mount = document.createElement("div");
   mount.style.cssText =
-    "position:fixed;left:-9999px;top:0;width:220px;height:260px;pointer-events:none;opacity:0";
+    "position:fixed;left:-9999px;top:0;width:280px;height:300px;pointer-events:none;opacity:0";
   document.body.appendChild(mount);
   thumbView = new CoachView(mount, "female", 0x0c3d31);
   thumbView.setVisible(true);

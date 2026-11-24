@@ -12,7 +12,7 @@
 <meta property="og:locale" content="ar_SA">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 150'%3E%3Crect width='150' height='150' rx='27' fill='%230B4A42'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='9.5' stroke-linecap='round'%3E%3Cpath d='M46.8 82.3L112.5 28M74.8 58V90M74.8 90L57.5 125.5M74.8 90L92.5 125.5'/%3E%3C/g%3E%3Ccircle cx='74.8' cy='31.8' r='10.5' fill='%23fff'/%3E%3Cg fill='%23E07A3F'%3E%3Ccircle cx='112.5' cy='28' r='7'/%3E%3Ccircle cx='74.8' cy='58' r='6.5'/%3E%3Ccircle cx='74.8' cy='90' r='6.5'/%3E%3Ccircle cx='46.8' cy='82.3' r='7'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="stylesheet" href="fonts/plex.css">
-<link rel="modulepreload" href="/daab-coach3d.js?v=20251123i">
+<link rel="modulepreload" href="/daab-coach3d.js?v=20251125lib">
 <link rel="preload" href="/models/x-bot.fbx" as="fetch" crossorigin>
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
@@ -79,7 +79,7 @@ html[data-mode=child] .guide-home{display:none}
 .ex-guide .top .imp{margin:12px 0 0;padding-top:12px;border-top:1px solid var(--line);width:100%;font-size:calc(13px*var(--fz));flex-wrap:wrap;gap:8px}
 .ex-guide .ex-illus-wrap{position:relative;margin:14px var(--ex-pad) 0;background:var(--illus);border-radius:16px;min-height:168px;display:grid;place-items:center;padding:14px}
 .ex-guide .ex-num{position:absolute;top:12px;inset-inline-end:12px;width:34px;height:34px;border-radius:50%;background:var(--orange);color:#fff;font:700 calc(16px*var(--fz)) var(--fh);display:grid;place-items:center;z-index:2}
-.ex-coach3d{width:100%;min-height:148px;border-radius:14px;background:#0c3d31 center/contain no-repeat}
+.ex-coach3d{width:100%;min-height:148px;border-radius:14px;background:#0c3d31 center/cover no-repeat}
 .ex-coach3d:not(.has-thumb){background-image:linear-gradient(165deg,#0c3d31,#1a5c4a)}
 .phone .hsplit .coach3d-host{position:relative;min-height:140px;width:100%;height:100%;flex:1}
 .coach3d-host{position:relative}
@@ -1198,9 +1198,13 @@ function route(){
  paintWsw();if(cur.dataset.page==='cond')paintCg();
  if(['home','library','session'].indexOf(cur.dataset.page)>-1)coach3dBoot(cur.dataset.page);
 }
+function libraryThumbsPaint(){
+ if(typeof run!=='undefined'&&run)return;
+ loadCoach3dMod().then(function(D){if(!D||!D.paintLibraryThumbs||run)return;var g=$('grid');if(!g||!g.querySelector('.ex-coach3d'))return;
+  var paint=function(){D.paintLibraryThumbs(g).catch(function(e){console.warn('libraryThumbs',e)})};
+  if(typeof requestIdleCallback==='function')requestIdleCallback(paint,{timeout:4000});else setTimeout(paint,300)})}
 function coach3dBoot(page){
- /* paintLibraryThumbs off — يسبب تعارض WebGL مع الجلسة */
-}
+ if(page==='library')libraryThumbsPaint();}
 function waitCoach3dMod(){
  if(window.DaabCoach3D)return Promise.resolve(window.DaabCoach3D);
  return new Promise(function(resolve,reject){
@@ -1552,7 +1556,7 @@ function renderLib(){
  $('sugSec').hidden=!cs.length;
  $('sugH').textContent=getMode()==='companion'&&ward?'مقترحات لحالة '+ward:'مقترحات لحالتك';$('jSug').hidden=!cs.length;$('jSug').textContent=$('sugH').textContent;$('jCnd').textContent=$('cndH').textContent;
  $('sugList').innerHTML=SG.length?SG.map(function(s){var x=byId(s.id),on=S.mine.indexOf(s.id)>-1;return '<div class="mine sug"><span><b>'+tx(x.n)+'</b><small>'+tx('مناسب لـ')+': '+s.why.map(function(w){return tx(w)}).join(', ')+'</small></span>'+libBtns(s.id,'sug',lbl)+'</div>'}).join(''):'<p class="small">لا يوجد في المكتبة حالياً تمرين مخصص لهذه الحالة. مختصك هو من يحدد ما يناسبك.</p>';
- var LL=EX.filter(function(x){return (flt==='all'||x.cat===flt)&&libMatch(x)}).sort(function(a,b){var p=sgIds.indexOf(a.id)>-1?0:1,q=sgIds.indexOf(b.id)>-1?0:1;return p-q||exOrd(a.id)-exOrd(b.id)});libInfo(LL.length);$('grid').innerHTML=(LL.length?'':libEmpty())+LL.map(function(x){return exGuideCard(x,sgIds,lbl)}).join('');
+ var LL=EX.filter(function(x){return (flt==='all'||x.cat===flt)&&libMatch(x)}).sort(function(a,b){var p=sgIds.indexOf(a.id)>-1?0:1,q=sgIds.indexOf(b.id)>-1?0:1;return p-q||exOrd(a.id)-exOrd(b.id)});libInfo(LL.length);$('grid').innerHTML=(LL.length?'':libEmpty())+LL.map(function(x){return exGuideCard(x,sgIds,lbl)}).join('');libraryThumbsPaint();
  $('myN').textContent=S.mine.length?'('+S.mine.length+')':'';
  $('gNote').innerHTML=acct?tx('تُحفظ قائمتك وحالتك في حسابك.'):tx('ضيف: تُحفظ قائمة تمارينك على هذا الجهاز.')+' <a href="#auth">'+tx('سجّل الدخول لحفظها مع حسابك.')+'</a>.';
  cleanMine();
@@ -1722,7 +1726,7 @@ function chips(){[].forEach.call($('eyeChk').children,function(e){var k=e.datase
  [].forEach.call($('eyeDemo').querySelectorAll('[data-sc]'),function(b){b.setAttribute('aria-pressed',b.dataset.sc===eyeSc)});
  var al=$('eyeAl');al.hidden=eyeSc==='ok';if(eyeSc!=='ok')al.textContent=eyeMsg(eyeSc)}
 var coach3dLoad=null;
-function loadCoach3dMod(){if(window.DaabCoach3D)return Promise.resolve(window.DaabCoach3D);if(coach3dLoad)return coach3dLoad;coach3dLoad=waitCoach3dMod().catch(function(){return import('/daab-coach3d.js?v=20251123i').then(function(){return window.DaabCoach3D||null})}).catch(function(e){console.warn('DaabCoach3D',e);coach3dLoad=null;return null});return coach3dLoad}
+function loadCoach3dMod(){if(window.DaabCoach3D)return Promise.resolve(window.DaabCoach3D);if(coach3dLoad)return coach3dLoad;coach3dLoad=waitCoach3dMod().catch(function(){return import('/daab-coach3d.js?v=20251125lib').then(function(){return window.DaabCoach3D||null})}).catch(function(e){console.warn('DaabCoach3D',e);coach3dLoad=null;return null});return coach3dLoad}
 function coach3dOk(){return window.DaabCoach3D&&DaabCoach3D.ready}
 function coach3dArmLoading(msg){var c1=$('coach3d1'),c2=$('coach3d2');if(!c1)return;c1.hidden=false;c2.hidden=false;c1.classList.remove('coach3d-fail');c2.classList.remove('coach3d-fail');c1.classList.add('coach3d-loading');c2.classList.add('coach3d-loading');if(msg)c1.setAttribute('data-loading',msg);$('rig1').classList.add('coach-off');$('rig2').classList.add('coach-off')}
 function coach3dFail(msg){var c1=$('coach3d1'),c2=$('coach3d2');if(!c1)return;c1.classList.remove('coach3d-loading');c2.classList.remove('coach3d-loading');c1.classList.add('coach3d-fail');c2.classList.add('coach3d-fail');var t=msg||'تعذّر تحميل الشخصية. حدّث الصفحة (Cmd+Shift+R) أو جرّب Chrome/Safari.';c1.setAttribute('data-err',t);c2.setAttribute('data-err',t)}
@@ -2069,7 +2073,7 @@ new MutationObserver(soon).observe(document.body,{subtree:true,attributes:true,a
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',soon);else soon();
 })();
 </script>
-<script type="module" src="/daab-coach3d.js?v=20251123i"></script>
+<script type="module" src="/daab-coach3d.js?v=20251125lib"></script>
 <script src="daab-pose.js?v=9"></script>
 </body>
 </html>
