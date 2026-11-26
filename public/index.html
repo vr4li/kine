@@ -1228,6 +1228,7 @@ body.design-site{background:var(--paper,#fffefa);--bg:var(--paper,#fffefa)}
 <button type="button" data-ffk="sys" aria-pressed="false" style="font-family:system-ui,'Segoe UI',Tahoma,sans-serif">خط الجهاز</button></div></div>
 <button class="btn ghost rst" id="a11Rst" type="button">إعادة الضبط</button></div>
 <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-close" type="button" data-action="close-modal" aria-label="إغلاق">×</button><div id="modalContent"></div></section></div>
+<script src="/daab-lib-img.js?v=20251126design"></script>
 <script>
 (function(){
 var S={mode:'',mine:[],stars:0},acct=null,guest=false,unlocked=false,pendingStop=false,KID=['kids','play','stars','session','rest'],ALIAS={packs:'how',child:'safe',contact:'clinics',report:'adult'},PRIV=['session','library','companion','adult','kids','play','stars','mode','account','rest','cond','report'];
@@ -1811,7 +1812,8 @@ function musSvg(id){var m=MUS[musRefId(id)];if(!m)return '';var svg;if(m.eye)svg
  else svg=BODY+(m.v===B?SPINE:'')+'<g fill="#F2B08A" stroke="#F2B08A">'+m.s.map(function(k){return MZ[k]}).join('')+'</g><g fill="#E67E22" stroke="#E67E22">'+m.m.map(function(k){return MZ[k]}).join('')+'</g>';
  return '<svg viewBox="0 0 120 200" role="img" aria-hidden="true">'+svg+'</svg>'}
 function coach3dThumbBlock(id){return '<div class="ex-coach3d" data-rig="'+poseRefId(id)+'" role="img" aria-label="'+tx('معاينة الشخصية ثلاثية الأبعاد')+'"></div>'}
-function libImgSrc(id){var m=MUS[musRefId(id)];if(m&&m.eye)return '';var n=exOrd(id);return n>=1&&n<=20?'/exercise-art/page-'+String(n).padStart(2,'0')+'.png':''}
+var EX_LIB_G={e1:'g28',e2:'g9',e3:'g2',e4:'g4',e5:'g38',e6:'g37',e7:'g29',e8:'g39',e9:'g7',e11:'g25',e12:'g31',e13:'g48',e14:'g39',e15:'g37',e16:'g29',e17:'g1',e18:'g3',e19:'g24',e20:'g25'};
+function libImgSrc(id){var m=MUS[musRefId(id)];if(m&&m.eye)return '';var g=EX_LIB_G[id],D=window.DAAB_IMG;return g&&D&&D[g]?D[g]:''}
 function libCardArt(id,num){var src=libImgSrc(id),n=num||(exOrd(id)<10?'0':'')+exOrd(id);if(src)return '<div class="exercise-art lib-img"><img src="'+src+'" alt="'+tx('رسم توضيحي للتمرين')+'" loading="lazy"><span>'+n+'</span></div>';var m=MUS[musRefId(id)];if(m&&m.eye)return '<div class="exercise-art lib-img">'+musSvg(id)+'<span>'+n+'</span></div>';return '<div class="exercise-art lib-img '+libArtTone(exOrd(id))+'"><span>'+n+'</span></div>'}
 function musBlock(id,compact){var m=MUS[musRefId(id)];if(!m)return '';if(compact)return m.eye?'<div class="mus-eye-thumb">'+musSvg(id)+'</div>':'';
  return '<div class="mus mus-text-only"><div><b>'+(m.eye?tx('لا عضلات هنا'):tx('العضلات المستهدفة'))+'</b><ul>'+m.l.map(function(r){return '<li><i class="'+(r[1]?'':'s')+'"></i>'+tx(r[0])+'</li>'}).join('')+'</ul><span class="mcap">'+tx(m.v)+(m.l.some(function(r){return !r[1]})&&!m.eye?tx(' · الغامق رئيسية والفاتح داعمة'):'')+'</span></div></div>'}
