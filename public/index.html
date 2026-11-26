@@ -236,6 +236,8 @@ body.is-auth .header-actions [data-action="login"],body.is-auth .header-actions 
 #secMine .mine-grid.exercise-grid{margin-top:14px}
 #page-library .lib-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;align-items:stretch}
 #page-library .lib-card .exercise-art.lib-3d,.page[data-page=library] .lib-card .exercise-art.lib-3d{min-height:200px;height:200px;background:#0c3d31}
+#page-library .lib-card .exercise-art.lib-img,.page[data-page=library] .lib-card .exercise-art.lib-img{min-height:200px;height:200px;background:#f6f4ee}
+#page-library .lib-card .exercise-art.lib-img img,.page[data-page=library] .lib-card .exercise-art.lib-img img{height:100%;object-fit:contain}
 #page-library .lib-card .exercise-art.lib-3d .ex-coach3d,.page[data-page=library] .lib-card .exercise-art.lib-3d .ex-coach3d{min-height:200px;height:200px}
 #page-library .lib-card .exercise-art.lib-3d .mus-eye-thumb,.page[data-page=library] .lib-card .exercise-art.lib-3d .mus-eye-thumb{height:200px;min-height:200px}
 #page-library .lib-card-btns,.page[data-page=library] .lib-card-btns{display:flex;gap:10px;align-items:flex-start;width:100%;flex-wrap:wrap}
@@ -1457,22 +1459,11 @@ function route(){
  if(['home','library','session'].indexOf(cur.dataset.page)>-1)coach3dBoot(cur.dataset.page);
 }
 var thumbPaintDeb=0;
-function libraryThumbsPaint(){
- if(typeof run!=='undefined'&&run)return;
- clearTimeout(thumbPaintDeb);
- thumbPaintDeb=setTimeout(function(){
-  loadCoach3dMod().then(function(D){if(!D||!D.paintLibraryThumbs||run)return;var g=$('grid');if(!g||!g.querySelector('.ex-coach3d'))return;
-   var paint=function(){D.paintLibraryThumbs(g).catch(function(e){console.warn('libraryThumbs',e);if(run)return;setTimeout(function(){D.paintLibraryThumbs(g).catch(function(e2){console.warn('libraryThumbs retry',e2)})},900)})};
-   if(typeof requestIdleCallback==='function')requestIdleCallback(paint,{timeout:2500});else setTimeout(paint,120)})},80)}
-function heroHome3d(){
- if(typeof run!=='undefined'&&run)return;
- loadCoach3dMod().then(function(D){if(!D||!D.mountHeroDemo||run)return;var box=$('hero3dBox');if(!box||!document.querySelector('.page[data-page=home].on'))return;
-  var go=function(){D.mountHeroDemo(box).catch(function(e){console.warn('hero3d',e)})};
-  if(typeof requestIdleCallback==='function')requestIdleCallback(go,{timeout:3000});else setTimeout(go,200)})}
+function libraryThumbsPaint(){}
+function heroHome3d(){if(window.DaabCoach3D&&DaabCoach3D.stopHeroDemo)DaabCoach3D.stopHeroDemo()}
 function coach3dBoot(page){
- if(page==='library'){libraryThumbsPaint();if(window.DaabCoach3D&&DaabCoach3D.stopHeroDemo)DaabCoach3D.stopHeroDemo();return}
- if(page==='home')heroHome3d();
- else if(window.DaabCoach3D&&DaabCoach3D.stopHeroDemo)DaabCoach3D.stopHeroDemo();}
+ if(page==='library'||page==='home'){heroHome3d();return}
+ if(window.DaabCoach3D&&DaabCoach3D.stopHeroDemo)DaabCoach3D.stopHeroDemo()}
 function waitCoach3dMod(){
  if(window.DaabCoach3D)return Promise.resolve(window.DaabCoach3D);
  return new Promise(function(resolve,reject){
@@ -1820,7 +1811,9 @@ function musSvg(id){var m=MUS[musRefId(id)];if(!m)return '';var svg;if(m.eye)svg
  else svg=BODY+(m.v===B?SPINE:'')+'<g fill="#F2B08A" stroke="#F2B08A">'+m.s.map(function(k){return MZ[k]}).join('')+'</g><g fill="#E67E22" stroke="#E67E22">'+m.m.map(function(k){return MZ[k]}).join('')+'</g>';
  return '<svg viewBox="0 0 120 200" role="img" aria-hidden="true">'+svg+'</svg>'}
 function coach3dThumbBlock(id){return '<div class="ex-coach3d" data-rig="'+poseRefId(id)+'" role="img" aria-label="'+tx('معاينة الشخصية ثلاثية الأبعاد')+'"></div>'}
-function musBlock(id,compact){var m=MUS[musRefId(id)];if(!m)return '';if(compact)return m.eye?'<div class="mus-eye-thumb">'+musSvg(id)+'</div>':coach3dThumbBlock(id);
+function libImgSrc(id){var m=MUS[musRefId(id)];if(m&&m.eye)return '';var n=exOrd(id);return n>=1&&n<=20?'/exercise-art/page-'+String(n).padStart(2,'0')+'.png':''}
+function libCardArt(id,num){var src=libImgSrc(id),n=num||(exOrd(id)<10?'0':'')+exOrd(id);if(src)return '<div class="exercise-art lib-img"><img src="'+src+'" alt="'+tx('رسم توضيحي للتمرين')+'" loading="lazy"><span>'+n+'</span></div>';var m=MUS[musRefId(id)];if(m&&m.eye)return '<div class="exercise-art lib-img">'+musSvg(id)+'<span>'+n+'</span></div>';return '<div class="exercise-art lib-img '+libArtTone(exOrd(id))+'"><span>'+n+'</span></div>'}
+function musBlock(id,compact){var m=MUS[musRefId(id)];if(!m)return '';if(compact)return m.eye?'<div class="mus-eye-thumb">'+musSvg(id)+'</div>':'';
  return '<div class="mus mus-text-only"><div><b>'+(m.eye?tx('لا عضلات هنا'):tx('العضلات المستهدفة'))+'</b><ul>'+m.l.map(function(r){return '<li><i class="'+(r[1]?'':'s')+'"></i>'+tx(r[0])+'</li>'}).join('')+'</ul><span class="mcap">'+tx(m.v)+(m.l.some(function(r){return !r[1]})&&!m.eye?tx(' · الغامق رئيسية والفاتح داعمة'):'')+'</span></div></div>'}
 function exOrd(id){var n=parseInt(String(id).replace(/\D/g,''),10);return isNaN(n)?0:n}
 function guideMeta(x){if(!x)return {dur:'—',rep:'—'};if(x.cat==='eye')return {dur:tx('ثبات 5–10 ثوانٍ بمتابعة هادئة'),rep:tx('6–10 تكرارات')};if(x.cat==='kid'||x.dn)return {dur:tx('ثبات 15–30 ثانية'),rep:tx('8–10 تكرارات')};if(x.cat==='bal')return {dur:tx('ثبات 3–5 ثوانٍ'),rep:tx('10–12 تكراراً')};return {dur:tx('ثبات 2–5 ثوانٍ'),rep:tx('10–15 تكراراً')}}
@@ -1832,7 +1825,7 @@ function libCardDetails(x){var st=stepsOf(x.id),gm=guideMeta(x),dl='libdet-'+x.i
 function libCardActions(x,where,lbl){where=where||'grid';return '<div class="lib-card-actions"><div class="lib-card-btns"><button class="btn btn-outline" type="button" data-ldetail="'+x.id+'" aria-expanded="false" aria-controls="libdet-'+x.id+'">'+tx('التفاصيل')+'</button>'+libBtns(x.id,where,lbl)+'</div>'+libCardDetails(x)+'</div>'}
 function exGuideCard(x,sgIds,lbl,where){var st=guideSteps(x.id),n=exOrd(x.id),num=(n<10?'0':'')+n,sug=sgIds.indexOf(x.id)>-1?' lib-card-sug':'',desc=st.length?tx(st[0]):tx(x.s);if(desc.length>130)desc=desc.slice(0,127)+'…';where=where||'grid';
  var xb=(sgIds.indexOf(x.id)>-1?'<span class="lib-sug-hint">'+tx('مقترح لحالتك')+'</span>':'')+downBadge(x)+rxBadge(x)+eyeBadge(x);
- return '<article class="exercise-card lib-card'+sug+'" data-ex-id="'+x.id+'" data-cat="'+x.cat+'" data-f="'+x.cat+'"><div class="exercise-art lib-3d '+libArtTone(n)+'">'+musBlock(x.id,true)+'<span>'+num+'</span></div><div class="exercise-info"><span>'+tx(CATS[x.cat])+'</span><h3>'+tx(x.n)+'</h3>'+libAudBadge(x)+(xb?'<span class="lib-card-extra-badges">'+xb+'</span>':'')+'<p>'+desc+'</p></div>'+libCardActions(x,where,lbl)+'</article>'}
+ return '<article class="exercise-card lib-card'+sug+'" data-ex-id="'+x.id+'" data-cat="'+x.cat+'" data-f="'+x.cat+'">'+libCardArt(x.id,num)+'<div class="exercise-info"><span>'+tx(CATS[x.cat])+'</span><h3>'+tx(x.n)+'</h3>'+libAudBadge(x)+(xb?'<span class="lib-card-extra-badges">'+xb+'</span>':'')+'<p>'+desc+'</p></div>'+libCardActions(x,where,lbl)+'</article>'}
 /* ===== موعد التمرين عند إضافته من المكتبة ===== */
 var addTouched=false,addId='',addWhere='',addDays=[],addT={time:'16:00',dur:15,per:1,gap:180},addMsg='';
 function exDays(id){return SCH().map(function(d,i){return d.on&&d.ex.indexOf(id)>-1?i:-1}).filter(function(i){return i>-1})}
