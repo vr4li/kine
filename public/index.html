@@ -861,6 +861,16 @@ html[lang=en] .sess{height:auto;min-height:max(400px,min(68vh,540px))}
 /* ربط تصميم (3) بصفحات دأب */
 .page.design-v3 .page-app-shell,.page[data-page=library],.page[data-page=session],.page[data-page=auth],.page[data-page=mode],.page[data-page=cond],.page[data-page=account],.page[data-page=adult],.page[data-page=companion],.page[data-page=kids],.page[data-page=play],.page[data-page=stars],.page[data-page=rest]{background:var(--paper);color:var(--ink);font-family:var(--font)}
 .page[data-page=library] .wrap,.page[data-page=session] .wrap,.page[data-page=auth] .wrap{max-width:none;width:min(1160px,92%);margin-inline:auto;padding-inline:0}
+.page[data-page=auth] .g2{display:grid;gap:22px;grid-template-columns:1fr}
+@media(min-width:900px){.page[data-page=auth] .g2{grid-template-columns:1fr 1fr;align-items:start}}
+.page[data-page=auth] #authForm{display:grid;gap:14px;margin-top:14px}
+.page[data-page=auth] #authForm .fld{display:grid;gap:6px;font-size:calc(12.5px*var(--fs,1));color:#61716a}
+.page[data-page=auth] #authForm .fld input,.page[data-page=auth] #authForm .fld textarea{width:100%;box-sizing:border-box}
+.page[data-page=auth] #authForm .fld.rl{display:block}
+.page[data-page=auth] #authForm .fld.rl label{display:flex;align-items:center;gap:8px;font-size:calc(13.5px*var(--fs,1));color:var(--ink);margin:6px 0}
+.page[data-page=auth] #authForm .fld.rl label input{width:auto}
+.page[data-page=auth] #authXferCard .fld{display:grid;gap:6px;margin-top:12px}
+.page[data-page=auth] #authXferCard .fld input,.page[data-page=auth] #authXferCard .fld textarea{width:100%;box-sizing:border-box}
 .page[data-page=library] h1,.page[data-page=library] h2,.page[data-page=session] h1{color:var(--green);font-family:var(--font)}
 .page[data-page=library] .rule,.page[data-page=session] .rule{border-color:var(--line)}
 .page[data-page=library] .chip:not(.active),.page[data-page=auth] .chip,.jump .chip,.apanel .chip,.chips .chip{border-radius:20px;border:1px solid #e2e8e1;background:#fff;color:#71817b;font-size:calc(12.5px*var(--fs,1));font-weight:600}
@@ -970,7 +980,7 @@ body.design-site{background:var(--paper,#fffefa);--bg:var(--paper,#fffefa)}
 <div class="card"><h3>ضيف</h3><p>جرّب الموقع فوراً دون حساب. لا نحفظ أي بيانات: قائمة تمارينك ونجومك تختفي عند إغلاق الصفحة.</p><div class="cta"><button class="btn ghost" id="guestBtn" type="button">أكمل كضيف</button></div></div>
 <div class="card"><h3>تسجيل الدخول</h3>
 <div class="chips" role="group" aria-label="نوع الدخول"><button class="chip" type="button" data-tab="login" aria-pressed="true">دخول</button><button class="chip" type="button" data-tab="signup" aria-pressed="false">حساب جديد</button></div>
-<form id="authForm" novalidate>
+<form id="authForm" class="modal-form" novalidate>
 <label class="fld" id="nameRow" hidden>اسمك<input id="aName" autocomplete="name"></label>
 <fieldset class="fld rl" id="roleRow" hidden><legend>أنا</legend><label><input type="radio" name="role" value="cchild">مرافق لطفل</label><label><input type="radio" name="role" value="cadult">مرافق لبالغ</label><label><input type="radio" name="role" value="adult">مريض بالغ</label></fieldset>
 <p class="small" id="roleNote" hidden style="margin:-6px 0 14px">اختر دورك أولاً. الطفل لا ينشئ حساباً بنفسه: يسجّله مرافقه البالغ، ويدخل واجهته من حساب المرافق.</p>
@@ -1925,8 +1935,8 @@ document.addEventListener('click',function(e){var b=e.target.closest('[data-ws]'
 document.addEventListener('click',function(e){var b=e.target.closest('[data-view-jump]');if(!b)return;var comp=$('compDashRoot');if(!comp||!comp.contains(b))return;e.preventDefault();var v=b.getAttribute('data-view-jump');if(v)renderCompWs(v)});
 function goGuest(){guestEntryModal()}
 $('guestBtn').onclick=goGuest;
-document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-action]');if(!b)return;var act=b.getAttribute('data-action');if(act==='login'){e.preventDefault();closeModal();location.hash='#auth'}else if(act==='guest'){e.preventDefault();guestEntryModal()}else if(act==='logout'){e.preventDefault();$('acOut').click()}else if(act==='dismiss-banner'){e.preventDefault();var bar=document.querySelector('.announcement');if(bar)bar.remove()}},true);
-document.addEventListener('click',function(e){var b=e.target.closest('[data-lock-signup]');if(!b)return;e.preventDefault();closeModal();location.hash='#auth';setTimeout(function(){var t=document.querySelector('#authForm [data-tab="signup"]');if(t)t.click()},80)},true);
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-action]');if(!b)return;var act=b.getAttribute('data-action');if(act==='login'){e.preventDefault();loginModal()}else if(act==='guest'){e.preventDefault();guestEntryModal()}else if(act==='logout'){e.preventDefault();$('acOut').click()}else if(act==='dismiss-banner'){e.preventDefault();var bar=document.querySelector('.announcement');if(bar)bar.remove()}},true);
+document.addEventListener('click',function(e){var b=e.target.closest('[data-lock-signup]');if(!b)return;e.preventDefault();signupModal()},true);
 function openWardPick(){var w=$('wardPick');w.hidden=false;$('wpName').value=(S.ward&&S.ward.name&&S.ward.name!=='بطل'&&S.ward.name!=='البالغ')?S.ward.name:'';w.scrollIntoView({block:'center'});w.querySelector('[data-ward]').focus()}
 document.addEventListener('click',function(e){var b=e.target.closest('[data-wsw]');if(!b)return;var i=+b.dataset.wsw;if(i===S.wi)return;wStash();wLoad(i);unlocked=false;save();wNote('');afterWard()});
 document.addEventListener('click',function(e){if(!e.target.closest('[data-wadd]'))return;wForm=true;wNote('');if(location.hash==='#companion'){paintWard();$('waName').focus()}else{location.hash='#companion';setTimeout(function(){var n=q('waName');if(n)n.focus()},150)}});
@@ -1949,43 +1959,73 @@ async function acctImport(code,pw,msgEl,clear){if(!code||!pw){msgEl.textContent=
 $('acExport').onclick=async function(){if(!acct)return;var r=db()[acct];if(!r){$('acXferMsg').textContent='لا يوجد حساب للتصدير.';return}var code=xferPack({v:1,m:acct,r:r,t:Date.now()});$('acPack').value=code;$('acPackRow').hidden=false;try{if(navigator.clipboard&&navigator.clipboard.writeText)await navigator.clipboard.writeText(code);$('acXferMsg').textContent='تم إنشاء الرمز ونسخه. على الجوال أو اللابتوب أو الآيباد الجديد: افتح الدخول → الصق الرمز في الاستيراد.'}catch(x){$('acXferMsg').textContent='تم إنشاء الرمز. انسخه يدوياً من المربع أعلاه.'}};
 $('acImportBtn').onclick=function(){acctImport($('acImportIn').value,$('acImportPw').value.trim(),$('acXferMsg'),function(){$('acImportIn').value='';$('acImportPw').value=''})};
 $('acImportBtnAuth').onclick=function(){acctImport($('acImportInAuth').value,$('acImportPwAuth').value.trim(),$('acXferMsgAuth'),function(){$('acImportInAuth').value='';$('acImportPwAuth').value=''})};
-$('authForm').addEventListener('submit',async function(e){e.preventDefault();
- var mail=$('aMail').value.trim().toLowerCase(),pw=$('aPass').value.trim(),nm=$('aName').value.trim(),u=db();
- if(!/^\S+@\S+\.\S+$/.test(mail)){aMsg.textContent=tx("اكتب بريداً إلكترونياً صحيحاً.");return}
- if(pw.length<6){aMsg.textContent=tx("كلمة المرور 6 أحرف على الأقل.");return}
- if(!(window.crypto&&crypto.subtle)){aMsg.textContent=tx("هذا المتصفح لا يدعم الحماية اللازمة لحفظ الحساب.");return}
- try{
-  if(tab==='signup'){
-   if(u[mail]){aMsg.textContent=tx("هذا البريد مسجّل. جرّب «دخول».");return}
-   if(nm.length<2){aMsg.textContent=tx("اكتب اسمك (حرفان على الأقل).");return}
-   var rEl=document.querySelector('input[name=role]:checked');if(!rEl){aMsg.textContent=tx("اختر دورك: مرافق لطفل، أو مرافق لبالغ، أو مريض بالغ.");return}
-   var cdv=cdPick();if(!cdv.length){aMsg.textContent=rEl.value==='adult'?tx('اختر الحالة التي تتمرّن لها، أو «حالة أخرى أو لا أعرف بعد».'):tx('اختر حالة من ترافقه، أو «حالة أخرى أو لا أعرف بعد».');return}
-   var rv=rEl.value,role=rv==='adult'?'adult':'companion',salt=Math.random().toString(36).slice(2);S.cond=cdv;S.since=Date.now();delete S.sched;delete S.plan;S.hist=[];S.fb=[];S.log=[];
-   S.hasComp=false;S.compName='';S.compMail='';delete S.ward;delete S.codeH;delete S.codeS;delete S.wards;delete S.wi;
-   if(role==='companion'){
-    var wn=$('wName').value.trim(),wk={value:rv==='cchild'?'child':'adult'},cc=$('cCode').value;
-    if(wn.length<2){aMsg.textContent=rv==='cchild'?tx('اكتب اسم الطفل (حرفان على الأقل).'):tx('اكتب اسم البالغ الذي ترافقه (حرفان على الأقل).');return}
-    if(!/^\d{4}$/.test(cc)){aMsg.textContent=tx("اختر رمز مرافق من 4 أرقام عند إنشاء الحساب. لا تخبر به الطفل.");return}
-    var pinSalt=Math.random().toString(36).slice(2),pinHash=await hpw(cc,pinSalt);
-    S.pinH=pinHash;S.pinS=pinSalt;S.ward={name:wn,kind:wk.value};
-    if(wk.value==='child'){S.codeS=pinSalt;S.codeH=pinHash;S.wards=[wNew(wn,wk.value,pinHash,pinSalt)]}else{S.hasComp=true;delete S.codeH;delete S.codeS;S.wards=[wNew(wn,wk.value)]}
-    S.wi=0;wStash();
-   }else if($('aComp').checked){
-    var cn=$('aCompName').value.trim(),cm=$('aCompMail').value.trim().toLowerCase();
-    if(cn.length<2){aMsg.textContent=tx("اكتب اسم المرافق.");return}
-    if(!/^\S+@\S+\.\S+$/.test(cm)){aMsg.textContent=tx("اكتب بريداً إلكترونياً صحيحاً للمرافق.");return}
-    S.hasComp=true;S.compName=cn;S.compMail=cm;
-   }
-   S.role=role;S.mode=role;
-   u[mail]={name:nm,salt:salt,hash:await hpw(pw,salt),data:S,pinH:S.pinH||'',pinS:S.pinS||''};wr(u);begin(mail);
-  }else{
-   var r=u[mail],h=r?await hpw(pw,r.salt):'';
-   if(!r){aMsg.textContent=tx("لا يوجد حساب بهذا البريد على هذا الجهاز (جوال/لابتوب/آيباد). من الجهاز القديم: حسابي → إنشاء رمز النقل، ثم الصق الرمز في «استيراد الحساب» أسفل هذه الصفحة، أو أنشئ حساباً جديداً إن لم يكن لديك حساب بعد.");return}
-   if(r.hash!==h){aMsg.textContent=tx("كلمة المرور غير صحيحة. تأكد من الكتابة من جديد (بدون مسافات زائدة في البداية أو النهاية).");return}
-   begin(mail);
+async function authLogin(mail,pw,msgEl){mail=String(mail||'').trim().toLowerCase();pw=String(pw||'').trim();
+ if(!/^\S+@\S+\.\S+$/.test(mail)){msgEl.textContent=tx("اكتب بريداً إلكترونياً صحيحاً.");return false}
+ if(pw.length<6){msgEl.textContent=tx("كلمة المرور 6 أحرف على الأقل.");return false}
+ if(!(window.crypto&&crypto.subtle)){msgEl.textContent=tx("هذا المتصفح لا يدعم الحماية اللازمة لحفظ الحساب.");return false}
+ var u=db();
+ try{var r=u[mail],h=r?await hpw(pw,r.salt):'';
+  if(!r){msgEl.textContent=tx("لا يوجد حساب بهذا البريد على هذا الجهاز (جوال/لابتوب/آيباد). من الجهاز القديم: حسابي → إنشاء رمز النقل، ثم الصق الرمز في «استيراد الحساب» أسفل هذه الصفحة، أو أنشئ حساباً جديداً إن لم يكن لديك حساب بعد.");return false}
+  if(r.hash!==h){msgEl.textContent=tx("كلمة المرور غير صحيحة. تأكد من الكتابة من جديد (بدون مسافات زائدة في البداية أو النهاية).");return false}
+  begin(mail);$('authForm').reset();aMsg.textContent='';roleUI();afterAuth();return true
+ }catch(x){msgEl.textContent=tx("تعذّر حفظ الحساب على هذا الجهاز.");return false}}
+function goAuthPageSignup(){closeModal();location.hash='#auth';setTimeout(function(){var t=document.querySelector('#authForm [data-tab="signup"]');if(t)t.click()},80)}
+async function authSignup(p,msgEl){p=p||{};msgEl=msgEl||aMsg;var mail=String(p.mail||'').trim().toLowerCase(),pw=String(p.pw||'').trim(),nm=String(p.nm||'').trim(),rv=p.rv,cdv=p.cdv||[],u=db();
+ if(!/^\S+@\S+\.\S+$/.test(mail)){msgEl.textContent=tx("اكتب بريداً إلكترونياً صحيحاً.");return false}
+ if(pw.length<6){msgEl.textContent=tx("كلمة المرور 6 أحرف على الأقل.");return false}
+ if(!(window.crypto&&crypto.subtle)){msgEl.textContent=tx("هذا المتصفح لا يدعم الحماية اللازمة لحفظ الحساب.");return false}
+ if(u[mail]){msgEl.textContent=tx("هذا البريد مسجّل. جرّب «دخول».");return false}
+ if(nm.length<2){msgEl.textContent=tx("اكتب اسمك (حرفان على الأقل).");return false}
+ if(!rv){msgEl.textContent=tx("اختر دورك: مرافق لطفل، أو مرافق لبالغ، أو مريض بالغ.");return false}
+ if(!cdv.length){msgEl.textContent=rv==='adult'?tx('اختر الحالة التي تتمرّن لها، أو «حالة أخرى أو لا أعرف بعد».'):tx('اختر حالة من ترافقه، أو «حالة أخرى أو لا أعرف بعد».');return false}
+ var role=rv==='adult'?'adult':'companion',cc=p.cc||'';
+ try{var salt=Math.random().toString(36).slice(2);S.cond=cdv;S.since=Date.now();delete S.sched;delete S.plan;S.hist=[];S.fb=[];S.log=[];
+  S.hasComp=false;S.compName='';S.compMail='';delete S.ward;delete S.codeH;delete S.codeS;delete S.wards;delete S.wi;
+  if(role==='companion'){
+   var wn=String(p.wn||'').trim(),wk={value:rv==='cchild'?'child':'adult'};
+   if(wn.length<2){msgEl.textContent=rv==='cchild'?tx('اكتب اسم الطفل (حرفان على الأقل).'):tx('اكتب اسم البالغ الذي ترافقه (حرفان على الأقل).');return false}
+   if(wk.value==='child'&&!/^\d{4}$/.test(cc)){msgEl.textContent=tx("اختر رمز مرافق من 4 أرقام عند إنشاء الحساب. لا تخبر به الطفل.");return false}
+   if(wk.value==='child'){var pinSalt=Math.random().toString(36).slice(2),pinHash=await hpw(cc,pinSalt);S.pinH=pinHash;S.pinS=pinSalt;S.codeS=pinSalt;S.codeH=pinHash;S.ward={name:wn,kind:'child'};S.wards=[wNew(wn,'child',pinHash,pinSalt)]}else{S.hasComp=true;delete S.codeH;delete S.codeS;S.ward={name:wn,kind:'adult'};S.wards=[wNew(wn,'adult')]}
+   S.wi=0;wStash();
+  }else if(p.comp){
+   var cn=String(p.compName||'').trim(),cm=String(p.compMail||'').trim().toLowerCase();
+   if(cn.length<2){msgEl.textContent=tx("اكتب اسم المرافق.");return false}
+   if(!/^\S+@\S+\.\S+$/.test(cm)){msgEl.textContent=tx("اكتب بريداً إلكترونياً صحيحاً للمرافق.");return false}
+   S.hasComp=true;S.compName=cn;S.compMail=cm;
   }
- }catch(x){aMsg.textContent=tx("تعذّر حفظ الحساب على هذا الجهاز.");return}
- $('authForm').reset();aMsg.textContent='';roleUI();afterAuth()});
+  S.role=role;S.mode=role;
+  u[mail]={name:nm,salt:salt,hash:await hpw(pw,salt),data:S,pinH:S.pinH||'',pinS:S.pinS||''};wr(u);begin(mail);
+  $('authForm').reset();aMsg.textContent='';roleUI();afterAuth();return true
+ }catch(x){msgEl.textContent=tx("تعذّر حفظ الحساب على هذا الجهاز.");return false}}
+function signupModal(){
+ var notes={carer:'أضف من ترافقه: طفلاً أو بالغاً. الطفل لا ينشئ حساباً بنفسه ويدخل واجهته من حسابك.',adult:'حسابك لك أنت، ويمكنك إضافة مرافق اختياري من صفحة الحساب لاحقاً.','':'اختر دورك أولاً: مرافق أو مريض بالغ.'};
+ openModal('<h2 id="modalTitle">إنشاء حساب دأب</h2><p class="req-note">الخانات اللي عليها <b>*</b> إجبارية، والباقي اختياري.</p><form class="modal-form" id="signupModalForm" novalidate><label><span class="req">اسمك</span><input id="suName" autocomplete="name" required></label><fieldset style="border:0;padding:0;margin:0 0 4px"><legend><b class="req">أنا</b></legend><div class="cd-opts"><label class="cd-opt"><input type="radio" name="suRole" value="carer"><span>مرافق</span></label><label class="cd-opt"><input type="radio" name="suRole" value="adult" checked><span>مريض بالغ</span></label></div></fieldset><p class="muted-note" id="suNote">'+notes.adult+'</p><div id="suCarerKind" hidden><b class="req">من ترافقه؟</b><div class="cd-opts" style="margin-top:8px"><label class="cd-opt"><input type="radio" name="suWard" value="cchild" checked><span>طفل</span></label><label class="cd-opt"><input type="radio" name="suWard" value="cadult"><span>بالغ</span></label></div></div><div id="suWardName" hidden><label><span class="req" id="suWardNameL">اسم الطفل</span><input id="suWName" autocomplete="off"></label></div><div id="suPinBox" hidden><label><span class="req">رمز المرافق (4 أرقام)</span><input id="suPin" type="password" inputmode="numeric" maxlength="4" dir="ltr" autocomplete="new-password"></label><p class="muted-note">اختره الآن — أنت وحدك من يعرفه. يقفل واجهة الطفل وإنهاء الجلسة.</p></div><div id="suCond"><b class="req" id="suCondT">الحالة التي تتمرّن لها</b><p class="muted-note">اختر كل ما ينطبق. نقترح بها التمارين المناسبة في المكتبة، ويمكن تعديلها لاحقاً.</p><div id="suCdList"></div></div><label><span class="req">بريدك الإلكتروني (تصلك عليه التنبيهات)</span><input id="suMail" type="email" dir="ltr" autocomplete="email" placeholder="name@example.com" required></label><label><span class="req">كلمة المرور</span><input id="suPass" type="password" dir="ltr" autocomplete="new-password" placeholder="6 أحرف على الأقل" required></label><p id="suMsg" class="small" role="alert" style="min-height:22px;color:var(--ink-o)"></p><button class="btn btn-primary" type="submit">إنشاء الحساب ←</button><button class="btn btn-soft" type="button" id="suFullPage">تسجيل مفصّل أو نقل حساب بين الأجهزة</button></form>');
+ var suModCdK='',suModSel=[];
+ function suCdKind(){var sr=($('input[name=suRole]:checked')||{}).value;if(sr==='adult')return 'adult';var w=($('input[name=suWard]:checked')||{}).value;return w==='cadult'?'adult':'child'}
+ function suPaintCd(){var k=suCdKind(),list=$('suCdList');if(!list)return;if(suModCdK!==k){[].forEach.call(list.querySelectorAll('input:checked'),function(i){if(suModSel.indexOf(i.value)<0)suModSel.push(i.value)});suModCdK=k;list.innerHTML=cdModalList(suModSel,k)}}
+ function suUi(){var sr=($('input[name=suRole]:checked')||{}).value,car=sr==='carer',kid=car&&($('input[name=suWard]:checked')||{}).value==='cchild';
+  $('suNote').textContent=notes[sr||''];$('suCarerKind').hidden=!car;$('suWardName').hidden=!car;$('suPinBox').hidden=!kid;
+  if(car){$('suWardNameL').textContent=kid?tx('اسم الطفل'):tx('اسم البالغ');$('suCondT').textContent=kid?tx('حالة الطفل الذي ترافقه'):tx('حالة البالغ الذي ترافقه')}
+  else $('suCondT').textContent=tx('الحالة التي تتمرّن لها');
+  suPaintCd()}
+ [].forEach.call(document.querySelectorAll('#signupModalForm input[name=suRole],#signupModalForm input[name=suWard]'),function(i){i.addEventListener('change',suUi)});
+ var fp=$('suFullPage');if(fp)fp.onclick=goAuthPageSignup;
+ suPaintCd();suUi();
+ var form=$('signupModalForm'),msg=$('suMsg');
+ if(form)form.onsubmit=async function(e){e.preventDefault();if(msg)msg.textContent='';var sr=($('input[name=suRole]:checked')||{}).value,rv=sr==='adult'?'adult':($('input[name=suWard]:checked')||{}).value||'cchild';
+  var cdv=[].map.call(document.querySelectorAll('#suCdList input:checked'),function(i){return i.value});
+  var p={nm:$('suName').value,mail:$('suMail').value,pw:$('suPass').value,rv:rv,cdv:cdv,wn:$('suWName')?$('suWName').value:'',cc:$('suPin')?$('suPin').value:''};
+  if(await authSignup(p,msg||aMsg))closeModal()}}
+function loginModal(){openModal('<h2 id="modalTitle">أهلاً بعودتك</h2><p>سجّل الدخول لمتابعة خطتك وجلساتك المحفوظة.</p><form class="modal-form" id="loginModalForm" novalidate><label>البريد الإلكتروني<input name="mail" type="email" required dir="ltr" autocomplete="email" placeholder="name@example.com"></label><label>كلمة المرور<input name="pw" type="password" required dir="ltr" autocomplete="current-password" placeholder="••••••••"></label><p id="loginModalMsg" class="small" role="alert" style="min-height:22px;color:var(--ink-o)"></p><button class="btn btn-primary" type="submit">تسجيل الدخول ←</button><button class="btn btn-soft" type="button" id="showSignup">إنشاء حساب جديد</button></form><p class="muted-note">الحساب يُحفظ على هذا الجهاز فقط في هذه النسخة التجريبية.</p>');
+ var form=$('loginModalForm'),su=$('showSignup'),msg=$('loginModalMsg');
+ if(su)su.onclick=function(){signupModal()};
+ if(form)form.onsubmit=async function(e){e.preventDefault();if(msg)msg.textContent='';var mail=form.querySelector('[name=mail]').value,pw=form.querySelector('[name=pw]').value;if(await authLogin(mail,pw,msg||aMsg))closeModal()}}
+$('authForm').addEventListener('submit',async function(e){e.preventDefault();
+ var mail=$('aMail').value.trim().toLowerCase(),pw=$('aPass').value.trim(),nm=$('aName').value.trim();
+ if(tab==='login'){if(await authLogin(mail,pw,aMsg)){$('authForm').reset();aMsg.textContent=''}return}
+ var rEl=document.querySelector('input[name=role]:checked'),rv=rEl?rEl.value:'',cdv=cdPick(),p={nm:nm,mail:mail,pw:pw,rv:rv,cdv:cdv,wn:$('wName').value,cc:$('cCode').value};
+ if(tab==='signup'&&$('aComp').checked)p.comp=true,p.compName=$('aCompName').value,p.compMail=$('aCompMail').value;
+ if(tab==='signup'){if(await authSignup(p,aMsg)){$('authForm').reset();aMsg.textContent=''}}});
 var STEPS={
 e1:['قف أو اجلس بظهر مستقيم وذراعك إلى جانبك','ارفع ذراعك أمامك ببطء حتى مستوى الكتف','أنزلها ببطء وكرّر'],
 e2:['ذراعك إلى جانبك وكفّك للأمام','اثنِ كوعك ببطء ليقترب كفّك من كتفك','افرده ببطء وكرّر'],
