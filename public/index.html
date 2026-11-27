@@ -871,6 +871,7 @@ html[lang=en] .sess{height:auto;min-height:max(400px,min(68vh,540px))}
 .page[data-page=auth] #authForm .fld.rl label input{width:auto}
 .page[data-page=auth] #authXferCard .fld{display:grid;gap:6px;margin-top:12px}
 .page[data-page=auth] #authXferCard .fld input,.page[data-page=auth] #authXferCard .fld textarea{width:100%;box-sizing:border-box}
+.page[data-page=auth]{display:none!important}
 .page[data-page=library] h1,.page[data-page=library] h2,.page[data-page=session] h1{color:var(--green);font-family:var(--font)}
 .page[data-page=library] .rule,.page[data-page=session] .rule{border-color:var(--line)}
 .page[data-page=library] .chip:not(.active),.page[data-page=auth] .chip,.jump .chip,.apanel .chip,.chips .chip{border-radius:20px;border:1px solid #e2e8e1;background:#fff;color:#71817b;font-size:calc(12.5px*var(--fs,1));font-weight:600}
@@ -910,7 +911,7 @@ body.design-site{background:var(--paper,#fffefa);--bg:var(--paper,#fffefa)}
 <a href="#how">كيف يعمل</a>
 <a href="#safe">الأمان والخصوصية</a>
 <a href="#session" data-priv>ابدأ التمرين</a>
-<a href="#library" data-priv>مكتبة التمارين</a>
+<a href="#library">مكتبة التمارين</a>
 <a href="#clinics">للعيادات</a>
 <a href="#about">عن دأب</a>
 </nav>
@@ -1241,7 +1242,7 @@ body.design-site{background:var(--paper,#fffefa);--bg:var(--paper,#fffefa)}
 <script src="/daab-lib-img.js?v=20251126design"></script>
 <script>
 (function(){
-var S={mode:'',mine:[],stars:0},acct=null,guest=false,unlocked=false,pendingStop=false,KID=['kids','play','stars','session','rest'],ALIAS={packs:'how',child:'safe',contact:'clinics',report:'adult'},PRIV=['session','library','companion','adult','kids','play','stars','mode','account','rest','cond','report'];
+var S={mode:'',mine:[],stars:0},acct=null,guest=false,unlocked=false,pendingStop=false,KID=['kids','play','stars','session','rest'],ALIAS={packs:'how',child:'safe',contact:'clinics',report:'adult'},PRIV=['session','companion','adult','kids','play','stars','mode','account','rest','cond','report'];
 function db(){try{return JSON.parse(localStorage.getItem('daab-users')||'{}')}catch(e){return{}}}
 function wr(u){try{localStorage.setItem('daab-users',JSON.stringify(u))}catch(e){}}
 var PK=['mine','sched','plan','stars','log','xu','lazy','codeH','codeS','fb','hold','cond','hist','docNote','since'],wForm=false,wDelArm=0;
@@ -1435,7 +1436,7 @@ function paintPlan(){if(getMode()==='adult'&&(acct||guest))paintAdultWorkspace()
 
 document.addEventListener('click',function(e){var b=e.target.closest('[data-pick]');if(!b)return;var m=b.dataset.pick,al=allowed();if(m==='child'&&S.role==='companion'){e.preventDefault();pendingOpenChildWi=null;openChildPinGate();return}if(guest&&!acct){if(b.id==='optComp'){lastGuestEntryRole='companion';if(S.wards&&S.wards.length){if(S.role!=='companion'){S.role='companion';wLoad(Math.min(S.wi||0,S.wards.length-1))}}else{openWardPick();return}}if(b.id==='optAdult'){lastGuestEntryRole='adult';if(S.role==='companion'){wStash();PK.forEach(function(k){delete S[k]});S.mine=[];S.stars=0}delete S.ward;delete S.wards;delete S.wi;S.role='adult';S.hasComp=false}}if(al.indexOf(m)<0){if(!b.dataset.go)return;m=S.mode||al[0]}S.mode=m;unlocked=false;save();var t=b.dataset.go||home(m);if(location.hash==='#'+t)route();else location.hash='#'+t});
 var pages=[].slice.call(document.querySelectorAll('.page')),links=document.querySelectorAll('.bar nav a');
-var MKT={how:'v3-how',safe:'v3-safety',clinics:'v3-clinics',about:'v3-about',contact:'v3-contact',bundles:'v3-bundles',faq:'v3-faq',child:'v3-child',library:'v3-library'};
+var MKT={how:'v3-how',safe:'v3-safety',clinics:'v3-clinics',about:'v3-about',contact:'v3-contact',bundles:'v3-bundles',faq:'v3-faq',child:'v3-child'};
 function marketScroll(raw){
  if(!raw||!MKT[raw])return false;
  var el=document.getElementById(MKT[raw]);
@@ -1444,17 +1445,20 @@ function marketScroll(raw){
  el.scrollIntoView({behavior:rm?'auto':'smooth',block:'start'});
  return true;
 }
+var pendingAuthModal='';
+function openAuthModal(which){which=which||'login';if(which==='signup')signupModal();else loginModal()}
 function route(){
  ALIAS.report=getMode()==='companion'?'companion':'adult';var mode=getMode(),signed=!!(acct||guest),h=(location.hash||'').slice(1),hm=signed?(mode?home(mode):'mode'):'home',raw=h,al=ALIAS.hasOwnProperty(h);
  if(al)h=ALIAS[h];
- if(!signed){if(!h)h='home';if(PRIV.indexOf(h)>-1)h='auth'}
- else if(acct&&h==='auth')h=mode?hm:'mode';else if(!mode&&h!=='auth'&&h!=='account')h='mode';else if(!h)h=hm;
+ if(h==='auth'){if(signed)h=mode?hm:'mode';else{pendingAuthModal=/signup/i.test(location.hash)?'signup':'login';h='home'}raw=h;if(location.hash!=='#'+h)try{history.replaceState(null,'','#'+h)}catch(x){}}
+ if(!signed){if(!h)h='home';if(PRIV.indexOf(h)>-1){pendingAuthModal='login';h='home'}}
+ else if(acct&&h==='auth')h=mode?hm:'mode';else if(!mode&&h!=='auth'&&h!=='account'&&h!=='library')h='mode';else if(!h)h=hm;
  if(signed&&['kids','play','stars','rest'].indexOf(h)>-1&&allowed().indexOf('child')<0)h=mode?hm:'mode';
  if(mode==='child'&&KID.indexOf(h)<0&&!((h==='mode'||h==='account')&&unlocked))h='kids';
  if(mode==='child'&&KID.indexOf(h)>-1)unlocked=false;
   if(mode==='child'&&(h==='session'||h==='play')&&!run&&!gate().ok)h='rest';
  if(h==='cond')h=signed?(mode?home(mode):'home'):'home';
- if(signed&&mode&&mode!=='child'&&!hasCond()&&['auth','account','cond','mode','how','safe','clinics','about','session','companion','kids'].indexOf(h)<0)h=hm||'home';
+ if(signed&&mode&&mode!=='child'&&!hasCond()&&['auth','account','cond','mode','how','safe','clinics','about','library','session','companion','kids'].indexOf(h)<0)h=hm||'home';
  if(signed&&!mode&&(h==='session'||h==='library'||h==='adult'||h==='companion')){S.mode='adult';if(!S.role)S.role='adult';save();mode='adult';}
  document.documentElement.setAttribute('data-mode',(h==='mode'||h==='auth'||h==='account')?'':mode||'');
  document.getElementById('homeLink').setAttribute('href','#'+hm);document.getElementById('dashLink').setAttribute('href','#'+(mode==='companion'?'companion':'adult'));document.getElementById('brandLink').setAttribute('href','#'+hm);
@@ -1468,6 +1472,7 @@ function route(){
  paintWsw();if(raw==='cond'||cur.dataset.page==='cond')setTimeout(function(){openCondIfNeeded()},0);
  if(signed&&mode&&mode!=='child'&&!hasCond()&&['home','adult','companion'].indexOf(cur.dataset.page)>-1){clearTimeout(condDeferT);condDeferT=setTimeout(function(){if(!childPinOpening&&!condModalOpen())openCondIfNeeded({after:condAfterPick})},0)}
  if(['home','library','session'].indexOf(cur.dataset.page)>-1)coach3dBoot(cur.dataset.page);
+ if(pendingAuthModal){var pm=pendingAuthModal;pendingAuthModal='';setTimeout(function(){openAuthModal(pm)},0)}
 }
 var thumbPaintDeb=0;
 function libraryThumbsPaint(){}
@@ -1491,7 +1496,7 @@ function paintCg(){var comp=getMode()==='companion',nm=(S.role==='companion'&&S.
 document.addEventListener('click',function(e){if(!e.target.closest('#cgSave'))return;var v=[].map.call(document.querySelectorAll('#cgList input:checked'),function(i){return i.dataset.cg});
  if(!v.length){$('cgMsg').textContent='اختر حالة واحدة على الأقل، أو «حالة أخرى أو لا أعرف بعد».';return}
  S.cond=v;save();renderLib();location.hash='#library'});
-document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a||e.defaultPrevented)return;var h=a.getAttribute('href');if(h.length<2)return;e.preventDefault();if(location.hash===h)route();else location.hash=h});
+document.addEventListener('click',function(e){var ax=e.target.closest&&e.target.closest('a[href="#auth"],a[href="#auth/signup"]');if(ax){e.preventDefault();e.stopPropagation();openAuthModal(ax.getAttribute('href').indexOf('signup')>-1?'signup':'login');return}var a=e.target.closest&&e.target.closest('a[href^="#"]');if(!a||e.defaultPrevented)return;var h=a.getAttribute('href');if(h.length<2)return;e.preventDefault();if(location.hash===h)route();else location.hash=h});
 
 /* ===== الصوت ===== */
 var q=function(i){return document.getElementById(i)},snd=true,voices=[],AC=null,lastPg='',spPrimed=false;
@@ -1969,7 +1974,7 @@ async function authLogin(mail,pw,msgEl){mail=String(mail||'').trim().toLowerCase
   if(r.hash!==h){msgEl.textContent=tx("كلمة المرور غير صحيحة. تأكد من الكتابة من جديد (بدون مسافات زائدة في البداية أو النهاية).");return false}
   begin(mail);$('authForm').reset();aMsg.textContent='';roleUI();afterAuth();return true
  }catch(x){msgEl.textContent=tx("تعذّر حفظ الحساب على هذا الجهاز.");return false}}
-function goAuthPageSignup(){closeModal();location.hash='#auth';setTimeout(function(){var t=document.querySelector('#authForm [data-tab="signup"]');if(t)t.click()},80)}
+function goAuthPageSignup(){closeModal();signupModal()}
 async function authSignup(p,msgEl){p=p||{};msgEl=msgEl||aMsg;var mail=String(p.mail||'').trim().toLowerCase(),pw=String(p.pw||'').trim(),nm=String(p.nm||'').trim(),rv=p.rv,cdv=p.cdv||[],u=db();
  if(!/^\S+@\S+\.\S+$/.test(mail)){msgEl.textContent=tx("اكتب بريداً إلكترونياً صحيحاً.");return false}
  if(pw.length<6){msgEl.textContent=tx("كلمة المرور 6 أحرف على الأقل.");return false}
@@ -1999,7 +2004,7 @@ async function authSignup(p,msgEl){p=p||{};msgEl=msgEl||aMsg;var mail=String(p.m
  }catch(x){msgEl.textContent=tx("تعذّر حفظ الحساب على هذا الجهاز.");return false}}
 function signupModal(){
  var notes={carer:'أضف من ترافقه: طفلاً أو بالغاً. الطفل لا ينشئ حساباً بنفسه ويدخل واجهته من حسابك.',adult:'حسابك لك أنت، ويمكنك إضافة مرافق اختياري من صفحة الحساب لاحقاً.','':'اختر دورك أولاً: مرافق أو مريض بالغ.'};
- openModal('<h2 id="modalTitle">إنشاء حساب دأب</h2><p class="req-note">الخانات اللي عليها <b>*</b> إجبارية، والباقي اختياري.</p><form class="modal-form" id="signupModalForm" novalidate><label><span class="req">اسمك</span><input id="suName" autocomplete="name" required></label><fieldset style="border:0;padding:0;margin:0 0 4px"><legend><b class="req">أنا</b></legend><div class="cd-opts"><label class="cd-opt"><input type="radio" name="suRole" value="carer"><span>مرافق</span></label><label class="cd-opt"><input type="radio" name="suRole" value="adult" checked><span>مريض بالغ</span></label></div></fieldset><p class="muted-note" id="suNote">'+notes.adult+'</p><div id="suCarerKind" hidden><b class="req">من ترافقه؟</b><div class="cd-opts" style="margin-top:8px"><label class="cd-opt"><input type="radio" name="suWard" value="cchild" checked><span>طفل</span></label><label class="cd-opt"><input type="radio" name="suWard" value="cadult"><span>بالغ</span></label></div></div><div id="suWardName" hidden><label><span class="req" id="suWardNameL">اسم الطفل</span><input id="suWName" autocomplete="off"></label></div><div id="suPinBox" hidden><label><span class="req">رمز المرافق (4 أرقام)</span><input id="suPin" type="password" inputmode="numeric" maxlength="4" dir="ltr" autocomplete="new-password"></label><p class="muted-note">اختره الآن — أنت وحدك من يعرفه. يقفل واجهة الطفل وإنهاء الجلسة.</p></div><div id="suCond"><b class="req" id="suCondT">الحالة التي تتمرّن لها</b><p class="muted-note">اختر كل ما ينطبق. نقترح بها التمارين المناسبة في المكتبة، ويمكن تعديلها لاحقاً.</p><div id="suCdList"></div></div><label><span class="req">بريدك الإلكتروني (تصلك عليه التنبيهات)</span><input id="suMail" type="email" dir="ltr" autocomplete="email" placeholder="name@example.com" required></label><label><span class="req">كلمة المرور</span><input id="suPass" type="password" dir="ltr" autocomplete="new-password" placeholder="6 أحرف على الأقل" required></label><p id="suMsg" class="small" role="alert" style="min-height:22px;color:var(--ink-o)"></p><button class="btn btn-primary" type="submit">إنشاء الحساب ←</button><button class="btn btn-soft" type="button" id="suFullPage">تسجيل مفصّل أو نقل حساب بين الأجهزة</button></form>');
+ openModal('<h2 id="modalTitle">إنشاء حساب دأب</h2><p class="req-note">الخانات اللي عليها <b>*</b> إجبارية، والباقي اختياري.</p><form class="modal-form" id="signupModalForm" novalidate><label><span class="req">اسمك</span><input id="suName" autocomplete="name" required></label><fieldset style="border:0;padding:0;margin:0 0 4px"><legend><b class="req">أنا</b></legend><div class="cd-opts"><label class="cd-opt"><input type="radio" name="suRole" value="carer"><span>مرافق</span></label><label class="cd-opt"><input type="radio" name="suRole" value="adult" checked><span>مريض بالغ</span></label></div></fieldset><p class="muted-note" id="suNote">'+notes.adult+'</p><div id="suCarerKind" hidden><b class="req">من ترافقه؟</b><div class="cd-opts" style="margin-top:8px"><label class="cd-opt"><input type="radio" name="suWard" value="cchild" checked><span>طفل</span></label><label class="cd-opt"><input type="radio" name="suWard" value="cadult"><span>بالغ</span></label></div></div><div id="suWardName" hidden><label><span class="req" id="suWardNameL">اسم الطفل</span><input id="suWName" autocomplete="off"></label></div><div id="suPinBox" hidden><label><span class="req">رمز المرافق (4 أرقام)</span><input id="suPin" type="password" inputmode="numeric" maxlength="4" dir="ltr" autocomplete="new-password"></label><p class="muted-note">اختره الآن — أنت وحدك من يعرفه. يقفل واجهة الطفل وإنهاء الجلسة.</p></div><div id="suCond"><b class="req" id="suCondT">الحالة التي تتمرّن لها</b><p class="muted-note">اختر كل ما ينطبق. نقترح بها التمارين المناسبة في المكتبة، ويمكن تعديلها لاحقاً.</p><div id="suCdList"></div></div><label><span class="req">بريدك الإلكتروني (تصلك عليه التنبيهات)</span><input id="suMail" type="email" dir="ltr" autocomplete="email" placeholder="name@example.com" required></label><label><span class="req">كلمة المرور</span><input id="suPass" type="password" dir="ltr" autocomplete="new-password" placeholder="6 أحرف على الأقل" required></label><p id="suMsg" class="small" role="alert" style="min-height:22px;color:var(--ink-o)"></p><button class="btn btn-primary" type="submit">إنشاء الحساب ←</button></form><div class="auth-xfer-modal modal-form" style="margin-top:4px;padding-top:16px;border-top:1px solid var(--line)"><h3 style="font-size:calc(18px*var(--fs,1));color:var(--green);margin:0 0 8px">حسابك على جوال أو لابتوب أو آيباد آخر؟</h3><ol style="margin:8px 0 14px;padding-inline-start:22px;font-size:calc(12.5px*var(--fs,1));color:#71817b;line-height:1.9"><li>على الجهاز القديم: سجّل دخولك → حسابي → إنشاء رمز النقل وانسخ الرمز.</li><li>على الجهاز الجديد (أي متصفح): الصق الرمز أدناه مع نفس كلمة المرور واضغط استيراد.</li><li>بعدها سجّل دخولك بالبريد وكلمة المرور كالمعتاد على هذا الجهاز.</li></ol><label>رمز النقل<textarea id="suXferCode" rows="3" dir="ltr" autocomplete="off" placeholder="الصق الرمز من حسابي على اللابتوب أو الآيباد أو جوال آخر"></textarea></label><label>كلمة المرور (نفس كلمة الحساب)<input id="suXferPw" type="password" dir="ltr" autocomplete="current-password"></label><button class="btn btn-soft" type="button" id="suXferBtn" style="width:100%">استيراد الحساب على هذا الجهاز</button><p id="suXferMsg" class="small" role="alert" style="min-height:22px;margin-top:6px;color:var(--ink-o)"></p></div>');
  var suModCdK='',suModSel=[];
  function suCdKind(){var sr=($('input[name=suRole]:checked')||{}).value;if(sr==='adult')return 'adult';var w=($('input[name=suWard]:checked')||{}).value;return w==='cadult'?'adult':'child'}
  function suPaintCd(){var k=suCdKind(),list=$('suCdList');if(!list)return;if(suModCdK!==k){[].forEach.call(list.querySelectorAll('input:checked'),function(i){if(suModSel.indexOf(i.value)<0)suModSel.push(i.value)});suModCdK=k;list.innerHTML=cdModalList(suModSel,k)}}
@@ -2009,7 +2014,8 @@ function signupModal(){
   else $('suCondT').textContent=tx('الحالة التي تتمرّن لها');
   suPaintCd()}
  [].forEach.call(document.querySelectorAll('#signupModalForm input[name=suRole],#signupModalForm input[name=suWard]'),function(i){i.addEventListener('change',suUi)});
- var fp=$('suFullPage');if(fp)fp.onclick=goAuthPageSignup;
+ var xb=$('suXferBtn'),xm=$('suXferMsg');
+ if(xb)xb.onclick=function(){acctImport($('suXferCode').value,$('suXferPw').value.trim(),xm||aMsg,function(){var c=$('suXferCode'),p=$('suXferPw');if(c)c.value='';if(p)p.value='';closeModal()})};
  suPaintCd();suUi();
  var form=$('signupModalForm'),msg=$('suMsg');
  if(form)form.onsubmit=async function(e){e.preventDefault();if(msg)msg.textContent='';var sr=($('input[name=suRole]:checked')||{}).value,rv=sr==='adult'?'adult':($('input[name=suWard]:checked')||{}).value||'cchild';
